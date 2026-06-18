@@ -4,10 +4,13 @@
 #include "Utils.hpp"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_slang_rhi.h"
+#include "Maths.hpp"
+
 
 int main() {
     std::println("AXIOM");
-    axm::InitResult init = axm::init::Init();
+    axm::AppState init = axm::init::Init();
+
 
     bool running = true;
     auto depthTexture =

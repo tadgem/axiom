@@ -26,7 +26,7 @@ inline rhi::WindowHandle _getWindowHandleFromSDL(SDL_Window* window)
 #endif
     return {};
 }
-axm::InitResult axm::init::Init() {
+axm::AppState axm::init::Init() {
     using namespace rhi;
     SDL_SetMainReady();
 
@@ -34,14 +34,14 @@ axm::InitResult axm::init::Init() {
 
     if (!SDL_Init(kInitFlags)) {
         AXM_LOG("Failed to initialize AXIOM : SDL Init failed.");
-        return InitResult::BAD();
+        return AppState::BAD();
     }
 
     SDL_Window* window = SDL_CreateWindow("AXIOM", 1280, 720, SDL_WINDOW_RESIZABLE);
     if (!window) {
        AXM_LOG("Failed to initialize AXIOM : SDL Window Creation failed.");
         SDL_Quit();
-        return InitResult::BAD();
+        return AppState::BAD();
     }
 
     IDevice* device;
@@ -133,7 +133,7 @@ axm::InitResult axm::init::Init() {
     };
 }
 
-void axm::init::Quit(const InitResult &init) {
+void axm::init::Quit(const AppState &init) {
     init.m_Queue->waitOnHost();
 
     ImGui_ImplSlangRHI_Shutdown();
@@ -144,7 +144,7 @@ void axm::init::Quit(const InitResult &init) {
     SDL_Quit();
 }
 
-axm::InitResult axm::InitResult::BAD() {
+axm::AppState axm::AppState::BAD() {
     return {
         .m_OK =  false,
         .m_Window = nullptr,

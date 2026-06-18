@@ -4,7 +4,7 @@
 #include <memory>
 
 namespace axm {
-    struct InitResult {
+    struct AppState {
         bool m_OK;
 
         SDL_Window*             m_Window;
@@ -12,12 +12,12 @@ namespace axm {
         rhi::ISurface*          m_Surface;
         rhi::ICommandQueue*     m_Queue;
 
-        static InitResult BAD ();
+        static AppState BAD ();
     };
 
     namespace init {
-        InitResult   Init();
-        void         Quit(const InitResult& init);
+        AppState   Init();
+        void         Quit(const AppState& init);
     }
 
 }

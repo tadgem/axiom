@@ -31,6 +31,6 @@ add_subdirectory(submodules/assimp)
 
 # AXIOM
 add_subdirectory(axiom)
+include(cmake/AxiomUtils.cmake)
 
-add_executable(axiom-test main.cpp)
-target_link_libraries(axiom-test PRIVATE axiom)
+add_axiom_target(axiom-test main.cpp)

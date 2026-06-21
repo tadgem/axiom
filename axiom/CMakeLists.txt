@@ -14,6 +14,10 @@ add_library(axiom
         Utils.cpp
         Maths.hpp
         Axiom.hpp
+        Vertex.hpp
+        Buffer.hpp
+        Buffer.cpp
+        Shader.hpp
 )
 
 target_link_libraries(axiom PUBLIC

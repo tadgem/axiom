@@ -1,12 +1,10 @@
-#include <print>
 #include "Axiom.hpp"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_slang_rhi.h"
+#include "assimp/Importer.hpp"
+#include "flecs.h"
 
 using namespace axm;
 
 int main() {
-    std::println("AXIOM");
     AppState init = engine::Init();
 
     mat4 model  = maths::Multiply(
@@ -19,6 +17,8 @@ int main() {
     auto modelView     = maths::Multiply(view, model);
     auto mvp    = maths::Multiply(proj, modelView);
 
+    Assimp::Importer importer;
+    flecs::world ecs;
 
     while (init.m_Running) {
         engine::PreFrame(init);
@@ -29,11 +29,8 @@ int main() {
         ImGui::End();
         ImGui::Render();
 
-
-
         engine::PostFrame(init);
     }
-
 
     engine::Quit(init);
 

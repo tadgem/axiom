@@ -20,6 +20,15 @@ add_subdirectory(submodules/slang-rhi)
 # ImGui
 add_subdirectory(third_party/imgui)
 
+# Flecs
+set(FLECS_SHARED OFF CACHE BOOL "" FORCE)
+set(FLECS_STATIC ON CACHE BOOL "" FORCE)
+add_subdirectory(submodules/flecs)
+
+# ASSIMP
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking")
+add_subdirectory(submodules/assimp)
+
 # AXIOM
 add_subdirectory(axiom)
 

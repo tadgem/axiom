@@ -183,9 +183,9 @@ rhi::IRenderPassEncoder *axm::engine::BeginSwapchainRenderPass(AppState& e, rhi:
     colorAttachment.view = e.m_SwapchainColourImage->getDefaultView();
     colorAttachment.loadOp = rhi::LoadOp::Clear;
     colorAttachment.storeOp = rhi::StoreOp::Store;
-    colorAttachment.clearValue[0] = 0.15f;
-    colorAttachment.clearValue[1] = 0.1f;
-    colorAttachment.clearValue[2] = 0.1f;
+    colorAttachment.clearValue[0] = 0.0f;
+    colorAttachment.clearValue[1] = 0.0f;
+    colorAttachment.clearValue[2] = 0.0f;
     colorAttachment.clearValue[3] = 1.0f;
 
     rhi::RenderPassDepthStencilAttachment depthAttachment = {};

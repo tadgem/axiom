@@ -16,7 +16,12 @@ add_library(axiom
         Axiom.hpp
 )
 
-target_link_libraries(axiom PUBLIC SDL3-static slang-rhi)
+target_link_libraries(axiom PUBLIC
+        SDL3-static
+        slang-rhi
+        assimp
+        flecs_static
+)
 
 target_include_directories(axiom PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}

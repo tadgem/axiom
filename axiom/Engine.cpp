@@ -2,6 +2,7 @@
 #include "Log.hpp"
 #define SDL_MAIN_HANDLED
 #include "SDL3/SDL_main.h"
+#include "SDL3/SDL.h"
 #include <slang.h>
 #include <slang-rhi.h>
 #include <vector>
@@ -83,9 +84,6 @@ axm::AppState axm::engine::Init() {
         return {};
     }
 
-    ITexture* depthTexture = Utils::CreateDepthTexture(device, 1280, 720);
-
-
     SurfaceConfig surfaceConfig = {};
     surfaceConfig.width = width;
     surfaceConfig.height = height;
@@ -124,31 +122,95 @@ axm::AppState axm::engine::Init() {
         return {};
     }
 
+    ITexture* depthTexture = Utils::CreateDepthTexture(device, 1280, 720);
+
     return {
         .m_OK = true,
         .m_Window = window,
         .m_Device = device,
         .m_Surface = surface,
-        .m_Queue = graphicsQueue
+        .m_Queue = graphicsQueue,
+        .m_SwapchainColourImage = nullptr,
+        .m_SwapchainDepthImage = depthTexture
     };
 }
 
-void axm::engine::Quit(const AppState &init) {
-    init.m_Queue->waitOnHost();
+void axm::engine::Quit(const AppState &e) {
+    e.m_Queue->waitOnHost();
 
     ImGui_ImplSlangRHI_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_DestroyWindow(init.m_Window);
+    SDL_DestroyWindow(e.m_Window);
     SDL_Quit();
+}
+void axm::engine::PreFrame(AppState &e) {
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+        ImGui_ImplSDL3_ProcessEvent(&event);
+        switch (event.type) {
+            case SDL_EVENT_QUIT:
+                e.m_Running = false;
+                break;
+            default:
+                // AXM_LOG("Unhandled event");
+                break;
+        }
+    }
+
+    ImGui_ImplSlangRHI_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    e.m_Surface->acquireNextImage(&e.m_SwapchainColourImage);
+}
+
+void axm::engine::PostFrame(AppState &e) {
+    auto commandEncoder = e.m_Queue->createCommandEncoder();
+    auto passEncoder = engine::BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
+
+    ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
+
+    passEncoder->end();
+    e.m_Queue->submit(commandEncoder->finish());
+    e.m_Surface->present();
+}
+
+rhi::IRenderPassEncoder *axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rhi::LoadOp loadOp) {
+    rhi::RenderPassColorAttachment colorAttachment = {};
+    colorAttachment.view = e.m_SwapchainColourImage->getDefaultView();
+    colorAttachment.loadOp = rhi::LoadOp::Clear;
+    colorAttachment.storeOp = rhi::StoreOp::Store;
+    colorAttachment.clearValue[0] = 0.15f;
+    colorAttachment.clearValue[1] = 0.1f;
+    colorAttachment.clearValue[2] = 0.1f;
+    colorAttachment.clearValue[3] = 1.0f;
+
+    rhi::RenderPassDepthStencilAttachment depthAttachment = {};
+    depthAttachment.view = e.m_SwapchainDepthImage->getDefaultView();
+    depthAttachment.depthLoadOp = rhi::LoadOp::Clear;
+    depthAttachment.depthStoreOp = rhi::StoreOp::Store;
+    depthAttachment.depthClearValue = 1.0f;
+
+    rhi::RenderPassDesc renderPass = {};
+    renderPass.colorAttachments = &colorAttachment;
+    renderPass.colorAttachmentCount = 1;
+    renderPass.depthStencilAttachment = &depthAttachment;
+
+    return cmd->beginRenderPass(renderPass);
 }
 
 axm::AppState axm::AppState::BAD() {
     return {
         .m_OK =  false,
+        .m_Running = false,
         .m_Window = nullptr,
         .m_Device = nullptr,
-        .m_Surface = nullptr
+        .m_Surface = nullptr,
+        .m_Queue = nullptr,
+        .m_SwapchainColourImage = nullptr,
+        .m_SwapchainDepthImage = nullptr
     };
 }

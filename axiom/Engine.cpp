@@ -1,4 +1,4 @@
-#include "Init.hpp"
+#include "Engine.hpp"
 #include "Log.hpp"
 #define SDL_MAIN_HANDLED
 #include "SDL3/SDL_main.h"
@@ -26,7 +26,7 @@ inline rhi::WindowHandle _getWindowHandleFromSDL(SDL_Window* window)
 #endif
     return {};
 }
-axm::AppState axm::init::Init() {
+axm::AppState axm::engine::Init() {
     using namespace rhi;
     SDL_SetMainReady();
 
@@ -133,7 +133,7 @@ axm::AppState axm::init::Init() {
     };
 }
 
-void axm::init::Quit(const AppState &init) {
+void axm::engine::Quit(const AppState &init) {
     init.m_Queue->waitOnHost();
 
     ImGui_ImplSlangRHI_Shutdown();

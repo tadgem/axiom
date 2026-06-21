@@ -7,12 +7,13 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/imgui_widgets.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
-        Init.cpp
+        Engine.cpp
         Log.hpp
         Utils.hpp
         Prim.hpp
         Utils.cpp
         Maths.hpp
+        Axiom.hpp
 )
 
 target_link_libraries(axiom PUBLIC SDL3-static slang-rhi)

@@ -1,20 +1,28 @@
 #include <print>
-#include "Init.hpp"
-#include "Log.hpp"
-#include "Utils.hpp"
+#include "Axiom.hpp"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_slang_rhi.h"
-#include "Maths.hpp"
 
+using namespace axm;
 
 int main() {
     std::println("AXIOM");
-    axm::AppState init = axm::init::Init();
+    AppState init = engine::Init();
 
+    mat4 model  = maths::Multiply(
+        maths::RotateX(maths::Radians(0.016f)),
+        maths::RotateY(maths::Radians(0.016f))
+    );
+    mat4 view   = maths::Translate(vec3 { 0.0f, 0.0f, -2.5f });
+    mat4 proj   = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 10.0f);
+
+    auto modelView     = maths::Multiply(view, model);
+    auto mvp    = maths::Multiply(proj, modelView);
+    // auto mvp2   = maths::Multiply(mvp, mv);
 
     bool running = true;
     auto depthTexture =
-        axm::Utils::CreateDepthTexture(init.m_Device, 1280, 720, rhi::Format::D32Float);
+        Utils::CreateDepthTexture(init.m_Device, 1280, 720, rhi::Format::D32Float);
 
     while (running) {
         SDL_Event e;
@@ -76,6 +84,6 @@ int main() {
     }
 
 
-    axm::init::Quit(init);
+    engine::Quit(init);
 
 }

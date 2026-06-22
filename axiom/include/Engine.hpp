@@ -8,6 +8,8 @@ namespace axm {
         bool m_OK = false;
         bool m_Running = true;
 
+        rhi::DepthStencilDesc   m_DepthStencilDesc;
+
         SDL_Window*             m_Window    = nullptr;
         rhi::IDevice*           m_Device    = nullptr;
         rhi::ISurface*          m_Surface   = nullptr;

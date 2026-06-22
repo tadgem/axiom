@@ -1,11 +1,11 @@
-#include "Axiom.hpp"
-#include "assimp/Importer.hpp"
-#include "flecs.h"
-
+#include "axiom.hpp"
+#include <array>
 using namespace axm;
 
 int main() {
     AppState init = engine::Init();
+
+    AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
     mat4 model  = maths::Multiply(
         maths::RotateX(maths::Radians(0.016f)),
@@ -19,6 +19,14 @@ int main() {
 
     Assimp::Importer importer;
     flecs::world ecs;
+
+    std::array<rhi::Format, 1> formats =
+    {
+        init.m_SwapchainColourImage->getDesc().format
+    };
+
+    Shader cube = Shader(init.m_Device, "resources/cube");
+    auto pipeline = pipeline::CreateRasterPipeline(init.m_Device, formats, init.m_DepthStencilDesc, cube, axm::vertex::PosNormalUV::GetInputLayout(init.m_Device));
 
     while (init.m_Running) {
         engine::PreFrame(init);

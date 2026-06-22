@@ -78,7 +78,7 @@ namespace axm {
                     float sum = 0.0f;
                     for (int k = 0; k < 4; ++k) {
                         sum += a.m[i][k] * b.m[k][j];
-                    }
+                    }  
                     m.m[i][j] = sum;
                 }
             }

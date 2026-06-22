@@ -1,5 +1,5 @@
-#include "Engine.hpp"
-#include "Log.hpp"
+#include "../include/Engine.hpp"
+#include "../include/Log.hpp"
 #define SDL_MAIN_HANDLED
 #include "SDL3/SDL_main.h"
 #include "SDL3/SDL.h"
@@ -7,11 +7,15 @@
 #include <slang-rhi.h>
 #include <vector>
 
-#include "Utils.hpp"
+#include "../include/Utils.hpp"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_slang_rhi.h"
 #include "imgui.h"
+
+#if SLANG_WINDOWS_FAMILY
 #include "windows.h"
+#endif
+
 inline rhi::WindowHandle _getWindowHandleFromSDL(SDL_Window* window)
 {
 #if SLANG_WINDOWS_FAMILY
@@ -27,6 +31,7 @@ inline rhi::WindowHandle _getWindowHandleFromSDL(SDL_Window* window)
 #endif
     return {};
 }
+
 axm::AppState axm::engine::Init() {
     using namespace rhi;
     SDL_SetMainReady();
@@ -124,8 +129,16 @@ axm::AppState axm::engine::Init() {
 
     ITexture* depthTexture = Utils::CreateDepthTexture(device, 1280, 720);
 
+    DepthStencilDesc depthStencilDesc = {};
+    depthStencilDesc.format = Format::D32Float;
+    depthStencilDesc.depthTestEnable = true;
+    depthStencilDesc.depthWriteEnable = true;
+    depthStencilDesc.depthFunc = ComparisonFunc::LessEqual;
+
     return {
         .m_OK = true,
+        .m_Running = true,
+        .m_DepthStencilDesc =  depthStencilDesc,
         .m_Window = window,
         .m_Device = device,
         .m_Surface = surface,
@@ -206,6 +219,7 @@ axm::AppState axm::AppState::BAD() {
     return {
         .m_OK =  false,
         .m_Running = false,
+        .m_DepthStencilDesc = {},
         .m_Window = nullptr,
         .m_Device = nullptr,
         .m_Surface = nullptr,

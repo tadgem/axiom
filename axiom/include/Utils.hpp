@@ -1,6 +1,6 @@
 #pragma once
-#include "slang-rhi.h"
 #include "Prim.hpp"
+#include "slang-rhi.h"
 
 namespace axm {
     class Utils {

@@ -1,4 +1,6 @@
 
+file(GLOB_RECURSE AXM_SRCS src/*.cpp)
+
 add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/imgui.cpp
         ${IMGUI_INCLUDE_DIRS}/imgui_demo.cpp
@@ -7,17 +9,9 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/imgui_widgets.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
-        Engine.cpp
-        Log.hpp
-        Utils.hpp
-        Prim.hpp
-        Utils.cpp
-        Maths.hpp
-        Axiom.hpp
-        Vertex.hpp
-        Buffer.hpp
-        Buffer.cpp
-        Shader.hpp
+        ${AXM_SRCS}
+        include/Pipeline.hpp
+        src/Pipeline.cpp
 )
 
 target_link_libraries(axiom PUBLIC
@@ -28,7 +22,7 @@ target_link_libraries(axiom PUBLIC
 )
 
 target_include_directories(axiom PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${IMGUI_INCLUDE_DIRS}
         ${SLANG_INCLUDE_DIRS}
         ${SDL_INCLUDE_DIRS}

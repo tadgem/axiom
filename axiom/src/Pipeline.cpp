@@ -1,0 +1,29 @@
+#include "Pipeline.hpp"
+#include <vector>
+rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(
+    rhi::IDevice* device,
+    const std::span<rhi::Format> &colourFormats,
+    const rhi::DepthStencilDesc &depthTarget,
+    const Shader &shader,
+    rhi::IInputLayout *inputLayout) {
+
+    std::vector<rhi::ColorTargetDesc> colorTargets;
+    colorTargets.resize(colourFormats.size());
+
+    for (auto i = 0; i < colourFormats.size(); i++) {
+        colorTargets[i].format = colourFormats[i];
+    }
+
+    rhi::RenderPipelineDesc pipelineDesc = {};
+    pipelineDesc.program = shader.m_Program;
+    pipelineDesc.inputLayout = inputLayout;
+    pipelineDesc.targets = colorTargets.data();
+    pipelineDesc.targetCount = colorTargets.size();
+    pipelineDesc.depthStencil = depthTarget;
+
+    rhi::ComPtr<rhi::IRenderPipeline> pipeline;
+    device->createRenderPipeline(pipelineDesc, pipeline.writeRef());
+
+    return pipeline;
+
+}

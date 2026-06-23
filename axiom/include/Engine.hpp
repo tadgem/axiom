@@ -18,6 +18,8 @@ namespace axm {
         rhi::ITexture*          m_SwapchainColourImage  = nullptr;
         rhi::ITexture*          m_SwapchainDepthImage   = nullptr;
 
+        std::unique_ptr<rhi::IDebugCallback>    m_DebugCallback;
+
         static AppState BAD ();
 
     };

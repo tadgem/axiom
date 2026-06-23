@@ -32,7 +32,7 @@ void CreateShaderProgram(IDevice* device, ShaderProgramDesc desc, ComPtr<IShader
     }
 }
 
-axm::Shader::Shader(IDevice *device, const char *name, const char *vertexEntry, const char *fragEntry) {
+axm::Shader::Shader(IDevice *device, const char *name, const char *vertexEntry, const char *fragEntry) :m_Name(name){
 
     slang::IModule * shaderModule = GetModule(device, name);
 
@@ -56,7 +56,7 @@ axm::Shader::Shader(IDevice *device, const char *name, const char *vertexEntry, 
 
     CreateShaderProgram(device, programDesc, m_Program, name);
 }
-axm::Shader::Shader(rhi::IDevice *device, const char *name, const char *computeEntry) {
+axm::Shader::Shader(rhi::IDevice *device, const char *name, const char *computeEntry) : m_Name(name) {
     slang::IModule * shaderModule = GetModule(device, name);
 
     if (!shaderModule) {

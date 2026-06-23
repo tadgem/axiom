@@ -12,6 +12,10 @@ add_library(axiom
         ${AXM_SRCS}
         include/Pipeline.hpp
         src/Pipeline.cpp
+        include/RenderPass.hpp
+        src/RenderPass.cpp
+        include/Shapes.hpp
+        src/Shapes.cpp
 )
 
 target_link_libraries(axiom PUBLIC

@@ -1,5 +1,7 @@
-#include "Pipeline.hpp"
 #include <vector>
+#include "Pipeline.hpp"
+#include "Log.hpp"
+
 rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(
     rhi::IDevice* device,
     const std::span<rhi::Format> &colourFormats,
@@ -22,7 +24,11 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(
     pipelineDesc.depthStencil = depthTarget;
 
     rhi::ComPtr<rhi::IRenderPipeline> pipeline;
-    device->createRenderPipeline(pipelineDesc, pipeline.writeRef());
+
+    if (SLANG_FAILED(device->createRenderPipeline(pipelineDesc, pipeline.writeRef()))) {
+        AXM_LOG("Failed to create render pipeline with shader : {}", shader.m_Name);
+        return {};
+    }
 
     return pipeline;
 

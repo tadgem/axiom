@@ -20,7 +20,8 @@ namespace axm {
             const char* computeEntry
         );
 
-        rhi::ComPtr<rhi::IShaderProgram> m_Program;
+        const char*                         m_Name;
+        rhi::ComPtr<rhi::IShaderProgram>    m_Program;
     };
 
 }

@@ -73,10 +73,10 @@ namespace axm {
         mat4x4_t<DecimalType> Multiply(const mat4x4_t<DecimalType>& a, const mat4x4_t<DecimalType>& b) {
             mat4x4_t<DecimalType> m = {};
 
-            for (int i = 0; i < 4; ++i) {
-                for (int j = 0; j < 4; ++j) {
-                    float sum = 0.0f;
-                    for (int k = 0; k < 4; ++k) {
+            for (auto i = 0; i < 4; ++i) {
+                for (auto j = 0; j < 4; ++j) {
+                    DecimalType sum = 0.0f;
+                    for (auto k = 0; k < 4; ++k) {
                         sum += a.m[i][k] * b.m[k][j];
                     }  
                     m.m[i][j] = sum;

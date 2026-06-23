@@ -9,6 +9,8 @@
 #include "Vertex.hpp"
 #include "Shader.hpp"
 #include "Pipeline.hpp"
+#include "RenderPass.hpp"
+#include "Shapes.hpp"
 
 // Third party includes
 // TODO: (Do we want these in the public header?)

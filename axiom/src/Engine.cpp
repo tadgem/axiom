@@ -32,6 +32,52 @@ inline rhi::WindowHandle _getWindowHandleFromSDL(SDL_Window* window)
     return {};
 }
 
+constexpr const char* UNKNOWN_MSG = "UNKNOWN";
+
+const char* GetSlangRHIDebugMessageType(const rhi::DebugMessageType& messageType) {
+    constexpr const char* INFO_MSG = "INFO";
+    constexpr const char* WARN_MSG = "WARN";
+    constexpr const char* ERROR_MSG = "ERROR";
+
+    switch (messageType) {
+        case rhi::DebugMessageType::Info: return INFO_MSG;
+        case rhi::DebugMessageType::Warning: return WARN_MSG;
+        case rhi::DebugMessageType::Error: return ERROR_MSG;
+        default: return UNKNOWN_MSG;
+    }
+}
+
+const char* GetSlangRHIDebugMessageSource(const rhi::DebugMessageSource& messageType) {
+    constexpr const char* LAYER_MSG = "LAYER";
+    constexpr const char* DRIVER_MSG = "DRIVER";
+    constexpr const char* SLANG_MSG = "SLANG";
+
+    switch (messageType) {
+        case rhi::DebugMessageSource::Layer: return LAYER_MSG;
+        case rhi::DebugMessageSource::Driver: return DRIVER_MSG;
+        case rhi::DebugMessageSource::Slang: return SLANG_MSG;
+        default: return UNKNOWN_MSG;
+    }
+}
+
+
+class SlangRHIDebugCallback : public rhi::IDebugCallback
+{
+public:
+    virtual SLANG_NO_THROW void SLANG_MCALL handleMessage(
+        rhi::DebugMessageType type,
+        rhi::DebugMessageSource source,
+        const char* message
+    ) override
+    {
+        AXM_LOG("RHI Error : {} : {} : {}",
+            GetSlangRHIDebugMessageType(type),
+            GetSlangRHIDebugMessageSource(source),
+            message
+        );
+    }
+};
+
 axm::AppState axm::engine::Init() {
     using namespace rhi;
     SDL_SetMainReady();
@@ -43,7 +89,7 @@ axm::AppState axm::engine::Init() {
         return AppState::BAD();
     }
 
-    SDL_Window* window = SDL_CreateWindow("AXIOM", 1280, 720, SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("AXIOM", 1280, 720, /*SDL_WINDOW_RESIZABLE*/ 0);
     if (!window) {
        AXM_LOG("Failed to initialize AXIOM : SDL Window Creation failed.");
         SDL_Quit();
@@ -51,20 +97,25 @@ axm::AppState axm::engine::Init() {
     }
 
     IDevice* device;
-    DeviceType deviceTypes[] = { DeviceType::Vulkan, DeviceType::D3D12, DeviceType::D3D11, DeviceType::Metal };
+    DeviceType deviceTypes[] = { DeviceType::Vulkan, DeviceType::D3D11, DeviceType::D3D12, DeviceType::Metal };
     DeviceType selectedType = DeviceType::Default;
 
+
+    auto debugCallback = std::make_unique<SlangRHIDebugCallback>();
 
     for (auto type : deviceTypes) {
         if (getRHI()->isDeviceTypeSupported(type)) {
             DeviceDesc deviceDesc = {};
             deviceDesc.deviceType = type;
+            deviceDesc.debugCallback = debugCallback.get();
+            deviceDesc.enableValidation = true;
 
-            std::vector<Feature> requiredFeatures = { Feature::Surface, Feature::Rasterization };
+            std::vector requiredFeatures = { Feature::Surface, Feature::Rasterization };
             deviceDesc.requiredFeatureCount = static_cast<uint32_t>(requiredFeatures.size());
             deviceDesc.requiredFeatures = requiredFeatures.data();
 
             if (SLANG_SUCCEEDED(getRHI()->createDevice(deviceDesc, &device))) {
+                AXM_LOG("Selected Rendering Backend : {}", getRHI()->getDeviceTypeName(type));
                 selectedType = type;
                 break;
             }
@@ -99,6 +150,7 @@ axm::AppState axm::engine::Init() {
         SDL_Quit();
         return {};
     }
+
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -135,6 +187,7 @@ axm::AppState axm::engine::Init() {
     depthStencilDesc.depthWriteEnable = true;
     depthStencilDesc.depthFunc = ComparisonFunc::LessEqual;
 
+
     return {
         .m_OK = true,
         .m_Running = true,
@@ -144,7 +197,8 @@ axm::AppState axm::engine::Init() {
         .m_Surface = surface,
         .m_Queue = graphicsQueue,
         .m_SwapchainColourImage = nullptr,
-        .m_SwapchainDepthImage = depthTexture
+        .m_SwapchainDepthImage = depthTexture,
+        .m_DebugCallback = std::move(debugCallback)
     };
 }
 
@@ -182,19 +236,21 @@ void axm::engine::PreFrame(AppState &e) {
 
 void axm::engine::PostFrame(AppState &e) {
     auto commandEncoder = e.m_Queue->createCommandEncoder();
-    auto passEncoder = engine::BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
+    auto passEncoder = BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
 
     ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
 
     passEncoder->end();
     e.m_Queue->submit(commandEncoder->finish());
     e.m_Surface->present();
+
+    AXM_FLUSH_LOG();
 }
 
 rhi::IRenderPassEncoder *axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rhi::LoadOp loadOp) {
     rhi::RenderPassColorAttachment colorAttachment = {};
     colorAttachment.view = e.m_SwapchainColourImage->getDefaultView();
-    colorAttachment.loadOp = rhi::LoadOp::Clear;
+    colorAttachment.loadOp = loadOp;
     colorAttachment.storeOp = rhi::StoreOp::Store;
     colorAttachment.clearValue[0] = 0.0f;
     colorAttachment.clearValue[1] = 0.0f;

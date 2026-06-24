@@ -16,6 +16,8 @@ add_library(axiom
         src/RenderPass.cpp
         include/Shapes.hpp
         src/Shapes.cpp
+        include/Texture.hpp
+        src/Texture.cpp
 )
 
 target_link_libraries(axiom PUBLIC
@@ -30,4 +32,5 @@ target_include_directories(axiom PUBLIC
         ${IMGUI_INCLUDE_DIRS}
         ${SLANG_INCLUDE_DIRS}
         ${SDL_INCLUDE_DIRS}
+        ${SINGLE_HEADER_INCLUDE_DIRS}
 )

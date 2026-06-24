@@ -29,6 +29,9 @@ add_subdirectory(submodules/flecs)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking")
 add_subdirectory(submodules/assimp)
 
+# Third Party Single Headers
+set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_headers)
+
 # AXIOM
 add_subdirectory(axiom)
 include(cmake/AxiomUtils.cmake)

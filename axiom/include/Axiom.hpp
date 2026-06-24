@@ -7,6 +7,7 @@
 #include "Engine.hpp"
 #include "Prim.hpp"
 #include "Vertex.hpp"
+#include "Texture.hpp"
 #include "Shader.hpp"
 #include "Pipeline.hpp"
 #include "RenderPass.hpp"
@@ -17,3 +18,4 @@
 #include "imgui.h"
 #include "assimp/Importer.hpp"
 #include "flecs.h"
+

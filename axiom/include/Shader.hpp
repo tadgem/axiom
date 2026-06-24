@@ -1,6 +1,7 @@
 #pragma once
 #include "slang-rhi.h"
 #include "slang.h"
+#include "slang-rhi/shader-cursor.h"
 
 namespace axm {
 

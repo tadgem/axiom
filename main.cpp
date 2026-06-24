@@ -1,7 +1,6 @@
 #include "axiom.hpp"
 #include <array>
 
-#include "slang-rhi/shader-cursor.h"
 using namespace axm;
 
 mat4 GetMVP(const vec3& pos, const vec3& euler) {
@@ -52,13 +51,30 @@ int main() {
     );
 
 
-    Shader cube = Shader(init.m_Device, "resources/cube");
+    Shader cube = Shader(init.m_Device, "resources/shaders/cube");
     auto pipeline = pipeline::CreateRasterPipeline(
         init.m_Device,
         formats,
         init.m_DepthStencilDesc,
         cube,
         vertex::PosNormalUV::GetInputLayout(init.m_Device));
+
+    auto cpuTextureData = textures::LoadCPUTextureDataFromFile("resources/textures/crate.jpg");
+
+    auto gpuTexture = textures::CreateTexture2D(
+        init.m_Device,
+        cpuTextureData.m_Data,
+        rhi::Format::RGBA8Unorm,
+        cpuTextureData.m_Width, cpuTextureData.m_Height
+    );
+
+    auto sampler = textures::CreateSampler(
+        init.m_Device,
+        rhi::TextureFilteringMode::Linear,
+        rhi::TextureAddressingMode::ClampToEdge
+    );
+
+    cpuTextureData.Release();
 
     AXM_LOG("Starting Axiom Main Loop");
     AXM_FLUSH_LOG();
@@ -74,6 +90,11 @@ int main() {
         if (SLANG_FAILED(cursor["modelViewProj"].setData(&mvp, sizeof(mat4)))) {
             AXM_LOG("Failed to bind modelViewProj to pipeline");
         }
+
+        cursor["diffuse"].setBinding(gpuTexture.m_TextureView);
+        cursor["diffuseSampler"].setBinding(sampler);
+
+
 
         rhi::RenderState renderState = {};
         renderState.viewports[0] = rhi::Viewport::fromSize(width, height);

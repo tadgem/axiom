@@ -3,15 +3,15 @@
 
 using namespace axm;
 
-mat4 GetMVP(const vec3& pos, const vec3& euler) {
+mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
     mat4 model  = maths::Multiply(
-        maths::RotateX(maths::Radians(euler.x)),
-        maths::RotateY(maths::Radians(euler.y))
+        maths::Multiply(
+            maths::Translate(pos),
+            maths::Scale(scale)),
+        maths::Rotate(euler)
     );
 
-    model = maths::Multiply(model, maths::RotateZ(euler.z));
-
-    mat4 view   = maths::Translate(pos);
+    mat4 view   = maths::Translate(vec3{0.0f, 0.0f, 0.0f});
     mat4 proj   = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
 
     auto modelView     = maths::Multiply(view, model);
@@ -25,7 +25,8 @@ int main() {
 
     vec3 position = {};
     vec3 euler = {};
-    auto mvp    = GetMVP(position, euler);
+    vec3 scale = {1.0, 1.0, 1.0};
+    auto mvp    = GetMVP(position, euler, scale);
 
     std::array formats =
     {
@@ -81,7 +82,7 @@ int main() {
 
     while (init.m_Running) {
         engine::PreFrame(init);
-        mvp = GetMVP(position, euler);
+        mvp = GetMVP(position, euler, scale);
 
         auto commandEncoder = init.m_Queue->createCommandEncoder();
         auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(init, commandEncoder);
@@ -114,6 +115,7 @@ int main() {
         if (ImGui::Begin("Hello!")) {
             ImGui::DragFloat3("Position", &position.x);
             ImGui::DragFloat3("Euler", &euler.x);
+            ImGui::DragFloat3("Scale", &scale.x);
         }
         ImGui::End();
         ImGui::Render();

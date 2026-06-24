@@ -98,6 +98,17 @@ namespace axm {
         }
 
         template<typename DecimalType>
+        mat4x4_t<DecimalType> Scale(const vec3_t<DecimalType>& s) {
+            mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
+
+            m.m[0][0] = s.x;
+            m.m[1][1] = s.y;
+            m.m[2][2] = s.z;
+
+            return m;
+        }
+
+        template<typename DecimalType>
         mat4x4_t<DecimalType> RotateX(const DecimalType& xAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
@@ -143,6 +154,18 @@ namespace axm {
         }
 
         template<typename DecimalType>
+        mat4x4_t<DecimalType> Rotate(const vec3_t<DecimalType>& euler) {
+            auto model  = maths::Multiply(
+               maths::RotateX(maths::Radians(euler.x)),
+               maths::RotateY(maths::Radians(euler.y))
+           );
+
+            return maths::Multiply(model, maths::RotateZ(euler.z));
+
+        }
+
+
+        template<typename DecimalType>
         mat4x4_t<DecimalType> PerspectiveFOV(DecimalType fovRad, DecimalType aspect, DecimalType near, DecimalType far) {
             mat4x4_t<DecimalType> m = {};
 
@@ -157,6 +180,8 @@ namespace axm {
 
             return m;
         }
+
+
 
     }
 

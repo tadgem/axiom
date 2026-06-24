@@ -4,13 +4,16 @@
 #include "slang-rhi/shader-cursor.h"
 using namespace axm;
 
-mat4 GetMVP(const vec3& pos) {
+mat4 GetMVP(const vec3& pos, const vec3& euler) {
     mat4 model  = maths::Multiply(
-        maths::RotateX(maths::Radians(0.016f)),
-        maths::RotateY(maths::Radians(0.016f))
+        maths::RotateX(maths::Radians(euler.x)),
+        maths::RotateY(maths::Radians(euler.y))
     );
+
+    model = maths::Multiply(model, maths::RotateZ(euler.z));
+
     mat4 view   = maths::Translate(pos);
-    mat4 proj   = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 10.0f);
+    mat4 proj   = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
 
     auto modelView     = maths::Multiply(view, model);
     return maths::Multiply(proj, modelView);
@@ -22,7 +25,8 @@ int main() {
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
     vec3 position = {};
-    auto mvp    = GetMVP(position);
+    vec3 euler = {};
+    auto mvp    = GetMVP(position, euler);
 
     std::array formats =
     {
@@ -61,7 +65,7 @@ int main() {
 
     while (init.m_Running) {
         engine::PreFrame(init);
-        mvp = GetMVP(position);
+        mvp = GetMVP(position, euler);
 
         auto commandEncoder = init.m_Queue->createCommandEncoder();
         auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(init, commandEncoder);
@@ -88,6 +92,7 @@ int main() {
 
         if (ImGui::Begin("Hello!")) {
             ImGui::DragFloat3("Position", &position.x);
+            ImGui::DragFloat3("Euler", &euler.x);
         }
         ImGui::End();
         ImGui::Render();

@@ -8,7 +8,7 @@ struct VertexInput
 struct VertexOutput
 {
     float4 position : SV_Position;
-    float3 color : COLOR;
+    float4 color : COLOR;
 };
 
 uniform float4x4 modelViewProj;
@@ -18,12 +18,12 @@ VertexOutput vertexMain(VertexInput input)
 {
     VertexOutput output;
     output.position = mul(modelViewProj, float4(input.position, 1.0));
-    output.color = input.normal;
+    output.color = mul(modelViewProj, float4(input.normal, 1.0));
     return output;
 }
 
 [shader("fragment")]
 float4 fragmentMain(VertexOutput input) : SV_Target
 {
-    return float4(input.color, 1.0);
+    return float4(input.color.xyz, 1.0);
 }

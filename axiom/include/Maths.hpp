@@ -104,8 +104,8 @@ namespace axm {
             DecimalType c = cosf(xAngle);
             DecimalType s = sinf(xAngle);
 
-            m.m[1][2] = c;
-            m.m[1][3] = -s;
+            m.m[1][1] = c;
+            m.m[1][2] = -s;
             m.m[2][1] = s;
             m.m[2][2] = c;
 

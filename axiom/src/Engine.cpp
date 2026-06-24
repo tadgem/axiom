@@ -70,7 +70,7 @@ public:
         const char* message
     ) override
     {
-        AXM_LOG("RHI Error : {} : {} : {}",
+        AXM_LOG("SlangRHI : {} : {} : {}",
             GetSlangRHIDebugMessageType(type),
             GetSlangRHIDebugMessageSource(source),
             message

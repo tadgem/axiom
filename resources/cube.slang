@@ -1,7 +1,8 @@
 struct VertexInput
 {
     float3 position : POSITION;
-    float3 color : COLOR;
+    float3 normal : NORMAL;
+    float2 uv : UV;
 };
 
 struct VertexOutput
@@ -17,7 +18,7 @@ VertexOutput vertexMain(VertexInput input)
 {
     VertexOutput output;
     output.position = mul(modelViewProj, float4(input.position, 1.0));
-    output.color = input.color;
+    output.color = input.normal;
     return output;
 }
 

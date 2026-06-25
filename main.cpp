@@ -19,6 +19,8 @@ mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
 }
 
 int main() {
+    constexpr u32 width = 1280;
+    constexpr u32 height = 720;
     AppState init = engine::Init();
 
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
@@ -29,17 +31,7 @@ int main() {
     auto mvp    = GetMVP(position, euler, scale);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout(init.m_Device);
-
-    std::array formats =
-    {
-        init.m_Surface->getInfo().preferredFormat
-    };
-
-    constexpr u32 width = 1280;
-    constexpr u32 height = 720;
-
     auto cubeShapeDef = shapes::GetCubeShape();
-
     auto cubeMesh = meshes::CreateMeshFromData(
         init.m_Device,
         cubeShapeDef.m_VertexBuffer,
@@ -50,6 +42,11 @@ int main() {
     );
 
     Shader cube = Shader(init.m_Device, "resources/shaders/cube");
+
+    std::array formats = {
+        init.m_Surface->getInfo().preferredFormat
+    };
+
     auto pipeline = pipeline::CreateRasterPipeline(
         init.m_Device,
         formats,

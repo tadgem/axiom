@@ -12,6 +12,7 @@
 #include "Pipeline.hpp"
 #include "RenderPass.hpp"
 #include "Shapes.hpp"
+#include "Mesh.hpp"
 
 // Third party includes
 // TODO: (Do we want these in the public header?)

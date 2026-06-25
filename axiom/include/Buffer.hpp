@@ -7,14 +7,14 @@
 #include "slang-rhi.h"
 namespace axm {
     namespace buffer {
-        rhi::IBuffer* CreateVertexBuffer(
+        rhi::ComPtr<rhi::IBuffer> CreateVertexBuffer(
             rhi::IDevice* device,
             u64 size,
             const void* data,
             const char* label = "VertexBuffer"
         );
 
-        rhi::IBuffer* CreateIndexBuffer(
+        rhi::ComPtr<rhi::IBuffer> CreateIndexBuffer(
             rhi::IDevice* device,
             u64 size,
             const void* data,

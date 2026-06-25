@@ -28,6 +28,8 @@ int main() {
     vec3 scale = {1.0, 1.0, 1.0};
     auto mvp    = GetMVP(position, euler, scale);
 
+    auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout(init.m_Device);
+
     std::array formats =
     {
         init.m_Surface->getInfo().preferredFormat
@@ -38,19 +40,14 @@ int main() {
 
     auto cubeShapeDef = shapes::GetCubeShape();
 
-    auto vertexBuffer = buffer::CreateVertexBuffer(
+    auto cubeMesh = meshes::CreateMeshFromData(
         init.m_Device,
-        cubeShapeDef.m_BufferLength * sizeof(f32),
         cubeShapeDef.m_VertexBuffer,
-        "CubeVertexBuffer_PosNormalUV"
+        cubeShapeDef.m_BufferLength * sizeof(f32),
+        cubeShapeDef.m_IndexBuffer,
+        cubeShapeDef.m_NumIndices * sizeof(u32),
+        posNormalUvLayout
     );
-
-    auto indexBuffer = buffer::CreateIndexBuffer(
-        init.m_Device,
-        cubeShapeDef.m_NumIndices * sizeof(i32),
-        cubeShapeDef.m_IndexBuffer, "CubeIndexBuffer"
-    );
-
 
     Shader cube = Shader(init.m_Device, "resources/shaders/cube");
     auto pipeline = pipeline::CreateRasterPipeline(
@@ -58,7 +55,8 @@ int main() {
         formats,
         init.m_DepthStencilDesc,
         cube,
-        vertex::PosNormalUV::GetInputLayout(init.m_Device));
+        posNormalUvLayout
+    );
 
     auto cpuTextureData = textures::LoadCPUTextureDataFromFile("resources/textures/crate.jpg");
 
@@ -92,19 +90,22 @@ int main() {
             AXM_LOG("Failed to bind modelViewProj to pipeline");
         }
 
-        cursor["diffuse"].setBinding(gpuTexture.m_TextureView);
-        cursor["diffuseSampler"].setBinding(sampler);
+        if (SLANG_FAILED(cursor["diffuse"].setBinding(gpuTexture.m_TextureView))) {
+            AXM_LOG("Failed to bind diffuse texture to pipeline");
+        }
 
-
+        if (SLANG_FAILED(cursor["diffuseSampler"].setBinding(sampler))) {
+            AXM_LOG("Failed to bind diffuse sampler to pipeline");
+        }
 
         rhi::RenderState renderState = {};
         renderState.viewports[0] = rhi::Viewport::fromSize(width, height);
         renderState.viewportCount = 1;
         renderState.scissorRects[0] = rhi::ScissorRect::fromSize(width, height);
         renderState.scissorRectCount = 1;
-        renderState.vertexBuffers[0].buffer = vertexBuffer;
+        renderState.vertexBuffers[0].buffer = cubeMesh.m_VertexBuffer;
         renderState.vertexBufferCount = 1;
-        renderState.indexBuffer.buffer = indexBuffer;
+        renderState.indexBuffer.buffer = cubeMesh.m_IndexBuffer;
         renderState.indexFormat = rhi::IndexFormat::Uint32;
         renderPassEncoder->setRenderState(renderState);
 

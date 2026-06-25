@@ -6,8 +6,8 @@ namespace axm::shapes {
     struct Description {
         f32*    m_VertexBuffer;
         size_t  m_BufferLength;
-        i32*    m_IndexBuffer;
-        i32     m_NumIndices;
+        u32*    m_IndexBuffer;
+        u32     m_NumIndices;
 
     };
 

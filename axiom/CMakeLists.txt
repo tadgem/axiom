@@ -18,6 +18,8 @@ add_library(axiom
         src/Shapes.cpp
         include/Texture.hpp
         src/Texture.cpp
+        include/Mesh.hpp
+        src/Mesh.cpp
 )
 
 target_link_libraries(axiom PUBLIC

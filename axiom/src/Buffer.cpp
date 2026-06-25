@@ -1,6 +1,6 @@
 #include "../include/Buffer.hpp"
 #include "../include/Log.hpp"
-rhi::IBuffer *axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, const void* data, const char *label) {
+rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, const void* data, const char *label) {
     using namespace rhi;
 
     BufferDesc desc = {};
@@ -9,8 +9,8 @@ rhi::IBuffer *axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, co
     desc.defaultState = ResourceState::VertexBuffer;
     desc.label = label;
 
-    IBuffer* buffer;
-    if (SLANG_FAILED(device->createBuffer(desc, data, &buffer))) {
+    ComPtr<IBuffer> buffer;
+    if (SLANG_FAILED(device->createBuffer(desc, data, buffer.writeRef()))) {
         AXM_LOG("Failed to create vertex buffer");
         return nullptr;
     }
@@ -18,7 +18,7 @@ rhi::IBuffer *axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, co
     return buffer;
 
 }
-rhi::IBuffer *axm::buffer::CreateIndexBuffer(rhi::IDevice *device, u64 size, const void *data, const char *label) {
+rhi::ComPtr<rhi::IBuffer>axm::buffer::CreateIndexBuffer(rhi::IDevice *device, u64 size, const void *data, const char *label) {
     using namespace rhi;
 
     BufferDesc desc = {};
@@ -27,8 +27,8 @@ rhi::IBuffer *axm::buffer::CreateIndexBuffer(rhi::IDevice *device, u64 size, con
     desc.defaultState = ResourceState::IndexBuffer;
     desc.label = label;
 
-    IBuffer* buffer;
-    if (SLANG_FAILED(device->createBuffer(desc, data, &buffer))) {
+    ComPtr<IBuffer> buffer;
+    if (SLANG_FAILED(device->createBuffer(desc, data, buffer.writeRef()))) {
         AXM_LOG("Failed to create vertex buffer");
         return nullptr;
     }

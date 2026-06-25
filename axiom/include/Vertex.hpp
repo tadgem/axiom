@@ -22,7 +22,7 @@ namespace axm {
             vec3 m_Normal;
             vec2 m_UV;
 
-            static rhi::IInputLayout* GetInputLayout(rhi::IDevice* device) {
+            static rhi::ComPtr<rhi::IInputLayout> GetInputLayout(rhi::IDevice* device) {
                 using namespace rhi;
                 VertexStreamDesc vertexStreams[] = {
                     {sizeof(PosNormalUV), InputSlotClass::PerVertex, 0},
@@ -37,8 +37,8 @@ namespace axm {
                 inputLayoutDesc.inputElementCount = sizeof(inputElements) / sizeof(inputElements[0]);
                 inputLayoutDesc.vertexStreams = vertexStreams;
                 inputLayoutDesc.vertexStreamCount = sizeof(vertexStreams) / sizeof(vertexStreams[0]);
-                IInputLayout* inputLayout;
-                if (SLANG_FAILED(device->createInputLayout(inputLayoutDesc, &inputLayout))) {
+                ComPtr<IInputLayout> inputLayout;
+                if (SLANG_FAILED(device->createInputLayout(inputLayoutDesc, inputLayout.writeRef()))) {
                     AXM_LOG("Failed to create input layout");
                     return nullptr;
                 }

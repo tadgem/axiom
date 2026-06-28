@@ -160,7 +160,7 @@ namespace axm {
                maths::RotateY(maths::Radians(euler.y))
            );
 
-            return maths::Multiply(model, maths::RotateZ(euler.z));
+            return maths::Multiply(model, maths::RotateZ(maths::Radians(euler.z)));
 
         }
 

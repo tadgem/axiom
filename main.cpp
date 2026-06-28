@@ -28,6 +28,9 @@ int main() {
     constexpr u32 height = 720;
     AppState init = engine::Init();
 
+    axm::json jballs = {};
+    jballs["dada"] = 3;
+
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
     vec3 position = {};

@@ -1,5 +1,5 @@
 #include "../include/Buffer.hpp"
-#include "../include/Log.hpp"
+#include "../include/Debug.hpp"
 rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, const void* data, const char *label) {
     using namespace rhi;
 

@@ -2,6 +2,7 @@
 #include "SDL3/SDL.h"
 #include <slang-rhi.h>
 #include <memory>
+#include "STL.hpp"
 
 namespace axm {
     struct AppState {
@@ -18,7 +19,7 @@ namespace axm {
         rhi::ITexture*          m_SwapchainColourImage  = nullptr;
         rhi::ITexture*          m_SwapchainDepthImage   = nullptr;
 
-        std::unique_ptr<rhi::IDebugCallback>    m_DebugCallback;
+        Unique<rhi::IDebugCallback>    m_DebugCallback;
 
         static AppState BAD ();
 

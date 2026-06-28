@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <vector>
-#include "Log.hpp"
+#include "STL.hpp"
+#include "Debug.hpp"
 #include "Maths.hpp"
 #include "slang-rhi.h"
 
@@ -14,7 +14,7 @@ namespace axm {
 
         struct Description {
             rhi::VertexStreamDesc m_StreamDesc;
-            std::vector<rhi::InputElementDesc> m_InputElementDesc;
+            Vector<rhi::InputElementDesc> m_InputElementDesc;
         };
 
         struct PosNormalUV {

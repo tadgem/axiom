@@ -43,6 +43,7 @@ namespace axm {
     using vec3 = vec3_t<f32>;
     using vec4 = vec4_t<f32>;
 
+
     template<typename DecimalType>
     struct mat4x4_t {
         DecimalType m[4][4];
@@ -58,7 +59,6 @@ namespace axm {
     };
 
     using mat4 = mat4x4_t<f32>;
-
 
     namespace maths {
 
@@ -180,8 +180,6 @@ namespace axm {
 
             return m;
         }
-
-
 
     }
 

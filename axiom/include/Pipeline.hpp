@@ -1,5 +1,5 @@
 #pragma once
-#include <span>
+#include "STL.hpp"
 #include "Shader.hpp"
 #include "slang-rhi.h"
 
@@ -8,7 +8,7 @@ namespace axm {
 
         rhi::ComPtr<rhi::IRenderPipeline> CreateRasterPipeline (
             rhi::IDevice* device,
-            const std::span<rhi::Format> &colourFormats,
+            const Span<rhi::Format> &colourFormats,
             const rhi::DepthStencilDesc &depthTarget,
             const Shader& shader,
             rhi::IInputLayout* inputLayout

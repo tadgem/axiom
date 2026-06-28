@@ -1,6 +1,7 @@
-#include <array>
 #include "Shader.hpp"
-#include "Log.hpp"
+#include <array>
+#include "Debug.hpp"
+#include "STL.hpp"
 
 using namespace rhi;
 
@@ -46,7 +47,7 @@ axm::Shader::Shader(IDevice *device, const char *name, const char *vertexEntry, 
     slang::IEntryPoint* fragmentEntryPoint = nullptr;
     shaderModule->findEntryPointByName(fragEntry, &fragmentEntryPoint);
 
-    std::array<slang::IComponentType*, 2> entryPoints = { vertexEntryPoint, fragmentEntryPoint };
+    Array<slang::IComponentType*, 2> entryPoints = { vertexEntryPoint, fragmentEntryPoint };
 
     ShaderProgramDesc programDesc = {};
     programDesc.linkingStyle = LinkingStyle::SingleProgram;
@@ -67,7 +68,7 @@ axm::Shader::Shader(rhi::IDevice *device, const char *name, const char *computeE
     slang::IEntryPoint* computeEntryPoint = nullptr;
     shaderModule->findEntryPointByName(computeEntry, &computeEntryPoint);
 
-    std::array<slang::IComponentType*, 1> entryPoint = { computeEntryPoint };
+    Array<slang::IComponentType*, 1> entryPoint = { computeEntryPoint };
 
     ShaderProgramDesc programDesc = {};
     programDesc.linkingStyle = LinkingStyle::SingleProgram;

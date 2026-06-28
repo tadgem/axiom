@@ -1,7 +1,10 @@
 #include "axiom.hpp"
 #include <array>
 
+AXM_OVERRIDE_GLOBAL_NEW(false)
+
 using namespace axm;
+
 
 mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
     mat4 model  = maths::Multiply(
@@ -18,7 +21,9 @@ mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
     return maths::Multiply(proj, modelView);
 }
 
+
 int main() {
+
     constexpr u32 width = 1280;
     constexpr u32 height = 720;
     AppState init = engine::Init();
@@ -43,7 +48,7 @@ int main() {
 
     Shader cube = Shader(init.m_Device, "resources/shaders/cube");
 
-    std::array formats = {
+    Array formats = {
         init.m_Surface->getInfo().preferredFormat
     };
 

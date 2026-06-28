@@ -1,17 +1,18 @@
-#include "../include/Engine.hpp"
-#include "../include/Log.hpp"
-#define SDL_MAIN_HANDLED
-#include "SDL3/SDL_main.h"
-#include "SDL3/SDL.h"
-#include <slang.h>
-#include <slang-rhi.h>
-#include <vector>
+#include "Engine.hpp"
+#include "Debug.hpp"
+#include "Utils.hpp"
+#include "STL.hpp"
 
-#include "../include/Utils.hpp"
+#define SDL_MAIN_HANDLED
+
+
+#include <slang-rhi.h>
+#include <slang.h>
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_main.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_slang_rhi.h"
 #include "imgui.h"
-
 #if SLANG_WINDOWS_FAMILY
 #include "windows.h"
 #endif
@@ -64,7 +65,7 @@ const char* GetSlangRHIDebugMessageSource(const rhi::DebugMessageSource& message
 class SlangRHIDebugCallback : public rhi::IDebugCallback
 {
 public:
-    virtual SLANG_NO_THROW void SLANG_MCALL handleMessage(
+    SLANG_NO_THROW void SLANG_MCALL handleMessage(
         rhi::DebugMessageType type,
         rhi::DebugMessageSource source,
         const char* message
@@ -76,6 +77,8 @@ public:
             message
         );
     }
+
+    virtual ~SlangRHIDebugCallback() = default;
 };
 
 axm::AppState axm::engine::Init() {
@@ -101,7 +104,8 @@ axm::AppState axm::engine::Init() {
     DeviceType selectedType = DeviceType::Default;
 
 
-    auto debugCallback = std::make_unique<SlangRHIDebugCallback>();
+    IDebugCallback* dbg = AXM_NEW(SlangRHIDebugCallback);
+    Unique<IDebugCallback> debugCallback (dbg);
 
     for (auto type : deviceTypes) {
         if (getRHI()->isDeviceTypeSupported(type)) {
@@ -110,7 +114,7 @@ axm::AppState axm::engine::Init() {
             deviceDesc.debugCallback = debugCallback.get();
             deviceDesc.enableValidation = true;
 
-            std::vector requiredFeatures = { Feature::Surface, Feature::Rasterization };
+            Array<Feature, 2> requiredFeatures = { Feature::Surface, Feature::Rasterization };
             deviceDesc.requiredFeatureCount = static_cast<uint32_t>(requiredFeatures.size());
             deviceDesc.requiredFeatures = requiredFeatures.data();
 
@@ -150,7 +154,6 @@ axm::AppState axm::engine::Init() {
         SDL_Quit();
         return {};
     }
-
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

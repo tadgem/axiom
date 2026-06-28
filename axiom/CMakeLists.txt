@@ -20,6 +20,9 @@ add_library(axiom
         src/Texture.cpp
         include/Mesh.hpp
         src/Mesh.cpp
+        include/Alloc.hpp
+        include/STL.hpp
+        src/STL.cpp
 )
 
 target_link_libraries(axiom PUBLIC
@@ -27,6 +30,7 @@ target_link_libraries(axiom PUBLIC
         slang-rhi
         assimp
         flecs_static
+        mimalloc-static
 )
 
 target_include_directories(axiom PUBLIC
@@ -34,5 +38,6 @@ target_include_directories(axiom PUBLIC
         ${IMGUI_INCLUDE_DIRS}
         ${SLANG_INCLUDE_DIRS}
         ${SDL_INCLUDE_DIRS}
+        ${MIMALLOC_INCLUDE_DIRS}
         ${SINGLE_HEADER_INCLUDE_DIRS}
 )

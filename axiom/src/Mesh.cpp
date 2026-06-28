@@ -24,5 +24,4 @@ axm::Mesh axm::meshes::CreateMeshFromData(
         .m_IndexCount =  numIndices
     };
 
-
 }

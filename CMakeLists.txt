@@ -4,6 +4,16 @@ project(axiom)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+message("-- Axiom : Configuring build --")
+
+# mimalloc
+set(MI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(MI_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(MI_BUILD_OBJECT OFF CACHE BOOL "" FORCE)
+set(MI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(MIMALLOC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mimalloc/include)
+add_subdirectory(third_party/mimalloc)
+
 # SDL3
 set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)

@@ -12,5 +12,8 @@ using i16 = int16_t;
 using i32 = int32_t;
 using i64 = int32_t;
 
+typedef u8  byte;
+typedef u64 str_hash;
+
 using f32 = float;
 using f64 = double;

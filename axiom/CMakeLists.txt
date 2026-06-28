@@ -11,6 +11,7 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
         ${AXM_SRCS}
         include/JSON.hpp
+        include/Timer.hpp
 )
 
 target_link_libraries(axiom PUBLIC

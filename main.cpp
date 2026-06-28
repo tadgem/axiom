@@ -26,10 +26,15 @@ int main() {
 
     constexpr u32 width = 1280;
     constexpr u32 height = 720;
+
+    Timer initTimer = {};
+
     AppState init = engine::Init();
 
     axm::json jballs = {};
     jballs["dada"] = 3;
+
+
 
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
@@ -80,6 +85,9 @@ int main() {
 
     cpuTextureData.Release();
 
+    f64 msInitTime = initTimer.ElapsedMillisecondsF();
+
+    AXM_LOG("Init took {} ms", msInitTime);
     AXM_LOG("Starting Axiom Main Loop");
     AXM_FLUSH_LOG();
 

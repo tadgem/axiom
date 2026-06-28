@@ -194,6 +194,7 @@ axm::AppState axm::engine::Init() {
     return {
         .m_OK = true,
         .m_Running = true,
+        .m_AssetManager = AssetManager(),
         .m_DepthStencilDesc =  depthStencilDesc,
         .m_Window = window,
         .m_Device = device,
@@ -278,6 +279,7 @@ axm::AppState axm::AppState::BAD() {
     return {
         .m_OK =  false,
         .m_Running = false,
+        .m_AssetManager = AssetManager(),
         .m_DepthStencilDesc = {},
         .m_Window = nullptr,
         .m_Device = nullptr,

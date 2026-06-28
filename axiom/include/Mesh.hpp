@@ -8,7 +8,7 @@ namespace axm {
         rhi::ComPtr<rhi::IBuffer>       m_IndexBuffer;
         rhi::ComPtr<rhi::IInputLayout>  m_InputLayout;
 
-        u32                             m_IndexCount;
+        u64                             m_IndexCount;
     };
 
     namespace meshes {

@@ -10,19 +10,6 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
         ${AXM_SRCS}
-        include/Pipeline.hpp
-        src/Pipeline.cpp
-        include/RenderPass.hpp
-        src/RenderPass.cpp
-        include/Shapes.hpp
-        src/Shapes.cpp
-        include/Texture.hpp
-        src/Texture.cpp
-        include/Mesh.hpp
-        src/Mesh.cpp
-        include/Alloc.hpp
-        include/STL.hpp
-        src/STL.cpp
 )
 
 target_link_libraries(axiom PUBLIC

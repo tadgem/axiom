@@ -3,11 +3,14 @@
 #include <slang-rhi.h>
 #include <memory>
 #include "STL.hpp"
+#include "AssetManager.hpp"
 
 namespace axm {
     struct AppState {
         bool m_OK = false;
         bool m_Running = true;
+
+        AssetManager            m_AssetManager;
 
         rhi::DepthStencilDesc   m_DepthStencilDesc;
 

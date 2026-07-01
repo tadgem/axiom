@@ -7,3 +7,6 @@
 [submodule "submodules/flecs"]
 	path = submodules/flecs
 	url = https://github.com/SanderMertens/flecs.git
+[submodule "submodules/luau"]
+	path = submodules/luau
+	url = https://github.com/luau-lang/luau.git

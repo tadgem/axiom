@@ -43,6 +43,10 @@ namespace axm {
     using vec3 = vec3_t<f32>;
     using vec4 = vec4_t<f32>;
 
+    using vec2u = vec2_t<u32>;
+    using vec3u = vec3_t<u32>;
+    using vec4u = vec4_t<u32>;
+
 
     template<typename DecimalType>
     struct mat4x4_t {

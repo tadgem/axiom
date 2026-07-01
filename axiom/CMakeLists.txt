@@ -12,6 +12,8 @@ add_library(axiom
         ${AXM_SRCS}
         include/JSON.hpp
         include/Timer.hpp
+        include/Viewport.hpp
+        src/Viewport.cpp
 )
 
 target_link_libraries(axiom PUBLIC

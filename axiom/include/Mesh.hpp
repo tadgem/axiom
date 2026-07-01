@@ -1,6 +1,6 @@
 #pragma once
 #include "slang-rhi.h"
-#include "Prim.hpp"
+#include "Viewport.hpp"
 
 namespace axm {
     struct Mesh {
@@ -20,5 +20,12 @@ namespace axm {
             u64 numIndices,
             rhi::ComPtr<rhi::IInputLayout> inputLayout,
             const char* label = "AnonMesh");
+
+
+        void DrawMesh(
+            const Viewport& viewPort,
+            const Mesh& mesh,
+            rhi::IRenderPassEncoder* renderPassEncoder
+        );
     }
 }

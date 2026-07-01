@@ -111,20 +111,9 @@ int main() {
             AXM_LOG("Failed to bind diffuse sampler to pipeline");
         }
 
-        rhi::RenderState renderState = {};
-        renderState.viewports[0] = rhi::Viewport::fromSize(width, height);
-        renderState.viewportCount = 1;
-        renderState.scissorRects[0] = rhi::ScissorRect::fromSize(width, height);
-        renderState.scissorRectCount = 1;
-        renderState.vertexBuffers[0].buffer = cubeMesh.m_VertexBuffer;
-        renderState.vertexBufferCount = 1;
-        renderState.indexBuffer.buffer = cubeMesh.m_IndexBuffer;
-        renderState.indexFormat = rhi::IndexFormat::Uint32;
-        renderPassEncoder->setRenderState(renderState);
+        auto viewport = viewports::GetFullscreenViewport(init.m_Window);
+        meshes ::DrawMesh(viewport, cubeMesh, renderPassEncoder);
 
-        rhi::DrawArguments drawArgs = {};
-        drawArgs.vertexCount = cubeShapeDef.m_NumIndices;
-        renderPassEncoder->drawIndexed(drawArgs);
 
         if (ImGui::Begin("Hello!")) {
             ImGui::DragFloat3("Position", &position.x);

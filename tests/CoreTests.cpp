@@ -10,7 +10,7 @@ TestResult ExampleTest(AppState *e) {
 
 TestResult ExampleTest2(AppState *e) {
 
-    return TestResult::Pass();
+    return TestResult::Fail("Something bad happened");
 }
 
 TestResult ExampleTest3(AppState *e) {

@@ -14,6 +14,8 @@ add_library(axiom
         include/Timer.hpp
         include/Viewport.hpp
         src/Viewport.cpp
+        ../tests/AxiomTestFramework.hpp
+        ../tests/CoreTests.cpp
 )
 
 target_link_libraries(axiom PUBLIC

@@ -1,14 +1,18 @@
 function(add_axiom_target name src)
     add_executable(${name} ${src})
     target_link_libraries(${name} PRIVATE axiom)
+    target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+endfunction()
+
+function(add_axiom_example name src)
+    add_axiom_target(${name} ${src})
 
     add_custom_command(
-        TARGET ${name} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_BINARY_DIR}/resources
-        COMMENT "Copying resources to target output directory"
+            TARGET ${name} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/resources
+            ${CMAKE_CURRENT_BINARY_DIR}/resources
+            COMMENT "Copying resources to target output directory"
     )
-
 
 endfunction()

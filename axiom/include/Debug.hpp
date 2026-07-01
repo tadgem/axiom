@@ -19,6 +19,8 @@
 #define AXM_ENABLE_LOGGING
 #ifdef  AXM_ENABLE_LOGGING
 #define AXM_LOG(fmt, ...) std::println("Axiom : " fmt, __VA_ARGS__)
+#define AXM_LOG_INFO(fmt, ...) std::println("Axiom : INFO : " fmt, __VA_ARGS__)
+#define AXM_LOG_ERROR(fmt, ...) std::println("Axiom : ERROR : " fmt, __VA_ARGS__)
 #define AXM_FLUSH_LOG() std::fflush(stdout)
 #else
 #define AXM_LOG(fmt, ...)

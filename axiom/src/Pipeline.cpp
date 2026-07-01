@@ -22,7 +22,7 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(
     pipelineDesc.targets = colorTargets.data();
     pipelineDesc.targetCount = colorTargets.size();
     pipelineDesc.depthStencil = depthTarget;
-
+    pipelineDesc.label = shader.m_Name;
     rhi::ComPtr<rhi::IRenderPipeline> pipeline;
 
     if (SLANG_FAILED(device->createRenderPipeline(pipelineDesc, pipeline.writeRef()))) {

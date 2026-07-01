@@ -78,3 +78,12 @@ axm::Shader::Shader(rhi::IDevice *device, const char *name, const char *computeE
 
     CreateShaderProgram(device, programDesc, m_Program, name);
 }
+
+axm::ShaderDataInterface::ShaderDataInterface(
+    IRenderPassEncoder *renderPassEncoder,
+    const ComPtr<IRenderPipeline>& pipeline)
+:
+m_SlangCursor(rhi::ShaderCursor(renderPassEncoder->bindPipeline(pipeline))),
+m_RenderPipeline(pipeline)
+{}
+

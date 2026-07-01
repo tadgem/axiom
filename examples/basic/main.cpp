@@ -7,16 +7,9 @@ using namespace axm;
 
 
 mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
-    mat4 model  = maths::Multiply(
-        maths::Multiply(
-            maths::Translate(pos),
-            maths::Scale(scale)),
-        maths::Rotate(euler)
-    );
-
+    mat4 model  = maths::GetModelMatrix(pos, euler, scale);
     mat4 view   = maths::Translate(vec3{0.0f, 0.0f, 0.0f});
     mat4 proj   = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
-
     auto modelView     = maths::Multiply(view, model);
     return maths::Multiply(proj, modelView);
 }
@@ -30,11 +23,6 @@ int main() {
     Timer initTimer = {};
 
     AppState init = engine::Init();
-
-    axm::json jballs = {};
-    jballs["dada"] = 3;
-
-
 
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
@@ -91,6 +79,9 @@ int main() {
     AXM_LOG("Starting Axiom Main Loop");
     AXM_FLUSH_LOG();
 
+    auto viewport = viewports::GetFullscreenViewport(init.m_Window);
+
+
     while (init.m_Running) {
         engine::PreFrame(init);
         mvp = GetMVP(position, euler, scale);
@@ -111,7 +102,6 @@ int main() {
             AXM_LOG("Failed to bind diffuse sampler to pipeline");
         }
 
-        auto viewport = viewports::GetFullscreenViewport(init.m_Window);
         meshes ::DrawMesh(viewport, cubeMesh, renderPassEncoder);
 
 

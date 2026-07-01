@@ -38,7 +38,6 @@ struct AssetLoadResult {
   // additional assets that may be required to completely load this asset
   Vector<AssetLoadInfo> NewAssetTasks;
   // synchronous tasks associated with this asset e.g. submit tex mem to GPU
-  // in openGL
   Vector<AssetIntermediateCallback> SyncAssetCallbacks;
 };
 

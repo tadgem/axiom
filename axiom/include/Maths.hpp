@@ -170,7 +170,12 @@ namespace axm {
 
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> PerspectiveFOV(DecimalType fovRad, DecimalType aspect, DecimalType near, DecimalType far) {
+        mat4x4_t<DecimalType> PerspectiveFOV(
+            DecimalType fovRad,
+            DecimalType aspect,
+            DecimalType near,
+            DecimalType far
+            ) {
             mat4x4_t<DecimalType> m = {};
 
             DecimalType g = 1.0f / tanf(fovRad * 0.5f);
@@ -183,6 +188,21 @@ namespace axm {
             m.m[3][2] = -1.0f;
 
             return m;
+        }
+
+        template<typename DecimalType>
+        mat4x4_t<DecimalType> GetModelMatrix(
+            vec3_t<DecimalType> pos,
+            vec3_t<DecimalType> euler,
+            vec3_t<DecimalType> scale
+        ) {
+            return maths::Multiply(
+            maths::Multiply(
+                maths::Translate(pos),
+                maths::Scale(scale)
+            ),
+            maths::Rotate(euler)
+            );
         }
 
     }

@@ -239,6 +239,7 @@ void axm::engine::PreFrame(AppState &e) {
 }
 
 void axm::engine::PostFrame(AppState &e) {
+    ImGui::Render();
     auto commandEncoder = e.m_Queue->createCommandEncoder();
     auto passEncoder = BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
 

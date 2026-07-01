@@ -16,6 +16,7 @@ add_subdirectory(third_party/mimalloc)
 
 # SDL3
 set(SDL_TESTS OFF CACHE BOOL "" FORCE)
+set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/sdl/include CACHE INTERNAL "")
@@ -46,4 +47,5 @@ set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_he
 add_subdirectory(axiom)
 include(cmake/AxiomUtils.cmake)
 
-add_axiom_target(axiom-test main.cpp)
+add_axiom_target(axiom-test-basic examples/basic/main.cpp)
+add_axiom_target(axiom-test-deferred examples/deferred/main.cpp)

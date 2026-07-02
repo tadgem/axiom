@@ -37,17 +37,17 @@ AssetHandle AssetManager::LoadAsset(const String &path,
   }
 
   AssetHandle handle(tmp_path, assetType);
-  AssetLoadInfo load_info{tmp_path, assetType};
+  AssetLoadInfo loadInfo{tmp_path, assetType};
 
-  auto it = std::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), load_info);
+  auto it = std::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), loadInfo);
 
   for (auto &queued_load : p_QueuedLoads) {
-    if (load_info == queued_load) {
+    if (loadInfo == queued_load) {
       return queued_load.ToHandle();
     }
   }
 
-  p_QueuedLoads.push_back(load_info);
+  p_QueuedLoads.push_back(loadInfo);
 
   if (onAssetLoaded != nullptr) {
     p_AssetLoadCallbacks.emplace(handle, onAssetLoaded);
@@ -105,12 +105,12 @@ AssetManager::GetAssetLoadProgress(const AssetHandle &handle) {
   return AssetLoadProgress::NotLoaded;
 }
 
-bool AssetManager::AnyAssetsLoading() {
+bool AssetManager::AnyAssetsLoading() const {
   return !p_PendingLoadTasks.empty() || !p_PendingSyncCallbacks.empty() ||
          !p_PendingUnloadCallbacks.empty() || !p_QueuedLoads.empty();
 }
 
-bool AssetManager::AnyAssetsUnloading() {
+bool AssetManager::AnyAssetsUnloading() const {
   return !p_PendingUnloadCallbacks.empty();
 }
 
@@ -165,22 +165,22 @@ void AssetManager::HandleCallbacks() {
       break;
 
     for (u16 i = 0; i < kCallbackTasksPerUpdate - processedCallbacks; i++) {
-      if (i >= asset.SyncAssetCallbacks.size())
+      if (i >= asset.m_SyncAssetCallbacks.size())
         break;
-      asset.SyncAssetCallbacks.back()(asset.loaded_intermediate);
-      asset.SyncAssetCallbacks.pop_back();
+      asset.m_SyncAssetCallbacks.back()(asset.m_TransientAssetData);
+      asset.m_SyncAssetCallbacks.pop_back();
       processedCallbacks++;
     }
 
-    if (asset.SyncAssetCallbacks.empty()) {
+    if (asset.m_SyncAssetCallbacks.empty()) {
       clears.push_back(handle);
     }
   }
   for (auto &handle : clears) {
     TransitionAssetToLoaded(
         handle,
-        p_PendingSyncCallbacks[handle].loaded_intermediate->asset_data_ptr);
-    AXM_DELETE(p_PendingSyncCallbacks[handle].loaded_intermediate);
+        p_PendingSyncCallbacks[handle].m_TransientAssetData->m_AssetDataPtr);
+    AXM_DELETE(p_PendingSyncCallbacks[handle].m_TransientAssetData);
     p_PendingSyncCallbacks.erase(handle);
   }
   clears.clear();
@@ -220,17 +220,17 @@ void AssetManager::HandleAsyncTasks() {
   for (auto &handle : finished) {
     AssetLoadResult asyncReturn = p_PendingLoadTasks[handle].get();
     // enqueue new loads
-    for (auto &newLoad : asyncReturn.NewAssetTasks) {
+    for (auto &newLoad : asyncReturn.m_NewAssetTasks) {
       LoadAsset(newLoad.path, newLoad.type);
     }
 
-    if (asyncReturn.SyncAssetCallbacks.empty() &&
-        asyncReturn.loaded_intermediate != nullptr) {
+    if (asyncReturn.m_SyncAssetCallbacks.empty() &&
+        asyncReturn.m_TransientAssetData != nullptr) {
       TransitionAssetToLoaded(handle,
-                              asyncReturn.loaded_intermediate->asset_data_ptr);
+                              asyncReturn.m_TransientAssetData->m_AssetDataPtr);
 
-      AXM_DELETE(asyncReturn.loaded_intermediate);
-      asyncReturn.loaded_intermediate = nullptr;
+      AXM_DELETE(asyncReturn.m_TransientAssetData);
+      asyncReturn.m_TransientAssetData = nullptr;
     } else {
       p_PendingSyncCallbacks.emplace(handle, asyncReturn);
     }

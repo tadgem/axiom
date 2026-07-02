@@ -34,11 +34,14 @@ using OnAssetLoadedCallback = void (*)(Asset *);
 using OnAssetUnloadedCallback = void (*)(Asset *);
 
 struct AssetLoadResult {
-  AssetTransientData *loaded_intermediate = nullptr;
-  // additional assets that may be required to completely load this asset
-  Vector<AssetLoadInfo> NewAssetTasks;
-  // synchronous tasks associated with this asset e.g. submit tex mem to GPU
-  Vector<AssetIntermediateCallback> SyncAssetCallbacks;
+    // may be null if asset needs to be loaded in multiple stages.
+    Asset*                              m_AssetData;
+    // may be null if asset does not need to load in multiple stages.
+    AssetTransientData *                m_TransientAssetData = nullptr;
+    // additional assets that may be required to completely load this asset
+    Vector<AssetLoadInfo>               m_NewAssetTasks;
+    // synchronous tasks associated with this asset e.g. submit tex mem to GPU
+    Vector<AssetIntermediateCallback>   m_SyncAssetCallbacks;
 };
 
 using LoadAssetCallback = AssetLoadResult (*)(const String &path);
@@ -69,8 +72,8 @@ public:
   }
   AssetLoadProgress GetAssetLoadProgress(const AssetHandle &handle);
 
-  bool AnyAssetsLoading();
-  bool AnyAssetsUnloading();
+  bool AnyAssetsLoading() const;
+  bool AnyAssetsUnloading() const;
 
   /// <summary>
   /// Synchronous calls that will wait until

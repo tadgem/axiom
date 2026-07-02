@@ -1,4 +1,6 @@
 #include "Utils.hpp"
+#include <fstream>
+#include <iostream>
 rhi::ITexture *axm::Utils::CreateDepthTexture(rhi::IDevice *device, u32 w, u32 h, rhi::Format format) {
     using namespace rhi;
     TextureDesc depthDesc = {};
@@ -15,4 +17,16 @@ rhi::ITexture *axm::Utils::CreateDepthTexture(rhi::IDevice *device, u32 w, u32 h
     ITexture* tex;
     device->createTexture(depthDesc, nullptr, &tex);
     return tex;
+}
+axm::Vector<u8> axm::Utils::LoadBinaryFromPath(const String &path) {
+    std::ifstream file{path.c_str(), std::ios::binary | std::ios::ate};
+    auto fileSize = file.tellg();
+    file.seekg(std::ios::beg);
+
+    Vector<u8> vec = {};
+    vec.resize(fileSize);
+    file.read(reinterpret_cast<char *>(std::data(vec)), fileSize);
+
+    return std::move(vec);
+
 }

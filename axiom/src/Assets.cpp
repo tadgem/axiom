@@ -14,4 +14,4 @@ namespace axm {
     Asset::Asset(const String &path, const AssetType &type)
         : path(path), handle(path, type) {}
 
-} // namespace harmony
+} // namespace axm

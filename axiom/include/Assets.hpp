@@ -53,14 +53,15 @@ public:
   const AssetHandle handle;
 };
 
-template <typename _Ty, AssetType _AssetTypeEnum> class AssetT : public Asset {
+template <typename _Ty, AssetType _AssetTypeEnum>
+class AssetT : public Asset {
 public:
   _Ty data;
 
   AssetT(const String &path, const _Ty &data)
       : Asset(path, _AssetTypeEnum), data(data) {};
 
-  ~AssetT() {};
+  ~AssetT() override {} ;
 };
 
 /// <summary>
@@ -70,8 +71,8 @@ public:
 /// </summary>
 class AssetTransientData {
 public:
-  Asset *asset_data_ptr;
-  AssetTransientData(Asset *asset) : asset_data_ptr(asset) {}
+  Asset *m_AssetDataPtr;
+  AssetTransientData(Asset *asset) : m_AssetDataPtr(asset) {}
 
   virtual ~AssetTransientData() {}
 };
@@ -80,13 +81,13 @@ template <typename _AssetTy, typename _IntermediateType,
           AssetType _AssetTypeEnum>
 class AssetTransientT : public AssetTransientData {
 public:
-  _IntermediateType intermediate_data;
+  _IntermediateType m_TransientData;
 
   AssetTransientT(Asset *data, const _IntermediateType &inter)
-      : AssetTransientData(data), intermediate_data(inter) {}
+      : AssetTransientData(data), m_TransientData(inter) {}
 
   AssetT<_AssetTy, _AssetTypeEnum> get_concrete_asset() {
-    return static_cast<AssetT<_AssetTy, _AssetTypeEnum>>(asset_data_ptr);
+    return static_cast<AssetT<_AssetTy, _AssetTypeEnum>>(m_AssetDataPtr);
   }
 };
 

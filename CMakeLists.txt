@@ -47,7 +47,10 @@ set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_he
 add_subdirectory(axiom)
 include(cmake/AxiomUtils.cmake)
 
-add_axiom_target(axiom-tests-core tests/CoreTests.cpp)
+# TODO : Allow tests and examples to be defined in subdirectories
+# issue with required DLLs not being copied to correct directory
+
+add_axiom_test(axiom-tests-core tests/CoreTests.cpp)
 
 add_axiom_example(axiom-example-basic examples/basic/main.cpp)
 add_axiom_example(axiom-example-deferred examples/deferred/main.cpp)

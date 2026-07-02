@@ -14,5 +14,16 @@ function(add_axiom_example name src)
             ${CMAKE_CURRENT_BINARY_DIR}/resources
             COMMENT "Copying resources to target output directory"
     )
+endfunction()
 
+function(add_axiom_test name src)
+    add_axiom_target(${name} ${src})
+
+    add_custom_command(
+            TARGET ${name} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resources
+            ${CMAKE_CURRENT_BINARY_DIR}/test_resources
+            COMMENT "Copying test_resources to target output directory"
+    )
 endfunction()

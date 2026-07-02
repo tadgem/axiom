@@ -38,10 +38,6 @@ struct TestResult {
 
 } // namespace axm
 
-static void TestGUI() {
-
-}
-
 #define STRINGIZE_DETAIL(x) #x
 #define STRINGIZE(x) STRINGIZE_DETAIL(x)
 #define FLOAT_ROUGHLY_EQUAL(x, y) abs(abs(x) - abs(y)) <= 0.00001
@@ -59,7 +55,6 @@ static void TestGUI() {
   int main() {                                                                 \
     constexpr u64 TEST_HEAP_SIZE = engine_heap_size;                           \
     TestVector<axm::TestResult> sResults{};                                    \
-    TestString sCurrentTestName = "";                                          \
     AXM_LOG_INFO("{} Tests", suite_name);
 
 #define TEST_APP_END_SUITE()                                                   \

@@ -1,0 +1,31 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="ztUH9YQNNhQDyhDWT896">
+    <mxGraphModel dx="1174" dy="1823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bC2i80Al-9XWZGJWraxF-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Engine&lt;br&gt;- subsystems" vertex="1">
+          <mxGeometry height="100" width="120" x="300" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="bC2i80Al-9XWZGJWraxF-2" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="bC2i80Al-9XWZGJWraxF-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="360" y="200" as="sourcePoint" />
+            <mxPoint x="430" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bC2i80Al-9XWZGJWraxF-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ECS System Container&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;- Transform System&lt;/div&gt;&lt;div&gt;- Animator System&lt;/div&gt;&lt;div&gt;- Script System&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;void DestroyScene(Scene&amp;amp;)&lt;/div&gt;&lt;div&gt;private:&lt;/div&gt;&lt;div&gt;List&amp;lt;Scene&amp;gt; ActiveScene&lt;/div&gt;" vertex="1">
+          <mxGeometry height="170" width="170" x="300" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="bC2i80Al-9XWZGJWraxF-4" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="ISystem&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;void Init(Scene&amp;amp; scene)&lt;/div&gt;&lt;div&gt;void Update(&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Scene&amp;amp; scene&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;void Cleanup(&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Scene&amp;amp; scene&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;List&amp;lt;AssetHandle&amp;gt; GetRequiredAssets()&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="190" width="190" x="500" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="bC2i80Al-9XWZGJWraxF-5" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="Scene&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;ECS Registry m_Registry&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;List&amp;lt;AssetHandle&amp;gt; m_RequiredAssets&lt;/div&gt;" vertex="1">
+          <mxGeometry height="161.25" width="161.25" x="470" y="412" as="geometry" />
+        </mxCell>
+        <mxCell id="bC2i80Al-9XWZGJWraxF-6" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="Scene&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;ECS Registry m_Registry&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;List&amp;lt;AssetHandle&amp;gt; m_RequiredAssets&lt;/div&gt;" vertex="1">
+          <mxGeometry height="161.25" width="161.25" x="700" y="412" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

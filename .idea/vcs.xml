@@ -4,6 +4,7 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/assimp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/flecs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules/luau" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/slang-rhi" vcs="Git" />
   </component>
 </project>

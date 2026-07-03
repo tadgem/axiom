@@ -2,12 +2,11 @@
 #include <vector>
 #include "Debug.hpp"
 
-rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(
-    rhi::IDevice* device,
-    const Span<rhi::Format> &colourFormats,
-    const rhi::DepthStencilDesc &depthTarget,
-    const Shader &shader,
-    rhi::IInputLayout *inputLayout) {
+rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice *device,
+                                                                      const Span<rhi::Format> &colourFormats,
+                                                                      const rhi::DepthStencilDesc &depthTarget,
+                                                                      const Shader &shader,
+                                                                      rhi::IInputLayout *inputLayout) {
 
     Vector<rhi::ColorTargetDesc> colorTargets;
     colorTargets.resize(colourFormats.size());
@@ -31,5 +30,4 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(
     }
 
     return pipeline;
-
 }

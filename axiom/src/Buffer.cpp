@@ -1,6 +1,7 @@
 #include "../include/Buffer.hpp"
 #include "../include/Debug.hpp"
-rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, const void* data, const char *label) {
+rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, const void *data,
+                                                          const char *label) {
     using namespace rhi;
 
     BufferDesc desc = {};
@@ -16,9 +17,9 @@ rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, 
     }
 
     return buffer;
-
 }
-rhi::ComPtr<rhi::IBuffer>axm::buffer::CreateIndexBuffer(rhi::IDevice *device, u64 size, const void *data, const char *label) {
+rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateIndexBuffer(rhi::IDevice *device, u64 size, const void *data,
+                                                         const char *label) {
     using namespace rhi;
 
     BufferDesc desc = {};

@@ -74,7 +74,7 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> Multiply(const mat4x4_t<DecimalType>& a, const mat4x4_t<DecimalType>& b) {
+        mat4x4_t<DecimalType> Multiply(const mat4x4_t<DecimalType> &a, const mat4x4_t<DecimalType> &b) {
             mat4x4_t<DecimalType> m = {};
 
             for (auto i = 0; i < 4; ++i) {
@@ -82,7 +82,7 @@ namespace axm {
                     DecimalType sum = 0.0f;
                     for (auto k = 0; k < 4; ++k) {
                         sum += a.m[i][k] * b.m[k][j];
-                    }  
+                    }
                     m.m[i][j] = sum;
                 }
             }
@@ -91,7 +91,7 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> Translate(const vec3_t<DecimalType>& p) {
+        mat4x4_t<DecimalType> Translate(const vec3_t<DecimalType> &p) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
             m.m[0][3] = p.x;
@@ -102,7 +102,7 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> Scale(const vec3_t<DecimalType>& s) {
+        mat4x4_t<DecimalType> Scale(const vec3_t<DecimalType> &s) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
             m.m[0][0] = s.x;
@@ -113,7 +113,7 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> RotateX(const DecimalType& xAngle) {
+        mat4x4_t<DecimalType> RotateX(const DecimalType &xAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
             DecimalType c = cosf(xAngle);
@@ -128,7 +128,7 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> RotateY(const DecimalType& yAngle) {
+        mat4x4_t<DecimalType> RotateY(const DecimalType &yAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
             DecimalType c = cosf(yAngle);
@@ -143,7 +143,7 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> RotateZ(const DecimalType& zAngle) {
+        mat4x4_t<DecimalType> RotateZ(const DecimalType &zAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
             DecimalType c = cosf(zAngle);
@@ -158,24 +158,17 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> Rotate(const vec3_t<DecimalType>& euler) {
-            auto model  = maths::Multiply(
-               maths::RotateX(maths::Radians(euler.x)),
-               maths::RotateY(maths::Radians(euler.y))
-           );
+        mat4x4_t<DecimalType> Rotate(const vec3_t<DecimalType> &euler) {
+            auto model =
+                    maths::Multiply(maths::RotateX(maths::Radians(euler.x)), maths::RotateY(maths::Radians(euler.y)));
 
             return maths::Multiply(model, maths::RotateZ(maths::Radians(euler.z)));
-
         }
 
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> PerspectiveFOV(
-            DecimalType fovRad,
-            DecimalType aspect,
-            DecimalType near,
-            DecimalType far
-            ) {
+        mat4x4_t<DecimalType> PerspectiveFOV(DecimalType fovRad, DecimalType aspect, DecimalType near,
+                                             DecimalType far) {
             mat4x4_t<DecimalType> m = {};
 
             DecimalType g = 1.0f / tanf(fovRad * 0.5f);
@@ -191,20 +184,11 @@ namespace axm {
         }
 
         template<typename DecimalType>
-        mat4x4_t<DecimalType> GetModelMatrix(
-            vec3_t<DecimalType> pos,
-            vec3_t<DecimalType> euler,
-            vec3_t<DecimalType> scale
-        ) {
-            return maths::Multiply(
-            maths::Multiply(
-                maths::Translate(pos),
-                maths::Scale(scale)
-            ),
-            maths::Rotate(euler)
-            );
+        mat4x4_t<DecimalType> GetModelMatrix(vec3_t<DecimalType> pos, vec3_t<DecimalType> euler,
+                                             vec3_t<DecimalType> scale) {
+            return maths::Multiply(maths::Multiply(maths::Translate(pos), maths::Scale(scale)), maths::Rotate(euler));
         }
 
-    }
+    } // namespace maths
 
 }

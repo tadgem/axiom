@@ -1,292 +1,278 @@
 #include "AssetManager.hpp"
 
 namespace axm {
-AssetHandle AssetLoadInfo::ToHandle() { return AssetHandle(path, type); }
+    AssetHandle AssetLoadInfo::ToHandle() { return AssetHandle(path, type); }
 
-bool AssetManager::ProvideAssetFactory(const AssetType &type,
-                                                LoadAssetCallback onLoad,
-                                                UnloadAssetCallback onUnload) {
-  if (p_AssetFactories.find(type) != p_AssetFactories.end()) {
-    return false;
-  }
+    bool AssetManager::ProvideAssetFactory(const AssetType &type, LoadAssetCallback onLoad,
+                                           UnloadAssetCallback onUnload) {
+        if (p_AssetFactories.find(type) != p_AssetFactories.end()) {
+            return false;
+        }
 
-  Pair<LoadAssetCallback, UnloadAssetCallback> funcs{onLoad, onUnload};
+        const Pair funcs{onLoad, onUnload};
 
-  p_AssetFactories[type] = funcs;
-  return true;
-}
-
-AssetHandle AssetManager::LoadAsset(const String &path,
-                                    const AssetType &assetType,
-                                    OnAssetLoadedCallback onAssetLoaded) {
-  if (!Filesystem::exists(path.c_str())) {
-    return {};
-  }
-
-  String wd(Filesystem::current_path().string().c_str());
-  String tmp_path = path;
-  if (path.find(wd) != std::string::npos) {
-    tmp_path.erase(tmp_path.find(wd), wd.length());
-
-    for (int i = 0; i < 2; i++) {
-      if (tmp_path[0] != '\\' && tmp_path[0] != '/') {
-        break;
-      }
-      tmp_path.erase(0, 1);
+        p_AssetFactories[type] = funcs;
+        return true;
     }
-  }
 
-  AssetHandle handle(tmp_path, assetType);
-  AssetLoadInfo loadInfo{tmp_path, assetType};
+    AssetHandle AssetManager::LoadAsset(const String &path, const AssetType &assetType,
+                                        OnAssetLoadedCallback onAssetLoaded) {
+        if (!Filesystem::exists(path.c_str())) {
+            return {};
+        }
 
-  auto it = std::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), loadInfo);
+        String wd(Filesystem::current_path().string().c_str());
+        String tmp_path = path;
+        if (path.find(wd) != std::string::npos) {
+            tmp_path.erase(tmp_path.find(wd), wd.length());
 
-  for (auto &queued_load : p_QueuedLoads) {
-    if (loadInfo == queued_load) {
-      return queued_load.ToHandle();
+            for (int i = 0; i < 2; i++) {
+                if (tmp_path[0] != '\\' && tmp_path[0] != '/') {
+                    break;
+                }
+                tmp_path.erase(0, 1);
+            }
+        }
+
+        AssetHandle handle(tmp_path, assetType);
+        AssetLoadInfo loadInfo{tmp_path, assetType};
+
+        auto it = std::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), loadInfo);
+
+        for (auto &queued_load: p_QueuedLoads) {
+            if (loadInfo == queued_load) {
+                return queued_load.ToHandle();
+            }
+        }
+
+        p_QueuedLoads.push_back(loadInfo);
+
+        if (onAssetLoaded != nullptr) {
+            p_AssetLoadCallbacks.emplace(handle, onAssetLoaded);
+        }
+
+        return handle;
     }
-  }
 
-  p_QueuedLoads.push_back(loadInfo);
+    void AssetManager::UnloadAsset(const AssetHandle &handle) {
+        // Asset is not loaded
+        if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
+            return;
+        }
 
-  if (onAssetLoaded != nullptr) {
-    p_AssetLoadCallbacks.emplace(handle, onAssetLoaded);
-  }
+        // make sure we have a provided function to unload the asset
+        if (p_AssetFactories.find(handle.type) == p_AssetFactories.end()) {
+            return;
+        }
 
-  return handle;
-}
-
-void AssetManager::UnloadAsset(const AssetHandle &handle) {
-  // Asset is not loaded
-  if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
-    return;
-  }
-
-  // make sure we have a provided function to unload the asset
-  if (p_AssetFactories.find(handle.type) == p_AssetFactories.end()) {
-    return;
-  }
-
-  // Enqueue unload
-  p_PendingUnloadCallbacks.emplace(handle,
-                                  p_AssetFactories[handle.type].second);
-}
-
-Asset *AssetManager::GetAsset(const AssetHandle &handle) {
-  if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
-    return nullptr;
-  }
-
-  return p_LoadedAssets[handle].get();
-}
-
-AssetLoadProgress
-AssetManager::GetAssetLoadProgress(const AssetHandle &handle) {
-  for (auto &queued : p_QueuedLoads) {
-    if (queued.ToHandle() == handle) {
-      return AssetLoadProgress::Loading;
+        // Enqueue unload
+        p_PendingUnloadCallbacks.emplace(handle, p_AssetFactories[handle.type].second);
     }
-  }
 
-  if (p_PendingLoadTasks.find(handle) != p_PendingLoadTasks.end() ||
-      p_PendingSyncCallbacks.find(handle) !=
-          p_PendingSyncCallbacks.end()) {
-    return AssetLoadProgress::Loading;
-  }
+    Asset *AssetManager::GetAsset(const AssetHandle &handle) {
+        if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
+            return nullptr;
+        }
 
-  if (p_PendingUnloadCallbacks.find(handle) != p_PendingUnloadCallbacks.end()) {
-    return AssetLoadProgress::Unloading;
-  }
+        return p_LoadedAssets[handle].get();
+    }
 
-  if (p_LoadedAssets.find(handle) != p_LoadedAssets.end()) {
-    return AssetLoadProgress::Loaded;
-  }
+    AssetLoadProgress AssetManager::GetAssetLoadProgress(const AssetHandle &handle) {
+        for (auto &queued: p_QueuedLoads) {
+            if (queued.ToHandle() == handle) {
+                return AssetLoadProgress::Loading;
+            }
+        }
 
-  return AssetLoadProgress::NotLoaded;
-}
+        if (p_PendingLoadTasks.find(handle) != p_PendingLoadTasks.end() ||
+            p_PendingSyncCallbacks.find(handle) != p_PendingSyncCallbacks.end()) {
+            return AssetLoadProgress::Loading;
+        }
 
-bool AssetManager::AnyAssetsLoading() const {
-  return !p_PendingLoadTasks.empty() || !p_PendingSyncCallbacks.empty() ||
-         !p_PendingUnloadCallbacks.empty() || !p_QueuedLoads.empty();
-}
+        if (p_PendingUnloadCallbacks.find(handle) != p_PendingUnloadCallbacks.end()) {
+            return AssetLoadProgress::Unloading;
+        }
 
-bool AssetManager::AnyAssetsUnloading() const {
-  return !p_PendingUnloadCallbacks.empty();
-}
+        if (p_LoadedAssets.find(handle) != p_LoadedAssets.end()) {
+            return AssetLoadProgress::Loaded;
+        }
 
-void AssetManager::WaitAllAssets() {
-  while (AnyAssetsLoading()) {
-    Update();
-  }
-}
+        return AssetLoadProgress::NotLoaded;
+    }
 
-void AssetManager::WaitAllUnloads() {
-  while (AnyAssetsUnloading()) {
-    Update();
-  }
-}
+    bool AssetManager::AnyAssetsLoading() const {
+        return !p_PendingLoadTasks.empty() || !p_PendingSyncCallbacks.empty() || !p_PendingUnloadCallbacks.empty() ||
+               !p_QueuedLoads.empty();
+    }
 
-void AssetManager::UnloadAllAssets() {
-  Vector<AssetHandle> assetsRemaining{};
+    bool AssetManager::AnyAssetsUnloading() const { return !p_PendingUnloadCallbacks.empty(); }
 
-  for (auto &[handle, asset] : p_LoadedAssets) {
-    assetsRemaining.push_back(handle);
-  }
+    void AssetManager::WaitAllAssets() {
+        while (AnyAssetsLoading()) {
+            Update();
+        }
+    }
 
-  for (auto &handle : assetsRemaining) {
-    UnloadAsset(handle);
-  }
+    void AssetManager::WaitAllUnloads() {
+        while (AnyAssetsUnloading()) {
+            Update();
+        }
+    }
 
-  WaitAllUnloads();
-}
+    void AssetManager::UnloadAllAssets() {
+        Vector<AssetHandle> assetsRemaining{};
 
-void AssetManager::Update() {
-  if (!AnyAssetsLoading()) {
-    return;
-  }
+        for (auto &[handle, asset]: p_LoadedAssets) {
+            assetsRemaining.push_back(handle);
+        }
 
-  HandleCallbacks();
-  HandlePendingLoads();
-  HandleAsyncTasks();
-}
+        for (auto &handle: assetsRemaining) {
+            UnloadAsset(handle);
+        }
 
-void AssetManager::Shutdown() {
-  WaitAllAssets();
-  WaitAllUnloads();
-  UnloadAllAssets();
-}
+        WaitAllUnloads();
+    }
 
-void AssetManager::HandleCallbacks() {
-  u16 processedCallbacks = 0;
-  Vector<AssetHandle> clears;
+    void AssetManager::Update() {
+        if (!AnyAssetsLoading()) {
+            return;
+        }
 
-  for (auto &[handle, asset] : p_PendingSyncCallbacks) {
-    if (processedCallbacks == kCallbackTasksPerUpdate)
-      break;
+        HandleCallbacks();
+        HandlePendingLoads();
+        HandleAsyncTasks();
+    }
 
-    for (u16 i = 0; i < kCallbackTasksPerUpdate - processedCallbacks; i++) {
-      if (i >= asset.m_SyncAssetCallbacks.size())
-        break;
-        // does asset have any intermediate steps?
-        if (std::holds_alternative<AssetTransientData*>(asset.m_Next)) {
-            // has transient
-            asset.m_SyncAssetCallbacks.back()(std::get<AssetTransientData*>(asset.m_Next));
-            asset.m_SyncAssetCallbacks.pop_back();
+    void AssetManager::Shutdown() {
+        WaitAllAssets();
+        WaitAllUnloads();
+        UnloadAllAssets();
+    }
+
+    void AssetManager::HandleCallbacks() {
+        u16 processedCallbacks = 0;
+        Vector<AssetHandle> clears;
+
+        for (auto &[handle, asset]: p_PendingSyncCallbacks) {
+            if (processedCallbacks == kCallbackTasksPerUpdate)
+                break;
+
+            for (u16 i = 0; i < kCallbackTasksPerUpdate - processedCallbacks; i++) {
+                if (i >= asset.m_SyncAssetCallbacks.size())
+                    break;
+                // does asset have any intermediate steps?
+                if (std::holds_alternative<AssetTransientData *>(asset.m_Next)) {
+                    // has transient
+                    asset.m_SyncAssetCallbacks.back()(std::get<AssetTransientData *>(asset.m_Next));
+                    asset.m_SyncAssetCallbacks.pop_back();
+                    processedCallbacks++;
+
+                }
+                // if not just move the asset to the loaded state.
+                else if (std::holds_alternative<Asset *>(asset.m_Next)) {
+                    Asset *a = std::get<Asset *>(asset.m_Next);
+                    TransitionAssetToLoaded(handle, a);
+                }
+                // or we have pwoblems.
+                else {
+                    AXM_ASSERT_NOT_REACHED();
+                }
+            }
+
+            if (asset.m_SyncAssetCallbacks.empty()) {
+                clears.push_back(handle);
+            }
+        }
+        for (auto &handle: clears) {
+            AssetTransientData *transient = std::get<AssetTransientData *>(p_PendingSyncCallbacks[handle].m_Next);
+            Asset *a = transient->m_AssetDataPtr;
+            TransitionAssetToLoaded(handle, a);
+
+            AXM_DELETE(transient);
+            p_PendingSyncCallbacks.erase(handle);
+        }
+
+        clears.clear();
+
+        for (auto &[handle, callback]: p_PendingUnloadCallbacks) {
+            if (processedCallbacks == kCallbackTasksPerUpdate)
+                break;
+            callback(p_LoadedAssets[handle].get());
+            clears.push_back(handle);
             processedCallbacks++;
-
-        }
-        // if not just move the asset to the loaded state.
-        else if (std::holds_alternative<Asset*>(asset.m_Next)) {
-            Asset* a = std::get<Asset*>(asset.m_Next);
-            TransitionAssetToLoaded( handle, a);
-        }
-        // or we have pwoblems.
-        else {
-            AXM_ASSERT_NOT_REACHED();
         }
 
+        for (auto &handle: clears) {
+            p_PendingUnloadCallbacks.erase(handle);
+            p_LoadedAssets[handle].reset();
+            p_LoadedAssets.erase(handle);
+        }
     }
 
-    if (asset.m_SyncAssetCallbacks.empty()) {
-      clears.push_back(handle);
-    }
-  }
-  for (auto &handle : clears) {
-    AssetTransientData* transient = std::get<AssetTransientData*>(p_PendingSyncCallbacks[handle].m_Next);
-    Asset* a = transient->m_AssetDataPtr;
-    TransitionAssetToLoaded(handle, a);
-
-    AXM_DELETE(transient);
-    p_PendingSyncCallbacks.erase(handle);
-  }
-
-    clears.clear();
-
-  for (auto &[handle, callback] : p_PendingUnloadCallbacks) {
-    if (processedCallbacks == kCallbackTasksPerUpdate)
-      break;
-    callback(p_LoadedAssets[handle].get());
-    clears.push_back(handle);
-    processedCallbacks++;
-  }
-
-  for (auto &handle : clears) {
-    p_PendingUnloadCallbacks.erase(handle);
-    p_LoadedAssets[handle].reset();
-    p_LoadedAssets.erase(handle);
-  }
-}
-
-void AssetManager::HandlePendingLoads() {
-  while (p_PendingLoadTasks.size() <= kMaxAsyncTasksInFlight &&
-         !p_QueuedLoads.empty()) {
-    auto &info = p_QueuedLoads.front();
-    DispatchAssetLoadTask(info.ToHandle(), info);
-    p_QueuedLoads.erase(p_QueuedLoads.begin());
-  }
-}
-
-// TODO: This + HandleSyncTasks are a bit dodgy, might need to rewrite this.
-// lets hook up asset manager specific allocators ASAP,
-// have a feeling this is very memory inefficient.
-
-void AssetManager::HandleAsyncTasks() {
-  Vector<AssetHandle> finished;
-  for (auto &[handle, future] : p_PendingLoadTasks) {
-    if (IsFutureReady(future)) {
-      finished.push_back(handle);
-    }
-  }
-
-  for (auto &handle : finished) {
-    AssetLoadResult asyncReturn = p_PendingLoadTasks[handle].get();
-    // enqueue new loads
-    for (auto &newLoad : asyncReturn.m_NewAssetTasks) {
-      LoadAsset(newLoad.path, newLoad.type);
+    void AssetManager::HandlePendingLoads() {
+        while (p_PendingLoadTasks.size() <= kMaxAsyncTasksInFlight && !p_QueuedLoads.empty()) {
+            auto &info = p_QueuedLoads.front();
+            DispatchAssetLoadTask(info.ToHandle(), info);
+            p_QueuedLoads.erase(p_QueuedLoads.begin());
+        }
     }
 
-    if (asyncReturn.m_SyncAssetCallbacks.empty() &&
-        std::holds_alternative<AssetTransientData*>(asyncReturn.m_Next)) {
-        auto* transient = std::get<AssetTransientData*>(asyncReturn.m_Next);
-        TransitionAssetToLoaded(handle, transient->m_AssetDataPtr);
+    // TODO: This + HandleSyncTasks are a bit dodgy, might need to rewrite this.
+    // lets hook up asset manager specific allocators ASAP,
+    // have a feeling this is very memory inefficient.
 
-        asyncReturn.m_Next = transient->m_AssetDataPtr;
+    void AssetManager::HandleAsyncTasks() {
+        Vector<AssetHandle> finished;
+        for (auto &[handle, future]: p_PendingLoadTasks) {
+            if (IsFutureReady(future)) {
+                finished.push_back(handle);
+            }
+        }
 
-        AXM_DELETE(transient);
+        for (auto &handle: finished) {
+            AssetLoadResult asyncReturn = p_PendingLoadTasks[handle].get();
+            // enqueue any new loads
+            for (auto &newLoad: asyncReturn.m_NewAssetTasks) {
+                LoadAsset(newLoad.path, newLoad.type);
+            }
+
+            if (asyncReturn.m_SyncAssetCallbacks.empty() &&
+                std::holds_alternative<AssetTransientData *>(asyncReturn.m_Next)) {
+                auto *transient = std::get<AssetTransientData *>(asyncReturn.m_Next);
+                TransitionAssetToLoaded(handle, transient->m_AssetDataPtr);
+
+                asyncReturn.m_Next = transient->m_AssetDataPtr;
+
+                AXM_DELETE(transient);
+            } else {
+                p_PendingSyncCallbacks.emplace(handle, asyncReturn);
+            }
+
+            p_PendingLoadTasks.erase(handle);
+        }
     }
-      else {
-        p_PendingSyncCallbacks.emplace(handle, asyncReturn);
+
+    void AssetManager::DispatchAssetLoadTask(const AssetHandle &handle, AssetLoadInfo &info) {
+        if (p_AssetFactories.find(handle.type) == p_AssetFactories.end()) {
+            return;
+        }
+        p_PendingLoadTasks.emplace(
+                handle, std::move(std::async(std::launch::async, p_AssetFactories[handle.type].first, info.path)));
     }
 
-    p_PendingLoadTasks.erase(handle);
-  }
-}
+    void AssetManager::TransitionAssetToLoaded(const AssetHandle &handle, Asset *asset_to_transition) {
+        p_LoadedAssets.emplace(handle, std::move(Unique<Asset>(asset_to_transition)));
 
-void AssetManager::DispatchAssetLoadTask(const AssetHandle &handle,
-                                         AssetLoadInfo &info) {
-  if (p_AssetFactories.find(handle.type) == p_AssetFactories.end()) {
-    return;
-  }
-  p_PendingLoadTasks.emplace(
-      handle, std::move(std::async(std::launch::async,
-                                   p_AssetFactories[handle.type].first,
-                                   info.path)));
-}
+        // TODO: Log Asset Loaded
+        if (p_AssetLoadCallbacks.find(handle) == p_AssetLoadCallbacks.end()) {
+            AXM_LOG("Asset {} already loaded", asset_to_transition->path);
+            return;
+        }
 
-void AssetManager::TransitionAssetToLoaded(const AssetHandle &handle,
-                                           Asset *asset_to_transition) {
-  p_LoadedAssets.emplace(handle, std::move(Unique<Asset>(asset_to_transition)));
+        for (auto &[ah, loaded_callback]: p_AssetLoadCallbacks) {
+            loaded_callback(p_LoadedAssets[ah].get());
+        }
 
-  // TODO: Log Asset Loaded
-  if (p_AssetLoadCallbacks.find(handle) == p_AssetLoadCallbacks.end()) {
-      AXM_LOG("Asset {} already loaded", asset_to_transition->path);
-    return;
-  }
-
-  for (auto &[ah, loaded_callback] : p_AssetLoadCallbacks) {
-    loaded_callback(p_LoadedAssets[ah].get());
-  }
-
-  p_AssetLoadCallbacks.erase(handle);
-}
-} // namespace harmony
+        p_AssetLoadCallbacks.erase(handle);
+    }
+} // namespace axm

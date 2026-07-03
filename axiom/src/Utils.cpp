@@ -14,7 +14,7 @@ rhi::ITexture *axm::Utils::CreateDepthTexture(rhi::IDevice *device, u32 w, u32 h
     depthDesc.usage = TextureUsage::DepthStencil;
     depthDesc.defaultState = ResourceState::DepthWrite;
     depthDesc.label = "Depth Texture";
-    ITexture* tex;
+    ITexture *tex;
     device->createTexture(depthDesc, nullptr, &tex);
     return tex;
 }
@@ -28,5 +28,4 @@ axm::Vector<u8> axm::Utils::LoadBinaryFromPath(const String &path) {
     file.read(reinterpret_cast<char *>(std::data(vec)), fileSize);
 
     return std::move(vec);
-
 }

@@ -3,9 +3,9 @@
 //
 
 #pragma once
-#include "STL.hpp"
 #include "Debug.hpp"
 #include "Maths.hpp"
+#include "STL.hpp"
 #include "slang-rhi.h"
 
 namespace axm {
@@ -22,15 +22,15 @@ namespace axm {
             vec3 m_Normal;
             vec2 m_UV;
 
-            static rhi::ComPtr<rhi::IInputLayout> GetInputLayout(rhi::IDevice* device) {
+            static rhi::ComPtr<rhi::IInputLayout> GetInputLayout(rhi::IDevice *device) {
                 using namespace rhi;
                 VertexStreamDesc vertexStreams[] = {
-                    {sizeof(PosNormalUV), InputSlotClass::PerVertex, 0},
+                        {sizeof(PosNormalUV), InputSlotClass::PerVertex, 0},
                 };
                 InputElementDesc inputElements[] = {
-                    {"POSITION", 0, Format::RGB32Float, offsetof(PosNormalUV, m_Pos), 0},
-                    {"NORMAL", 0, Format::RGB32Float, offsetof(PosNormalUV, m_Normal), 0},
-                    {"UV", 0, Format::RGB32Float, offsetof(PosNormalUV, m_UV), 0},
+                        {"POSITION", 0, Format::RGB32Float, offsetof(PosNormalUV, m_Pos), 0},
+                        {"NORMAL", 0, Format::RGB32Float, offsetof(PosNormalUV, m_Normal), 0},
+                        {"UV", 0, Format::RGB32Float, offsetof(PosNormalUV, m_UV), 0},
                 };
                 InputLayoutDesc inputLayoutDesc = {};
                 inputLayoutDesc.inputElements = inputElements;
@@ -48,5 +48,5 @@ namespace axm {
         };
 
 
-    };
+    }; // namespace vertex
 }

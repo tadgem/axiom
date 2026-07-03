@@ -4,11 +4,11 @@
 
 namespace axm {
     struct Viewport {
-        vec2u   m_Size;
+        vec2u m_Size;
     };
 
     namespace viewports {
-        Viewport GetFullscreenViewport(SDL_Window* window);
+        Viewport GetFullscreenViewport(SDL_Window *window);
     }
 
 }

@@ -5,4 +5,4 @@ namespace axm {
         static auto hasher = std::hash<String>();
         return hasher(input);
     }
-} // namespace harmony
+} // namespace axm

@@ -1,6 +1,6 @@
 #pragma once
-#include "Prim.hpp"
 #include <chrono>
+#include "Prim.hpp"
 
 namespace axm {
     typedef std::chrono::high_resolution_clock HighResolutionClock;
@@ -27,16 +27,14 @@ namespace axm {
 
         f64 ElapsedMillisecondsF() {
 
-            auto ns_raw =
-                std::chrono::duration_cast<std::chrono::nanoseconds>(Elapsed());
+            auto ns_raw = std::chrono::duration_cast<std::chrono::nanoseconds>(Elapsed());
             auto ns_f = static_cast<f64>(ns_raw.count());
             return ns_f / 1000000.0;
         }
 
         f64 ElapsedNanosecondsF() {
 
-            auto ns_raw =
-                std::chrono::duration_cast<std::chrono::nanoseconds>(Elapsed());
+            auto ns_raw = std::chrono::duration_cast<std::chrono::nanoseconds>(Elapsed());
             auto ns_f = static_cast<f64>(ns_raw.count());
             return ns_f;
         }

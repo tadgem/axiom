@@ -1,43 +1,40 @@
 #pragma once
-#include "SDL3/SDL.h"
-#include <slang-rhi.h>
 #include <memory>
-#include "STL.hpp"
+#include <slang-rhi.h>
 #include "AssetManager.hpp"
+#include "SDL3/SDL.h"
+#include "STL.hpp"
 
 namespace axm {
     struct AppState {
         bool m_OK = false;
         bool m_Running = true;
 
-        AssetManager            m_AssetManager;
+        AssetManager m_AssetManager;
 
-        rhi::DepthStencilDesc   m_DepthStencilDesc;
+        rhi::DepthStencilDesc m_DepthStencilDesc;
 
-        SDL_Window*             m_Window    = nullptr;
-        rhi::IDevice*           m_Device    = nullptr;
-        rhi::ISurface*          m_Surface   = nullptr;
-        rhi::ICommandQueue*     m_Queue     = nullptr;
+        SDL_Window *m_Window = nullptr;
+        rhi::IDevice *m_Device = nullptr;
+        rhi::ISurface *m_Surface = nullptr;
+        rhi::ICommandQueue *m_Queue = nullptr;
 
-        rhi::ITexture*          m_SwapchainColourImage  = nullptr;
-        rhi::ITexture*          m_SwapchainDepthImage   = nullptr;
+        rhi::ITexture *m_SwapchainColourImage = nullptr;
+        rhi::ITexture *m_SwapchainDepthImage = nullptr;
 
-        Unique<rhi::IDebugCallback>    m_DebugCallback;
+        Unique<rhi::IDebugCallback> m_DebugCallback;
 
-        static AppState BAD ();
-
+        static AppState BAD();
     };
 
     namespace engine {
-        AppState    Init();
-        void        Quit(const AppState& e);
-        void        PreFrame(AppState& e);
-        void        PostFrame(AppState& e);
+        AppState Init();
+        void Quit(const AppState &e);
+        void PreFrame(AppState &e);
+        void PostFrame(AppState &e);
 
-        rhi::IRenderPassEncoder*    BeginSwapchainRenderPass(
-            AppState& e,
-            rhi::ICommandEncoder* cmd,
-            rhi::LoadOp loadOp = rhi::LoadOp::Clear);
-    }
+        rhi::IRenderPassEncoder *BeginSwapchainRenderPass(AppState &e, rhi::ICommandEncoder *cmd,
+                                                          rhi::LoadOp loadOp = rhi::LoadOp::Clear);
+    } // namespace engine
 
-}
+} // namespace axm

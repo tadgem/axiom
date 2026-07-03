@@ -70,6 +70,7 @@ struct TestResult {
       AXM_LOG_ERROR("Message : {}", result.mResultMessage.c_str());            \
     }                                                                          \
   }                                                                            \
+  AXM_FLUSH_LOG();                                                             \
   }                                                                            \
   ;
 

@@ -167,13 +167,24 @@ void AssetManager::HandleCallbacks() {
     for (u16 i = 0; i < kCallbackTasksPerUpdate - processedCallbacks; i++) {
       if (i >= asset.m_SyncAssetCallbacks.size())
         break;
-
-        if (std::holds_alternative<AssetTransientData>(asset.m_Next)) {
+        // does asset have any intermediate steps?
+        if (std::holds_alternative<AssetTransientData*>(asset.m_Next)) {
+            // has transient
+            asset.m_SyncAssetCallbacks.back()(std::get<AssetTransientData*>(asset.m_Next));
+            asset.m_SyncAssetCallbacks.pop_back();
+            processedCallbacks++;
 
         }
-      asset.m_SyncAssetCallbacks.back()(asset.m_TransientAssetData);
-      asset.m_SyncAssetCallbacks.pop_back();
-      processedCallbacks++;
+        // if not just move the asset to the loaded state.
+        else if (std::holds_alternative<Asset*>(asset.m_Next)) {
+            Asset* a = std::get<Asset*>(asset.m_Next);
+            TransitionAssetToLoaded( handle, a);
+        }
+        // or we have pwoblems.
+        else {
+            AXM_ASSERT_NOT_REACHED();
+        }
+
     }
 
     if (asset.m_SyncAssetCallbacks.empty()) {
@@ -181,13 +192,15 @@ void AssetManager::HandleCallbacks() {
     }
   }
   for (auto &handle : clears) {
-    TransitionAssetToLoaded(
-        handle,
-        p_PendingSyncCallbacks[handle].m_TransientAssetData->m_AssetDataPtr);
-    AXM_DELETE(p_PendingSyncCallbacks[handle].m_TransientAssetData);
+    AssetTransientData* transient = std::get<AssetTransientData*>(p_PendingSyncCallbacks[handle].m_Next);
+    Asset* a = transient->m_AssetDataPtr;
+    TransitionAssetToLoaded(handle, a);
+
+    AXM_DELETE(transient);
     p_PendingSyncCallbacks.erase(handle);
   }
-  clears.clear();
+
+    clears.clear();
 
   for (auto &[handle, callback] : p_PendingUnloadCallbacks) {
     if (processedCallbacks == kCallbackTasksPerUpdate)
@@ -213,6 +226,10 @@ void AssetManager::HandlePendingLoads() {
   }
 }
 
+// TODO: This + HandleSyncTasks are a bit dodgy, might need to rewrite this.
+// lets hook up asset manager specific allocators ASAP,
+// have a feeling this is very memory inefficient.
+
 void AssetManager::HandleAsyncTasks() {
   Vector<AssetHandle> finished;
   for (auto &[handle, future] : p_PendingLoadTasks) {
@@ -229,14 +246,16 @@ void AssetManager::HandleAsyncTasks() {
     }
 
     if (asyncReturn.m_SyncAssetCallbacks.empty() &&
-        asyncReturn.m_TransientAssetData != nullptr) {
-      TransitionAssetToLoaded(handle,
-                              asyncReturn.m_TransientAssetData->m_AssetDataPtr);
+        std::holds_alternative<AssetTransientData*>(asyncReturn.m_Next)) {
+        auto* transient = std::get<AssetTransientData*>(asyncReturn.m_Next);
+        TransitionAssetToLoaded(handle, transient->m_AssetDataPtr);
 
-      AXM_DELETE(asyncReturn.m_TransientAssetData);
-      asyncReturn.m_TransientAssetData = nullptr;
-    } else {
-      p_PendingSyncCallbacks.emplace(handle, asyncReturn);
+        asyncReturn.m_Next = transient->m_AssetDataPtr;
+
+        AXM_DELETE(transient);
+    }
+      else {
+        p_PendingSyncCallbacks.emplace(handle, asyncReturn);
     }
 
     p_PendingLoadTasks.erase(handle);
@@ -260,6 +279,7 @@ void AssetManager::TransitionAssetToLoaded(const AssetHandle &handle,
 
   // TODO: Log Asset Loaded
   if (p_AssetLoadCallbacks.find(handle) == p_AssetLoadCallbacks.end()) {
+      AXM_LOG("Asset {} already loaded", asset_to_transition->path);
     return;
   }
 

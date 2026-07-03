@@ -1,6 +1,7 @@
 #pragma once
 #include <print>
 #include <stacktrace>
+#include <cassert>
 
 #define KILOBYTES(X) X * 1024ULL
 #define MEGABYTES(X) X * 1024ULL * 1024ULL
@@ -16,7 +17,7 @@
 #define WHITE_PRINT_CODE "\x1B[37m"
 
 // TODO (LiamD) : This should be configured from cmake.
-// #define AXM_ENABLE_LOGGING
+#define AXM_ENABLE_LOGGING
 #ifdef  AXM_ENABLE_LOGGING
 #define AXM_LOG(fmt, ...) std::println("Axiom : " fmt, __VA_ARGS__)
 #define AXM_LOG_INFO(fmt, ...) std::println("Axiom : INFO : " fmt, __VA_ARGS__)

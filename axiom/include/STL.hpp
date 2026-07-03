@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 #include <array>
+#include <variant>
 
 
 namespace axm {
@@ -27,6 +28,9 @@ namespace axm {
 
     template <typename _Ty1, typename _Ty2>
     using Pair = std::pair<_Ty1, _Ty2>;
+
+    template<typename _Ty1, typename ... _Others>
+    using Variant = std::variant<_Ty1, _Others...>;
 
     template <typename _Ty>
     using Unique = std::unique_ptr<_Ty, mimalloc_default_delete<_Ty>>;

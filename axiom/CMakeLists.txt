@@ -16,6 +16,7 @@ add_library(axiom
         src/Viewport.cpp
         ../tests/AxiomTestFramework.hpp
         ../tests/CoreTests.cpp
+        include/Decorators.hpp
 )
 
 target_link_libraries(axiom PUBLIC

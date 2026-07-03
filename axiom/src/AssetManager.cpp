@@ -167,6 +167,10 @@ void AssetManager::HandleCallbacks() {
     for (u16 i = 0; i < kCallbackTasksPerUpdate - processedCallbacks; i++) {
       if (i >= asset.m_SyncAssetCallbacks.size())
         break;
+
+        if (std::holds_alternative<AssetTransientData>(asset.m_Next)) {
+
+        }
       asset.m_SyncAssetCallbacks.back()(asset.m_TransientAssetData);
       asset.m_SyncAssetCallbacks.pop_back();
       processedCallbacks++;

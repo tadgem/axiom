@@ -12,10 +12,7 @@ struct AssetLoadInfo {
     return path == o.path && type == o.type;
   }
 
-  void operator=(const AssetLoadInfo &o) {
-    path = o.path;
-    type = o.type;
-  }
+  AssetLoadInfo& operator=(const AssetLoadInfo &o) = default;
 
   bool operator<(const AssetLoadInfo &o) const {
     return path.size() < o.path.size();
@@ -29,19 +26,17 @@ enum class AssetLoadProgress { NotLoaded, Loading, Loaded, Unloading };
 /// <summary>
 /// Asset callback type defs
 /// </summary>
-using AssetIntermediateCallback = void (*)(AssetTransientData *);
-using OnAssetLoadedCallback = void (*)(Asset *);
-using OnAssetUnloadedCallback = void (*)(Asset *);
+using AssetIntermediateCallback     = void (*)(AssetTransientData *);
+using OnAssetLoadedCallback         = void (*)(Asset *);
+using OnAssetUnloadedCallback       = void (*)(Asset *);
 
 struct AssetLoadResult {
-    // may be null if asset needs to be loaded in multiple stages.
-    Asset*                              m_AssetData;
-    // may be null if asset does not need to load in multiple stages.
-    AssetTransientData *                m_TransientAssetData = nullptr;
+    // Asset may return an intermediate _or_ the full asset.
+    Variant<Asset*, AssetTransientData*>    m_Next;
     // additional assets that may be required to completely load this asset
-    Vector<AssetLoadInfo>               m_NewAssetTasks;
+    Vector<AssetLoadInfo>                   m_NewAssetTasks;
     // synchronous tasks associated with this asset e.g. submit tex mem to GPU
-    Vector<AssetIntermediateCallback>   m_SyncAssetCallbacks;
+    Vector<AssetIntermediateCallback>       m_SyncAssetCallbacks;
 };
 
 using LoadAssetCallback = AssetLoadResult (*)(const String &path);
@@ -72,8 +67,8 @@ public:
   }
   AssetLoadProgress GetAssetLoadProgress(const AssetHandle &handle);
 
-  bool AnyAssetsLoading() const;
-  bool AnyAssetsUnloading() const;
+  NO_DISCARD bool AnyAssetsLoading() const;
+  NO_DISCARD bool AnyAssetsUnloading() const;
 
   /// <summary>
   /// Synchronous calls that will wait until

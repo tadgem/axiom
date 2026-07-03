@@ -1,7 +1,7 @@
 #include "AssetManager.hpp"
 
 namespace axm {
-    AssetHandle AssetLoadInfo::ToHandle() { return AssetHandle(path, type); }
+    AssetHandle AssetLoadInfo::ToHandle() const { return {path, type}; }
 
     bool AssetManager::ProvideAssetFactory(const AssetType &type, LoadAssetCallback onLoad,
                                            UnloadAssetCallback onUnload) {
@@ -21,7 +21,7 @@ namespace axm {
             return {};
         }
 
-        String wd(Filesystem::current_path().string().c_str());
+        const String wd(Filesystem::current_path().string());
         String tmp_path = path;
         if (path.find(wd) != std::string::npos) {
             tmp_path.erase(tmp_path.find(wd), wd.length());
@@ -37,7 +37,7 @@ namespace axm {
         AssetHandle handle(tmp_path, assetType);
         AssetLoadInfo loadInfo{tmp_path, assetType};
 
-        auto it = std::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), loadInfo);
+        auto it = std::ranges::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), loadInfo);
 
         for (auto &queued_load: p_QueuedLoads) {
             if (loadInfo == queued_load) {
@@ -56,12 +56,14 @@ namespace axm {
 
     void AssetManager::UnloadAsset(const AssetHandle &handle) {
         // Asset is not loaded
-        if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
+        if (p_LoadedAssets.contains(handle)) {
             return;
         }
 
         // make sure we have a provided function to unload the asset
-        if (p_AssetFactories.find(handle.type) == p_AssetFactories.end()) {
+        if (!p_AssetFactories.contains(handle.type)) {
+            // TODO: Get enum str value
+            AXM_LOG_ERROR("No provided AssetFactory for AssetType {}", static_cast<u8>(handle.type));
             return;
         }
 

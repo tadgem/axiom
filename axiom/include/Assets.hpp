@@ -3,6 +3,9 @@
 #include "STL.hpp"
 
 namespace axm {
+    // TODO: Can we have a reflectable enum structure or macro helper?
+    // e.g. something that lets us grab a human readable string name for each enum entry
+    // need to be careful not to use for _all_ enums as string sizes would skyrocket.
     enum class AssetType : u8 { Unknown, Model, Texture, Shader, Audio, Text, Binary };
 
     /// <summary>

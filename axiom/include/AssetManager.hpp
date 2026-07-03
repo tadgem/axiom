@@ -14,7 +14,7 @@ namespace axm {
 
         bool operator<(const AssetLoadInfo &o) const { return path.size() < o.path.size(); }
 
-        AssetHandle ToHandle();
+        NO_DISCARD AssetHandle ToHandle() const;
     };
 
     enum class AssetLoadProgress { NotLoaded, Loading, Loaded, Unloading };
@@ -50,12 +50,12 @@ namespace axm {
         void UnloadAsset(const AssetHandle &handle);
         Asset *GetAsset(const AssetHandle &handle);
 
-        template<typename _Ty>
-        _Ty *GetAsset(const AssetHandle &handle) {
-            static_assert(std::is_base_of<Asset, _Ty>() && "Provided type is not an asset");
+        template<typename AssetType>
+        AssetType *GetAsset(const AssetHandle &handle) {
+            static_assert(std::is_base_of<Asset, AssetType>() && "Provided type is not an asset");
             auto *a = GetAsset(handle);
             if (a) {
-                return static_cast<_Ty *>(a);
+                return static_cast<AssetType *>(a);
             }
             return nullptr;
         }

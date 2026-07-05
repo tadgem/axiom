@@ -42,7 +42,7 @@ namespace axm {
 #define AXM_TEST_ASSERT(cond, message, ...)                                                                            \
     if (!(cond)) {                                                                                                     \
         return TestResult{"", axm::TestResultEnum::Fail,                                                               \
-                          ##message " : Test failed at " __FILE__ ", Line " STRINGIZE(__LINE__) " : " #cond, 0.0};     \
+                          message " : Test failed at " __FILE__ ", Line " STRINGIZE(__LINE__) " : " #cond, 0.0};       \
     }
 
 #define AXM_BEGIN_TESTS(suite_name)                                                                                    \

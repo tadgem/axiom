@@ -9,8 +9,6 @@ TestResult ExampleTest2(AppState *e) { return TestResult::Fail("Something bad ha
 
 TestResult ExampleTest3(AppState *e) { return TestResult::Pass(); }
 
-using BinaryAsset = AssetT<Vector<u8>, AssetType::Binary>;
-
 
 TestResult AssetManager_CanProvideFactory(AppState *e) {
 

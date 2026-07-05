@@ -18,42 +18,56 @@ TestResult ExampleTest3(AppState *e) {
     return TestResult::Pass();
 }
 
-class BinaryAsset : public AssetT<Vector<u8>, AssetType::Binary> {
-public:
+using BinaryAsset =  AssetT<Vector<u8>, AssetType::Binary>;
 
-};
-
-
+static bool loaded = false;
 AssetLoadResult TestLoadBinaryAsset(const String &path) {
 
+    loaded = true;
     AssetLoadResult res = {};
     auto data = Utils::LoadBinaryFromPath(path);
 
-    return {};
+    auto* binaryAsset = AXM_NEW(BinaryAsset, path, std::move(data));
+    auto* asset = static_cast<Asset*>(binaryAsset);
+
+    return  {
+        .m_Next = asset,
+        .m_NewAssetTasks = {},
+        .m_SyncAssetCallbacks = {}
+    };
 }
 
 void TestUnloadBinaryAsset(Asset *a) {
-
+    loaded = false;
 }
 
 
-TestResult AssetManager_CanLoadAsset(AppState *e) {
+TestResult AssetManager_CanProvideFactory(AppState *e) {
+
 
     e->m_AssetManager.ProvideAssetFactory(
         AssetType::Binary,
         TestLoadBinaryAsset,
         TestUnloadBinaryAsset
-
     );
+
+    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
+
+    while (e->m_AssetManager.AnyAssetsLoading()) {
+        e->m_AssetManager.Update();
+    }
+
+    AXM_TEST_ASSERT(loaded, "BinaryAsset asset factory not invoked!");
+
     return TestResult::Pass();
 }
 
-TEST_APP_BEGIN_SUITE("Core Tests", MEGABYTES(128))
+AXM_BEGIN_TESTS("Core Tests", MEGABYTES(128))
 
-ADD_TEST(ExampleTest)
-ADD_TEST(ExampleTest2)
-ADD_TEST(ExampleTest3)
+AXM_ADD_TEST(ExampleTest)
+AXM_ADD_TEST(ExampleTest2)
+AXM_ADD_TEST(ExampleTest3)
 
-ADD_TEST(AssetManager_CanLoadAsset)
+AXM_ADD_TEST(AssetManager_CanProvideFactory)
 
-TEST_APP_END_SUITE()
+AXM_END_TESTS()

@@ -13,15 +13,15 @@ namespace axm {
     /// use in collections for fast look up
     /// </summary>
     struct AssetHandle {
-        AssetType type;
-        str_hash path_hash;
+        AssetType   m_AssetType;
+        str_hash    m_PathHash;
 
         AssetHandle();
         AssetHandle(const String &p, const AssetType &type);
 
-        bool operator==(const AssetHandle &o) const { return type == o.type && path_hash == o.path_hash; }
+        bool operator==(const AssetHandle &o) const { return m_AssetType == o.m_AssetType && m_PathHash == o.m_PathHash; }
 
-        bool operator<(const AssetHandle &o) const { return type < o.type && path_hash < o.path_hash; }
+        bool operator<(const AssetHandle &o) const { return m_AssetType < o.m_AssetType && m_PathHash < o.m_PathHash; }
     };
 
     /// <summary>
@@ -29,8 +29,8 @@ namespace axm {
     /// Giving concrete path and type of asset
     /// </summary>
     struct SerializableAssetHandle {
-        AssetHandle handle;
-        String path;
+        AssetHandle     m_Handle;
+        String          m_Path;
 
         SerializableAssetHandle(const String &p, const AssetType &type);
     };
@@ -38,20 +38,20 @@ namespace axm {
     class Asset {
     public:
         Asset(const String &path, const AssetType &type);
-        virtual ~Asset() {};
+        virtual ~Asset() = default;
 
-        const String path;
-        const AssetHandle handle;
+        const String        m_Path;
+        const AssetHandle   m_Handle;
     };
 
-    template<typename _Ty, AssetType _AssetTypeEnum>
+    template<typename AssetDataType, AssetType AssetTypeEnum>
     class AssetT : public Asset {
     public:
-        _Ty data;
+        AssetDataType   m_Data;
 
-        AssetT(const String &path, const _Ty &data) : Asset(path, _AssetTypeEnum), data(data) {};
+        AssetT(const String &path, AssetDataType && data) : Asset(path, AssetTypeEnum), m_Data(std::move(data)) {};
 
-        ~AssetT() override {};
+        ~AssetT() override = default;
     };
 
     /// <summary>
@@ -61,22 +61,22 @@ namespace axm {
     /// </summary>
     class AssetTransientData {
     public:
-        Asset *m_AssetDataPtr;
+        Asset*  m_AssetDataPtr;
         AssetTransientData(Asset *asset) : m_AssetDataPtr(asset) {}
 
-        virtual ~AssetTransientData() {}
+        virtual ~AssetTransientData() = default;
     };
 
-    template<typename _AssetTy, typename _IntermediateType, AssetType _AssetTypeEnum>
+    template<typename AssetDataType, typename IntermediateDataType, AssetType AssetTypeEnum>
     class AssetTransientT : public AssetTransientData {
     public:
-        _IntermediateType m_TransientData;
+        IntermediateDataType m_TransientData;
 
-        AssetTransientT(Asset *data, const _IntermediateType &inter) :
+        AssetTransientT(Asset *data, const IntermediateDataType &inter) :
             AssetTransientData(data), m_TransientData(inter) {}
 
-        AssetT<_AssetTy, _AssetTypeEnum> get_concrete_asset() {
-            return static_cast<AssetT<_AssetTy, _AssetTypeEnum>>(m_AssetDataPtr);
+        AssetT<AssetDataType, AssetTypeEnum> get_concrete_asset() {
+            return static_cast<AssetT<AssetDataType, AssetTypeEnum>>(m_AssetDataPtr);
         }
     };
 
@@ -87,7 +87,8 @@ namespace axm {
 /// </summary>
 template<>
 struct std::hash<axm::AssetHandle> {
-    size_t operator()(const axm::AssetHandle &ah) const {
-        return std::hash<i64>()(ah.path_hash) ^ std::hash<u8>()(static_cast<u8>(ah.type));
+
+    size_t operator()(const axm::AssetHandle &ah) const noexcept {
+        return std::hash<str_hash>()(ah.m_PathHash) ^ std::hash<u8>()(static_cast<u8>(ah.m_AssetType));
     }
 };

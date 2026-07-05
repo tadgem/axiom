@@ -42,7 +42,7 @@ struct TestResult {
 #define STRINGIZE(x) STRINGIZE_DETAIL(x)
 #define FLOAT_ROUGHLY_EQUAL(x, y) abs(abs(x) - abs(y)) <= 0.00001
 
-#define TEST_ASSERT(cond, message, ...)                                        \
+#define AXM_TEST_ASSERT(cond, message, ...)                                        \
   if (!(cond)) {                                                               \
     return TestResult{"", axm::TestResultEnum::Fail,                           \
                       ##message                                                \
@@ -50,14 +50,14 @@ struct TestResult {
                       ", Line " STRINGIZE(__LINE__) " : " #cond, 0.0};         \
   }
 
-#define TEST_APP_BEGIN_SUITE(suite_name, engine_heap_size)                     \
+#define AXM_BEGIN_TESTS(suite_name, engine_heap_size)                     \
   AXM_OVERRIDE_GLOBAL_NEW(true)                                                \
   int main() {                                                                 \
     constexpr u64 TEST_HEAP_SIZE = engine_heap_size;                           \
     TestVector<axm::TestResult> sResults{};                                    \
     AXM_LOG_INFO("{} Tests", suite_name);
 
-#define TEST_APP_END_SUITE()                                                   \
+#define AXM_END_TESTS()                                                   \
   for (auto &result : sResults) {                                              \
     AXM_LOG_INFO("Test {}, Result : {}" NORMAL_PRINT_CODE                      \
                  ", Time Taken : {} ms",                                       \
@@ -74,7 +74,7 @@ struct TestResult {
   }                                                                            \
   ;
 
-#define ADD_TEST(TEST_NAME)                                                    \
+#define AXM_ADD_TEST(TEST_NAME)                                                    \
   {                                                                            \
     AXM_LOG_INFO("Running Test : {}", #TEST_NAME);                             \
     AppState engine = engine::Init();                                          \

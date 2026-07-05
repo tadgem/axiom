@@ -61,14 +61,14 @@ namespace axm {
         }
 
         // make sure we have a provided function to unload the asset
-        if (!p_AssetFactories.contains(handle.type)) {
+        if (!p_AssetFactories.contains(handle.m_AssetType)) {
             // TODO: Get enum str value
-            AXM_LOG_ERROR("No provided AssetFactory for AssetType {}", static_cast<u8>(handle.type));
+            AXM_LOG_ERROR("No provided AssetFactory for AssetType {}", static_cast<u8>(handle.m_AssetType));
             return;
         }
 
         // Enqueue unload
-        p_PendingUnloadCallbacks.emplace(handle, p_AssetFactories[handle.type].second);
+        p_PendingUnloadCallbacks.emplace(handle, p_AssetFactories[handle.m_AssetType].second);
     }
 
     Asset *AssetManager::GetAsset(const AssetHandle &handle) {
@@ -156,18 +156,20 @@ namespace axm {
         Vector<AssetHandle> clears;
 
         for (auto &[handle, asset]: p_PendingSyncCallbacks) {
-            if (processedCallbacks == kCallbackTasksPerUpdate)
+            if (processedCallbacks == kCallbackTasksPerUpdate) {
                 break;
+            }
+
+            bool transient = false;
 
             for (u16 i = 0; i < kCallbackTasksPerUpdate - processedCallbacks; i++) {
-                if (i >= asset.m_SyncAssetCallbacks.size())
-                    break;
                 // does asset have any intermediate steps?
                 if (std::holds_alternative<AssetTransientData *>(asset.m_Next)) {
                     // has transient
                     asset.m_SyncAssetCallbacks.back()(std::get<AssetTransientData *>(asset.m_Next));
                     asset.m_SyncAssetCallbacks.pop_back();
                     processedCallbacks++;
+                    transient = true;
 
                 }
                 // if not just move the asset to the loaded state.
@@ -175,13 +177,15 @@ namespace axm {
                     Asset *a = std::get<Asset *>(asset.m_Next);
                     TransitionAssetToLoaded(handle, a);
                 }
+                else if (i >= asset.m_SyncAssetCallbacks.size())
+                    break;
                 // or we have pwoblems.
                 else {
                     AXM_ASSERT_NOT_REACHED();
                 }
             }
 
-            if (asset.m_SyncAssetCallbacks.empty()) {
+            if (asset.m_SyncAssetCallbacks.empty() && transient) {
                 clears.push_back(handle);
             }
         }
@@ -238,8 +242,7 @@ namespace axm {
                 LoadAsset(newLoad.path, newLoad.type);
             }
 
-            if (asyncReturn.m_SyncAssetCallbacks.empty() &&
-                std::holds_alternative<AssetTransientData *>(asyncReturn.m_Next)) {
+            if (asyncReturn.m_SyncAssetCallbacks.empty() && std::holds_alternative<AssetTransientData*>(asyncReturn.m_Next)) {
                 auto *transient = std::get<AssetTransientData *>(asyncReturn.m_Next);
                 TransitionAssetToLoaded(handle, transient->m_AssetDataPtr);
 
@@ -247,7 +250,7 @@ namespace axm {
 
                 AXM_DELETE(transient);
             } else {
-                p_PendingSyncCallbacks.emplace(handle, asyncReturn);
+                TransitionAssetToLoaded(handle, std::get<Asset*> (asyncReturn.m_Next));
             }
 
             p_PendingLoadTasks.erase(handle);
@@ -255,11 +258,11 @@ namespace axm {
     }
 
     void AssetManager::DispatchAssetLoadTask(const AssetHandle &handle, AssetLoadInfo &info) {
-        if (p_AssetFactories.find(handle.type) == p_AssetFactories.end()) {
+        if (p_AssetFactories.find(handle.m_AssetType) == p_AssetFactories.end()) {
             return;
         }
         p_PendingLoadTasks.emplace(
-                handle, std::move(std::async(std::launch::async, p_AssetFactories[handle.type].first, info.path)));
+                handle, std::move(std::async(std::launch::async, p_AssetFactories[handle.m_AssetType].first, info.path)));
     }
 
     void AssetManager::TransitionAssetToLoaded(const AssetHandle &handle, Asset *asset_to_transition) {
@@ -267,7 +270,7 @@ namespace axm {
 
         // TODO: Log Asset Loaded
         if (p_AssetLoadCallbacks.find(handle) == p_AssetLoadCallbacks.end()) {
-            AXM_LOG("Asset {} already loaded", asset_to_transition->path);
+            AXM_LOG("Asset {} already loaded", asset_to_transition->m_Path);
             return;
         }
 

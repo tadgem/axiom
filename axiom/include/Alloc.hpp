@@ -8,7 +8,7 @@
     void *__cdecl operator new[](size_t size, const char *name, int flags, unsigned debugFlags, const char *file,      \
                                  int line) {                                                                           \
         if (ENABLE_TRACE) {                                                                                            \
-            STACK_TRACE();                                                                                             \
+            AXM_STACK_TRACE();                                                                                         \
         }                                                                                                              \
         AXM_ASSERT_NOT_REACHED();                                                                                      \
         return mi_malloc(size);                                                                                        \
@@ -17,7 +17,7 @@
     void *__cdecl operator new[](size_t size, unsigned __int64, unsigned __int64, char const *, int, unsigned int,     \
                                  char const *, int) {                                                                  \
         if (ENABLE_TRACE) {                                                                                            \
-            STACK_TRACE();                                                                                             \
+            AXM_STACK_TRACE();                                                                                         \
         }                                                                                                              \
         AXM_ASSERT_NOT_REACHED();                                                                                      \
         return mi_malloc(size);                                                                                        \

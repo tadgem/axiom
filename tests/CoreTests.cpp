@@ -3,61 +3,35 @@
 using namespace axm;
 
 
-TestResult ExampleTest(AppState *e) {
+TestResult ExampleTest(AppState *e) { return TestResult::Pass(); }
 
-    return TestResult::Pass();
-}
+TestResult ExampleTest2(AppState *e) { return TestResult::Fail("Something bad happened"); }
 
-TestResult ExampleTest2(AppState *e) {
+TestResult ExampleTest3(AppState *e) { return TestResult::Pass(); }
 
-    return TestResult::Fail("Something bad happened");
-}
-
-TestResult ExampleTest3(AppState *e) {
-
-    return TestResult::Pass();
-}
-
-using BinaryAsset =  AssetT<Vector<u8>, AssetType::Binary>;
-
-static bool loaded = false;
-AssetLoadResult TestLoadBinaryAsset(const String &path) {
-
-    loaded = true;
-    AssetLoadResult res = {};
-    auto data = Utils::LoadBinaryFromPath(path);
-
-    auto* binaryAsset = AXM_NEW(BinaryAsset, path, std::move(data));
-    auto* asset = static_cast<Asset*>(binaryAsset);
-
-    return  {
-        .m_Next = asset,
-        .m_NewAssetTasks = {},
-        .m_SyncAssetCallbacks = {}
-    };
-}
-
-void TestUnloadBinaryAsset(Asset *a) {
-    loaded = false;
-}
+using BinaryAsset = AssetT<Vector<u8>, AssetType::Binary>;
 
 
 TestResult AssetManager_CanProvideFactory(AppState *e) {
 
+    using TestBinaryAsset = AssetT<u64, AssetType::Binary>;
 
-    e->m_AssetManager.ProvideAssetFactory(
-        AssetType::Binary,
-        TestLoadBinaryAsset,
-        TestUnloadBinaryAsset
-    );
 
+    auto load = [](const String &path) { return AssetLoadResult{.m_Next = AXM_NEW(TestBinaryAsset, path, 2305)}; };
+    auto unload = [](Asset *a) {
+        auto *b = dynamic_cast<TestBinaryAsset *>(a);
+        AXM_DELETE(b);
+    };
+
+    e->m_AssetManager.ProvideAssetFactory(AssetType::Binary, load, unload);
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
     while (e->m_AssetManager.AnyAssetsLoading()) {
         e->m_AssetManager.Update();
     }
+    auto *binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
 
-    AXM_TEST_ASSERT(loaded, "BinaryAsset asset factory not invoked!");
+    AXM_TEST_ASSERT(binary->m_Data == 2305, "BinaryAsset asset factory not invoked!");
 
     return TestResult::Pass();
 }

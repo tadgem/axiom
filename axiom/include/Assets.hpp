@@ -13,13 +13,15 @@ namespace axm {
     /// use in collections for fast look up
     /// </summary>
     struct AssetHandle {
-        AssetType   m_AssetType;
-        str_hash    m_PathHash;
+        AssetType m_AssetType;
+        str_hash m_PathHash;
 
         AssetHandle();
         AssetHandle(const String &p, const AssetType &type);
 
-        bool operator==(const AssetHandle &o) const { return m_AssetType == o.m_AssetType && m_PathHash == o.m_PathHash; }
+        bool operator==(const AssetHandle &o) const {
+            return m_AssetType == o.m_AssetType && m_PathHash == o.m_PathHash;
+        }
 
         bool operator<(const AssetHandle &o) const { return m_AssetType < o.m_AssetType && m_PathHash < o.m_PathHash; }
     };
@@ -29,8 +31,8 @@ namespace axm {
     /// Giving concrete path and type of asset
     /// </summary>
     struct SerializableAssetHandle {
-        AssetHandle     m_Handle;
-        String          m_Path;
+        AssetHandle m_Handle;
+        String m_Path;
 
         SerializableAssetHandle(const String &p, const AssetType &type);
     };
@@ -40,16 +42,18 @@ namespace axm {
         Asset(const String &path, const AssetType &type);
         virtual ~Asset() = default;
 
-        const String        m_Path;
-        const AssetHandle   m_Handle;
+        const String m_Path;
+        const AssetHandle m_Handle;
     };
 
     template<typename AssetDataType, AssetType AssetTypeEnum>
     class AssetT : public Asset {
     public:
-        AssetDataType   m_Data;
+        AssetDataType m_Data;
 
-        AssetT(const String &path, AssetDataType && data) : Asset(path, AssetTypeEnum), m_Data(std::move(data)) {};
+        static constexpr AssetType kAssetEnumType = AssetTypeEnum;
+
+        AssetT(const String &path, AssetDataType &&data) : Asset(path, AssetTypeEnum), m_Data(std::move(data)) {};
 
         ~AssetT() override = default;
     };
@@ -61,7 +65,7 @@ namespace axm {
     /// </summary>
     class AssetTransientData {
     public:
-        Asset*  m_AssetDataPtr;
+        Asset *m_AssetDataPtr;
         AssetTransientData(Asset *asset) : m_AssetDataPtr(asset) {}
 
         virtual ~AssetTransientData() = default;

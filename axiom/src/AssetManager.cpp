@@ -37,8 +37,6 @@ namespace axm {
         AssetHandle handle(tmp_path, assetType);
         AssetLoadInfo loadInfo{tmp_path, assetType};
 
-        auto it = std::ranges::find(p_QueuedLoads.begin(), p_QueuedLoads.end(), loadInfo);
-
         for (auto &queued_load: p_QueuedLoads) {
             if (loadInfo == queued_load) {
                 return queued_load.ToHandle();
@@ -176,8 +174,7 @@ namespace axm {
                 else if (std::holds_alternative<Asset *>(asset.m_Next)) {
                     Asset *a = std::get<Asset *>(asset.m_Next);
                     TransitionAssetToLoaded(handle, a);
-                }
-                else if (i >= asset.m_SyncAssetCallbacks.size())
+                } else if (i >= asset.m_SyncAssetCallbacks.size())
                     break;
                 // or we have pwoblems.
                 else {
@@ -185,16 +182,18 @@ namespace axm {
                 }
             }
 
-            if (asset.m_SyncAssetCallbacks.empty() && transient) {
+            if (asset.m_SyncAssetCallbacks.empty()) {
                 clears.push_back(handle);
+
+                if (transient) {
+                    AssetTransientData *t = std::get<AssetTransientData *>(p_PendingSyncCallbacks[handle].m_Next);
+                    Asset *a = t->m_AssetDataPtr;
+                    TransitionAssetToLoaded(handle, a);
+                    AXM_DELETE(t);
+                }
             }
         }
         for (auto &handle: clears) {
-            AssetTransientData *transient = std::get<AssetTransientData *>(p_PendingSyncCallbacks[handle].m_Next);
-            Asset *a = transient->m_AssetDataPtr;
-            TransitionAssetToLoaded(handle, a);
-
-            AXM_DELETE(transient);
             p_PendingSyncCallbacks.erase(handle);
         }
 
@@ -242,7 +241,8 @@ namespace axm {
                 LoadAsset(newLoad.path, newLoad.type);
             }
 
-            if (asyncReturn.m_SyncAssetCallbacks.empty() && std::holds_alternative<AssetTransientData*>(asyncReturn.m_Next)) {
+            if (asyncReturn.m_SyncAssetCallbacks.empty() &&
+                std::holds_alternative<AssetTransientData *>(asyncReturn.m_Next)) {
                 auto *transient = std::get<AssetTransientData *>(asyncReturn.m_Next);
                 TransitionAssetToLoaded(handle, transient->m_AssetDataPtr);
 
@@ -250,7 +250,7 @@ namespace axm {
 
                 AXM_DELETE(transient);
             } else {
-                TransitionAssetToLoaded(handle, std::get<Asset*> (asyncReturn.m_Next));
+                TransitionAssetToLoaded(handle, std::get<Asset *>(asyncReturn.m_Next));
             }
 
             p_PendingLoadTasks.erase(handle);
@@ -262,7 +262,8 @@ namespace axm {
             return;
         }
         p_PendingLoadTasks.emplace(
-                handle, std::move(std::async(std::launch::async, p_AssetFactories[handle.m_AssetType].first, info.path)));
+                handle,
+                std::move(std::async(std::launch::async, p_AssetFactories[handle.m_AssetType].first, info.path)));
     }
 
     void AssetManager::TransitionAssetToLoaded(const AssetHandle &handle, Asset *asset_to_transition) {

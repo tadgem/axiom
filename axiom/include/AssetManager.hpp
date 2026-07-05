@@ -59,6 +59,18 @@ namespace axm {
             }
             return nullptr;
         }
+
+        template<typename AssetType>
+        AssetType *GetAsset(const String &path) {
+            static_assert(std::is_base_of<Asset, AssetType>() && "Provided type is not an asset");
+
+            auto handle = AssetHandle(path, AssetType::kAssetEnumType);
+            auto *a = GetAsset(handle);
+            if (a) {
+                return static_cast<AssetType *>(a);
+            }
+            return nullptr;
+        }
         AssetLoadProgress GetAssetLoadProgress(const AssetHandle &handle);
 
         NO_DISCARD bool AnyAssetsLoading() const;

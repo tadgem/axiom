@@ -36,7 +36,7 @@ TestResult AssetManager_CanProvideFactory(AppState *e) {
     return TestResult::Pass();
 }
 
-AXM_BEGIN_TESTS("Core Tests", MEGABYTES(128))
+AXM_BEGIN_TESTS("Core Tests")
 
 AXM_ADD_TEST(ExampleTest)
 AXM_ADD_TEST(ExampleTest2)

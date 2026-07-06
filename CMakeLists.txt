@@ -44,8 +44,8 @@ add_subdirectory(submodules/assimp)
 set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_headers)
 
 # AXIOM
-add_subdirectory(axiom)
 include(cmake/AxiomUtils.cmake)
+add_subdirectory(axiom)
 
 # TODO : Allow tests and examples to be defined in subdirectories
 # issue with required DLLs not being copied to correct directory

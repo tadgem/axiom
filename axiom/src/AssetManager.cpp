@@ -1,4 +1,4 @@
-#include "AssetManager.hpp"
+#include "../include/Assets/AssetManager.hpp"
 
 namespace axm {
     AssetHandle AssetLoadInfo::ToHandle() const { return {path, type}; }

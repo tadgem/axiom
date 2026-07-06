@@ -1,4 +1,3 @@
-
 file(GLOB_RECURSE AXM_SRCS src/*.cpp)
 
 add_library(axiom
@@ -10,14 +9,10 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
         ${AXM_SRCS}
-        include/JSON.hpp
-        include/Timer.hpp
-        include/Viewport.hpp
-        src/Viewport.cpp
-        ../tests/AxiomTestFramework.hpp
-        ../tests/CoreTests.cpp
-        include/Decorators.hpp
 )
+
+# TODO: Cannot activate atm due to werrors in slang-rhi
+# set_warnings_as_errors(axiom)
 
 target_link_libraries(axiom PUBLIC
         SDL3-static

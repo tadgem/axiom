@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "Prim.hpp"
+#include "../Core/Prim.hpp"
 #include "slang-rhi.h"
 namespace axm {
     namespace buffer {

@@ -1,14 +1,13 @@
 #pragma once
 #include <cstdio>
 #define FLECS_USE_OS_ALLOC
-#include "Assets.hpp"
-#include "Debug.hpp"
-#include "Engine.hpp"
-#include "JSON.hpp"
-#include "Memory.h"
-#include "STL.hpp"
-#include "Timer.hpp"
-#include "Utils.hpp"
+#include "Assets/Assets.hpp"
+#include "Core/Debug.hpp"
+#include "Core/Engine.hpp"
+#include "Core/JSON.hpp"
+#include "Core/STL.hpp"
+#include "Core/Timer.hpp"
+#include "Core/Utils.hpp"
 #include "flecs.h"
 #include "flecs/addons/cpp/flecs.hpp"
 

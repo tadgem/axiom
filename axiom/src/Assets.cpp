@@ -1,5 +1,5 @@
 
-#include "Assets.hpp"
+#include "../include/Assets/Assets.hpp"
 
 namespace axm {
     SerializableAssetHandle::SerializableAssetHandle(const String &p, const AssetType &type) :

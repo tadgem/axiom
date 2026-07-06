@@ -1,5 +1,5 @@
 #pragma once
-#include "Maths.hpp"
+#include "../Core/Maths.hpp"
 #include "SDL3/SDL_video.h"
 
 namespace axm {

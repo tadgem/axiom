@@ -1,6 +1,6 @@
-#include "Mesh.hpp"
-#include "Buffer.hpp"
-#include "Vertex.hpp"
+#include "../include/Render/Mesh.hpp"
+#include "../include/Render/Buffer.hpp"
+#include "../include/Render/Vertex.hpp"
 
 axm::Mesh axm::meshes::CreateMeshFromData(rhi::IDevice *device, const void *vertexData, u64 vertexDataSize,
                                           const u32 *indexData, u64 numIndices, rhi::ComPtr<rhi::IInputLayout> layout,

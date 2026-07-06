@@ -1,5 +1,5 @@
 #pragma once
-#include "Prim.hpp"
+#include "../Core/Prim.hpp"
 
 namespace axm::shapes {
 

@@ -1,5 +1,5 @@
-#include "Texture.hpp"
-#include "Debug.hpp"
+#include "../include/Render/Texture.hpp"
+#include "../include/Core/Debug.hpp"
 
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -45,8 +45,8 @@ void axm::CPUTextureData::Release() const { stbi_image_free(m_Data); }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void *data, size_t length) {
 
     int texWidth, texHeight, texChannels;
-    auto *pixels = stbi_load_from_memory(static_cast<stbi_uc const *>(data), length, &texWidth, &texHeight,
-                                         &texChannels, STBI_rgb_alpha);
+    auto *pixels = stbi_load_from_memory(static_cast<stbi_uc const *>(data), static_cast<int>(length), &texWidth,
+                                         &texHeight, &texChannels, STBI_rgb_alpha);
 
     return {.m_Data = pixels, .m_Width = texWidth, .m_Height = texHeight, .m_NumChannels = texChannels};
 }

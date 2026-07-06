@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <slang-rhi.h>
-#include "AssetManager.hpp"
+#include "../Assets/AssetManager.hpp"
 #include "SDL3/SDL.h"
 #include "STL.hpp"
 

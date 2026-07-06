@@ -1,4 +1,4 @@
-#include "Shapes.hpp"
+#include "../include/Render/Shapes.hpp"
 
 f32 cube_pos_norm_uv_vertex_data[288] = {
         -1.000000, 1.000000,  -1.000000, -0.0000,   1.0000,    -0.0000,   0.875000,  0.500000,  1.000000,  1.000000,

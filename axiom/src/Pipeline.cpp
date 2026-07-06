@@ -1,6 +1,6 @@
-#include "Pipeline.hpp"
+#include "../include/Render/Pipeline.hpp"
 #include <vector>
-#include "Debug.hpp"
+#include "../include/Core/Debug.hpp"
 
 rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice *device,
                                                                       const Span<rhi::Format> &colourFormats,

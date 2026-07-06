@@ -1,6 +1,6 @@
 #pragma once
-#include "Prim.hpp"
-#include "STL.hpp"
+#include "../Core/Prim.hpp"
+#include "../Core/STL.hpp"
 
 namespace axm {
     // TODO: Can we have a reflectable enum structure or macro helper?

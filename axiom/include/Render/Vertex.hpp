@@ -3,9 +3,9 @@
 //
 
 #pragma once
-#include "Debug.hpp"
-#include "Maths.hpp"
-#include "STL.hpp"
+#include "Core/Debug.hpp"
+#include "Core/Maths.hpp"
+#include "Core/STL.hpp"
 #include "slang-rhi.h"
 
 namespace axm {
@@ -49,4 +49,4 @@ namespace axm {
 
 
     }; // namespace vertex
-}
+} // namespace axm

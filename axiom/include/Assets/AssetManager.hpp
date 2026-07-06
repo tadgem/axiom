@@ -1,6 +1,6 @@
 #pragma once
-#include "Assets.hpp"
-#include "Prim.hpp"
+#include "Assets/Assets.hpp"
+#include "Core/Prim.hpp"
 
 namespace axm {
 

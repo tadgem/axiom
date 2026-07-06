@@ -1,5 +1,5 @@
 #pragma once
-#include "Debug.hpp"
+#include "../Core/Debug.hpp"
 #include "slang-rhi.h"
 #include "slang-rhi/shader-cursor.h"
 #include "slang.h"

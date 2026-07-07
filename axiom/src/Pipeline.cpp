@@ -2,11 +2,11 @@
 #include <vector>
 #include "../include/Core/Debug.hpp"
 
-rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice *device,
-                                                                      const Span<rhi::Format> &colourFormats,
-                                                                      const rhi::DepthStencilDesc &depthTarget,
-                                                                      const Shader &shader,
-                                                                      rhi::IInputLayout *inputLayout) {
+rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice* device,
+                                                                      const Span<rhi::Format>& colourFormats,
+                                                                      const rhi::DepthStencilDesc& depthTarget,
+                                                                      const Shader& shader,
+                                                                      rhi::IInputLayout* inputLayout) {
 
     Vector<rhi::ColorTargetDesc> colorTargets;
     colorTargets.resize(colourFormats.size());
@@ -15,7 +15,7 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
         colorTargets[i].format = colourFormats[i];
     }
 
-    rhi::RenderPipelineDesc pipelineDesc = {};
+    rhi::RenderPipelineDesc pipelineDesc = { };
     pipelineDesc.program = shader.m_Program;
     pipelineDesc.inputLayout = inputLayout;
     pipelineDesc.targets = colorTargets.data();
@@ -26,7 +26,7 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
 
     if (SLANG_FAILED(device->createRenderPipeline(pipelineDesc, pipeline.writeRef()))) {
         AXM_LOG("Failed to create render pipeline with shader : {}", shader.m_Name);
-        return {};
+        return { };
     }
 
     return pipeline;

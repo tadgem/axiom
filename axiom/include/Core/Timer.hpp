@@ -5,13 +5,14 @@
 namespace axm {
     typedef std::chrono::high_resolution_clock HighResolutionClock;
 
-    class Timer {
+    class Timer
+    {
     public:
         typedef HighResolutionClock::time_point TimePoint;
 
         TimePoint m_Start;
 
-        Timer() : m_Start(HighResolutionClock::now()) {}
+        Timer() : m_Start(HighResolutionClock::now()) { }
 
         auto Elapsed() { return HighResolutionClock::now() - m_Start; }
 

@@ -5,12 +5,14 @@
 
 namespace axm {
 
-    struct CPUMesh {
-        void *m_CPUMemory;
+    struct CPUMesh
+    {
+        void* m_CPUMemory;
     };
 
-    class Model {
+    class Model
+    {
     public:
-        static Model CreateModelFromFile(const String &path);
+        static Model CreateModelFromFile(const String& path);
     };
 } // namespace axm

@@ -12,48 +12,52 @@ namespace axm {
     /// Lightweight identifier for an arbitrary asset
     /// use in collections for fast look up
     /// </summary>
-    struct AssetHandle {
+    struct AssetHandle
+    {
         AssetType m_AssetType;
         str_hash m_PathHash;
 
         AssetHandle();
-        AssetHandle(const String &p, const AssetType &type);
+        AssetHandle(const String& p, const AssetType& type);
 
-        bool operator==(const AssetHandle &o) const {
+        bool operator==(const AssetHandle& o) const {
             return m_AssetType == o.m_AssetType && m_PathHash == o.m_PathHash;
         }
 
-        bool operator<(const AssetHandle &o) const { return m_AssetType < o.m_AssetType && m_PathHash < o.m_PathHash; }
+        bool operator<(const AssetHandle& o) const { return m_AssetType < o.m_AssetType && m_PathHash < o.m_PathHash; }
     };
 
     /// <summary>
     /// Allow asset to be loaded by asset manager system
     /// Giving concrete path and type of asset
     /// </summary>
-    struct SerializableAssetHandle {
+    struct SerializableAssetHandle
+    {
         AssetHandle m_Handle;
         String m_Path;
 
-        SerializableAssetHandle(const String &p, const AssetType &type);
+        SerializableAssetHandle(const String& p, const AssetType& type);
     };
 
-    class Asset {
+    class Asset
+    {
     public:
-        Asset(const String &path, const AssetType &type);
+        Asset(const String& path, const AssetType& type);
         virtual ~Asset() = default;
 
         const String m_Path;
         const AssetHandle m_Handle;
     };
 
-    template<typename AssetDataType, AssetType AssetTypeEnum>
-    class AssetT : public Asset {
+    template <typename AssetDataType, AssetType AssetTypeEnum>
+    class AssetT : public Asset
+    {
     public:
         AssetDataType m_Data;
 
         static constexpr AssetType kAssetEnumType = AssetTypeEnum;
 
-        AssetT(const String &path, AssetDataType &&data) : Asset(path, AssetTypeEnum), m_Data(std::move(data)) {};
+        AssetT(const String& path, AssetDataType&& data) : Asset(path, AssetTypeEnum), m_Data(std::move(data)) { };
 
         ~AssetT() override = default;
     };
@@ -63,21 +67,23 @@ namespace axm {
     /// phases e.g. load texture from disk to ram -> transfer from ram to GPU Once
     /// AssetIntermediate has finished, the asset is moved to the ready state.
     /// </summary>
-    class AssetTransientData {
+    class AssetTransientData
+    {
     public:
-        Asset *m_AssetDataPtr;
-        AssetTransientData(Asset *asset) : m_AssetDataPtr(asset) {}
+        Asset* m_AssetDataPtr;
+        AssetTransientData(Asset* asset) : m_AssetDataPtr(asset) { }
 
         virtual ~AssetTransientData() = default;
     };
 
-    template<typename AssetDataType, typename IntermediateDataType, AssetType AssetTypeEnum>
-    class AssetTransientT : public AssetTransientData {
+    template <typename AssetDataType, typename IntermediateDataType, AssetType AssetTypeEnum>
+    class AssetTransientT : public AssetTransientData
+    {
     public:
         IntermediateDataType m_TransientData;
 
-        AssetTransientT(Asset *data, const IntermediateDataType &inter) :
-            AssetTransientData(data), m_TransientData(inter) {}
+        AssetTransientT(Asset* data, const IntermediateDataType& inter) :
+            AssetTransientData(data), m_TransientData(inter) { }
 
         AssetT<AssetDataType, AssetTypeEnum> get_concrete_asset() {
             return static_cast<AssetT<AssetDataType, AssetTypeEnum>>(m_AssetDataPtr);
@@ -89,10 +95,11 @@ namespace axm {
 /// <summary>
 /// Allow AssetHandle to be used as a key in unordered_map
 /// </summary>
-template<>
-struct std::hash<axm::AssetHandle> {
+template <>
+struct std::hash<axm::AssetHandle>
+{
 
-    size_t operator()(const axm::AssetHandle &ah) const noexcept {
+    size_t operator()(const axm::AssetHandle& ah) const noexcept {
         return std::hash<str_hash>()(ah.m_PathHash) ^ std::hash<u8>()(static_cast<u8>(ah.m_AssetType));
     }
 };

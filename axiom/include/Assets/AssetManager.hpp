@@ -4,15 +4,16 @@
 
 namespace axm {
 
-    struct AssetLoadInfo {
+    struct AssetLoadInfo
+    {
         String path;
         AssetType type;
 
-        bool operator==(const AssetLoadInfo &o) const { return path == o.path && type == o.type; }
+        bool operator==(const AssetLoadInfo& o) const { return path == o.path && type == o.type; }
 
-        AssetLoadInfo &operator=(const AssetLoadInfo &o) = default;
+        AssetLoadInfo& operator=(const AssetLoadInfo& o) = default;
 
-        bool operator<(const AssetLoadInfo &o) const { return path.size() < o.path.size(); }
+        bool operator<(const AssetLoadInfo& o) const { return path.size() < o.path.size(); }
 
         NO_DISCARD AssetHandle ToHandle() const;
     };
@@ -22,56 +23,58 @@ namespace axm {
     /// <summary>
     /// Asset callback type defs
     /// </summary>
-    using AssetIntermediateCallback = void (*)(AssetTransientData *);
-    using OnAssetLoadedCallback = void (*)(Asset *);
-    using OnAssetUnloadedCallback = void (*)(Asset *);
+    using AssetIntermediateCallback = void (*)(AssetTransientData*);
+    using OnAssetLoadedCallback = void (*)(Asset*);
+    using OnAssetUnloadedCallback = void (*)(Asset*);
 
-    struct AssetLoadResult {
+    struct AssetLoadResult
+    {
         // Asset may return an intermediate _or_ the full asset.
-        Variant<Asset *, AssetTransientData *> m_Next;
+        Variant<Asset*, AssetTransientData*> m_Next;
         // additional assets that may be required to completely load this asset
         Vector<AssetLoadInfo> m_NewAssetTasks;
         // synchronous tasks associated with this asset e.g. submit tex mem to GPu
         Vector<AssetIntermediateCallback> m_SyncAssetCallbacks;
     };
 
-    using LoadAssetCallback = AssetLoadResult (*)(const String &path);
-    using UnloadAssetCallback = void (*)(Asset *a);
+    using LoadAssetCallback = AssetLoadResult (*)(const String& path);
+    using UnloadAssetCallback = void (*)(Asset* a);
 
-    class AssetManager {
+    class AssetManager
+    {
     public:
         AssetManager() = default;
 
-        bool ProvideAssetFactory(const AssetType &type, LoadAssetCallback onLoad, UnloadAssetCallback onUnload);
+        bool ProvideAssetFactory(const AssetType& type, LoadAssetCallback onLoad, UnloadAssetCallback onUnload);
 
-        AssetHandle LoadAsset(const String &path, const AssetType &assetType,
-                              OnAssetLoadedCallback onAssetLoaded = nullptr);
+        AssetHandle
+        LoadAsset(const String& path, const AssetType& assetType, OnAssetLoadedCallback onAssetLoaded = nullptr);
 
-        void UnloadAsset(const AssetHandle &handle);
-        Asset *GetAsset(const AssetHandle &handle);
+        void UnloadAsset(const AssetHandle& handle);
+        Asset* GetAsset(const AssetHandle& handle);
 
-        template<typename AssetType>
-        AssetType *GetAsset(const AssetHandle &handle) {
+        template <typename AssetType>
+        AssetType* GetAsset(const AssetHandle& handle) {
             static_assert(std::is_base_of<Asset, AssetType>() && "Provided type is not an asset");
-            auto *a = GetAsset(handle);
+            auto* a = GetAsset(handle);
             if (a) {
-                return static_cast<AssetType *>(a);
+                return static_cast<AssetType*>(a);
             }
             return nullptr;
         }
 
-        template<typename AssetType>
-        AssetType *GetAsset(const String &path) {
+        template <typename AssetType>
+        AssetType* GetAsset(const String& path) {
             static_assert(std::is_base_of<Asset, AssetType>() && "Provided type is not an asset");
 
             auto handle = AssetHandle(path, AssetType::kAssetEnumType);
-            auto *a = GetAsset(handle);
+            auto* a = GetAsset(handle);
             if (a) {
-                return static_cast<AssetType *>(a);
+                return static_cast<AssetType*>(a);
             }
             return nullptr;
         }
-        AssetLoadProgress GetAssetLoadProgress(const AssetHandle &handle);
+        AssetLoadProgress GetAssetLoadProgress(const AssetHandle& handle);
 
         NO_DISCARD bool AnyAssetsLoading() const;
         NO_DISCARD bool AnyAssetsUnloading() const;
@@ -106,9 +109,9 @@ namespace axm {
 
         void HandleAsyncTasks();
 
-        void DispatchAssetLoadTask(const AssetHandle &handle, AssetLoadInfo &info);
+        void DispatchAssetLoadTask(const AssetHandle& handle, AssetLoadInfo& info);
 
     private:
-        void TransitionAssetToLoaded(const AssetHandle &handle, Asset *asset_to_transition);
+        void TransitionAssetToLoaded(const AssetHandle& handle, Asset* asset_to_transition);
     };
 } // namespace axm

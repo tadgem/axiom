@@ -1,10 +1,10 @@
 #include "../include/Render/Buffer.hpp"
 #include "../include/Core/Debug.hpp"
-rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, u64 size, const void *data,
-                                                          const char *label) {
+rhi::ComPtr<rhi::IBuffer>
+axm::buffer::CreateVertexBuffer(rhi::IDevice* device, u64 size, const void* data, const char* label) {
     using namespace rhi;
 
-    BufferDesc desc = {};
+    BufferDesc desc = { };
     desc.size = size;
     desc.usage = BufferUsage::VertexBuffer;
     desc.defaultState = ResourceState::VertexBuffer;
@@ -18,11 +18,11 @@ rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateVertexBuffer(rhi::IDevice *device, 
 
     return buffer;
 }
-rhi::ComPtr<rhi::IBuffer> axm::buffer::CreateIndexBuffer(rhi::IDevice *device, u64 size, const void *data,
-                                                         const char *label) {
+rhi::ComPtr<rhi::IBuffer>
+axm::buffer::CreateIndexBuffer(rhi::IDevice* device, u64 size, const void* data, const char* label) {
     using namespace rhi;
 
-    BufferDesc desc = {};
+    BufferDesc desc = { };
     desc.size = size;
     desc.usage = BufferUsage::IndexBuffer;
     desc.defaultState = ResourceState::IndexBuffer;

@@ -30,7 +30,7 @@
 #define AXM_FLUSH_LOG()
 #endif
 
-#define AXM_ASSERT(X, msg) assert(X &&msg)
+#define AXM_ASSERT(X, msg) assert(X&& msg)
 #define AXM_ASSERT_NOT_REACHED() AXM_ASSERT(false, "Should not be reached")
 
 #define AXM_STACK_TRACE() AXM_LOG("TRACE:\n{}\n", std::to_string(std::stacktrace::current()))

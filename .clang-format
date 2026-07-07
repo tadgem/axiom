@@ -55,4 +55,8 @@ SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 TabWidth: 4
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: true
+AllowAllParametersOfDeclarationOnNextLine: false
 ...

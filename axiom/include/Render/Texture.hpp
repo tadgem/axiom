@@ -4,15 +4,17 @@
 #include "slang-rhi.h"
 
 namespace axm {
-    struct Texture {
-        rhi::ITexture *m_GPUTexture;
-        rhi::ITextureView *m_TextureView;
+    struct Texture
+    {
+        rhi::ITexture* m_GPUTexture;
+        rhi::ITextureView* m_TextureView;
 
         static Texture BAD();
     };
 
-    struct CPUTextureData {
-        void *m_Data;
+    struct CPUTextureData
+    {
+        void* m_Data;
         int m_Width, m_Height, m_NumChannels;
 
         void Release() const;
@@ -20,13 +22,13 @@ namespace axm {
 
     namespace textures {
 
-        CPUTextureData LoadCPUTextureDataFromMemory(void *data, size_t length);
-        CPUTextureData LoadCPUTextureDataFromFile(const char *path);
+        CPUTextureData LoadCPUTextureDataFromMemory(void* data, size_t length);
+        CPUTextureData LoadCPUTextureDataFromFile(const char* path);
 
-        rhi::ComPtr<rhi::ISampler> CreateSampler(rhi::IDevice *device, rhi::TextureFilteringMode filter,
-                                                 rhi::TextureAddressingMode addressMode);
+        rhi::ComPtr<rhi::ISampler>
+        CreateSampler(rhi::IDevice* device, rhi::TextureFilteringMode filter, rhi::TextureAddressingMode addressMode);
 
-        Texture CreateTexture2D(rhi::IDevice *device, const void *data, rhi::Format format, u32 w, u32 h);
+        Texture CreateTexture2D(rhi::IDevice* device, const void* data, rhi::Format format, u32 w, u32 h);
     } // namespace textures
 
 } // namespace axm

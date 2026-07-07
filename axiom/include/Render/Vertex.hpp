@@ -19,9 +19,10 @@ namespace axm {
             rhi::VertexStreamDesc m_VertexStream;
 
 
-            template<size_t ElemCount>
-            Layout(size_t dataElemSize, Array<rhi::InputElementDesc, ElemCount> inputElements,
-                    u32 instanceDataStepRate = 0) : m_VertexStream({ }) {
+            template <size_t ElemCount>
+            Layout(size_t dataElemSize,
+                   Array<rhi::InputElementDesc, ElemCount> inputElements,
+                   u32 instanceDataStepRate = 0) : m_VertexStream({ }) {
 
                 m_InputElements.resize(ElemCount);
                 for (auto i = 0; i < ElemCount; i++) {
@@ -34,7 +35,7 @@ namespace axm {
                 m_VertexStream.instanceDataStepRate = instanceDataStepRate;
             }
 
-            template<typename VertexElementType, size_t ElementCount>
+            template <typename VertexElementType, size_t ElementCount>
             explicit Layout(Array<rhi::InputElementDesc, ElementCount> inputElements, u32 instanceDataStepRate = 0) :
                 Layout(sizeof(VertexElementType), inputElements, instanceDataStepRate) { }
 

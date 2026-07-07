@@ -1,7 +1,7 @@
 function(set_warnings_as_errors name)
     set_property(TARGET ${name} PROPERTY COMPILE_WARNING_AS_ERROR ON)
     if (MSVC)
-        target_compile_options(${name} PRIVATE /W3 /WX)
+        target_compile_options(${name} PRIVATE /W4 /WX)
     else ()
         target_compile_options(${name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
     endif ()
@@ -11,7 +11,8 @@ function(add_axiom_target name src)
     add_executable(${name} ${src})
     target_link_libraries(${name} PRIVATE axiom)
     target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    set_warnings_as_errors(${name})
+    # TODO: slang-rhi has some uses that break warnings-as-errors.
+    # set_warnings_as_errors(${name})
 
 endfunction()
 

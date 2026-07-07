@@ -1,22 +1,22 @@
 # Generated from CLion C/C++ Code Style settings
 ---
 Language: Cpp
-BasedOnStyle: LLVM
+BasedOnStyle: WebKit
 AccessModifierOffset: -4
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignOperands: true
 AlignTrailingComments: false
 AlwaysBreakTemplateDeclarations: Yes
-BraceWrapping: 
+BraceWrapping:
   AfterCaseLabel: false
-  AfterClass: false
+  AfterClass: true
   AfterControlStatement: false
   AfterEnum: false
   AfterFunction: false
   AfterNamespace: false
-  AfterStruct: false
-  AfterUnion: false
+  AfterStruct: true
+  AfterUnion: true
   AfterExternBlock: false
   BeforeCatch: false
   BeforeElse: false
@@ -31,7 +31,7 @@ BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 120
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ContinuationIndentWidth: 8
-IncludeCategories: 
+IncludeCategories:
   - Regex: '^<.*'
     Priority: 1
   - Regex: '^".*'
@@ -47,7 +47,7 @@ MacroBlockEnd: ''
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 SpaceAfterCStyleCast: true
-SpaceAfterTemplateKeyword: false
+SpaceAfterTemplateKeyword: true
 SpaceBeforeRangeBasedForLoopColon: false
 SpaceInEmptyParentheses: false
 SpacesInAngles: false

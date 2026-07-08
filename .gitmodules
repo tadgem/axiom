@@ -1,9 +1,6 @@
 [submodule "submodules/slang-rhi"]
 	path = submodules/slang-rhi
 	url = https://github.com/shader-slang/slang-rhi.git
-[submodule "submodules/assimp"]
-	path = submodules/assimp
-	url = https://github.com/assimp/assimp.git
 [submodule "submodules/flecs"]
 	path = submodules/flecs
 	url = https://github.com/SanderMertens/flecs.git

@@ -1,4 +1,5 @@
 #include <array>
+#include "Core/Profile.hpp"
 #include "axiom.hpp"
 
 AXM_OVERRIDE_GLOBAL_NEW(false)
@@ -93,6 +94,7 @@ int main() {
         meshes ::DrawMesh(viewport, cubeMesh, renderPassEncoder);
 
 
+        profiler::ProfilerImGuiWindow();
         if (ImGui::Begin("Hello!")) {
             ImGui::DragFloat3("Position", &position.x);
             ImGui::DragFloat3("Euler", &euler.x);

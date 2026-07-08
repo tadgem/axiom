@@ -1,6 +1,7 @@
 #include "../include/Render/Mesh.hpp"
 #include "../include/Render/Buffer.hpp"
 #include "../include/Render/Vertex.hpp"
+#include "Core/Profile.hpp"
 
 axm::Mesh axm::meshes::CreateMeshFromData(rhi::IDevice* device,
                                           const void* vertexData,
@@ -9,6 +10,8 @@ axm::Mesh axm::meshes::CreateMeshFromData(rhi::IDevice* device,
                                           u64 numIndices,
                                           const vertex::Layout& inputLayout,
                                           const char* label) {
+
+    PROFILE_SCOPE();
 
     auto vertexBuffer = buffer::CreateVertexBuffer(device, vertexDataSize, vertexData, label);
 
@@ -22,6 +25,7 @@ axm::Mesh axm::meshes::CreateMeshFromData(rhi::IDevice* device,
 
 
 void axm::meshes::DrawMesh(const Viewport& viewPort, const Mesh& mesh, rhi::IRenderPassEncoder* renderPassEncoder) {
+    PROFILE_SCOPE();
 
     rhi::RenderState renderState = { };
     renderState.viewports[0] = rhi::Viewport::fromSize(viewPort.m_Size.x, viewPort.m_Size.y);

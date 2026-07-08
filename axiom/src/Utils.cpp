@@ -1,8 +1,11 @@
 #include "../include/Core/Utils.hpp"
 #include <fstream>
 #include <iostream>
+#include "Core/Profile.hpp"
+
 rhi::ITexture* axm::Utils::CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format) {
     using namespace rhi;
+    PROFILE_SCOPE();
     TextureDesc depthDesc = { };
     depthDesc.type = TextureType::Texture2D;
     depthDesc.size.width = w;
@@ -19,6 +22,7 @@ rhi::ITexture* axm::Utils::CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h
     return tex;
 }
 axm::Vector<u8> axm::Utils::LoadBinaryFromPath(const String& path) {
+    PROFILE_SCOPE();
     std::ifstream file { path.c_str(), std::ios::binary | std::ios::ate };
     auto fileSize = file.tellg();
     file.seekg(std::ios::beg);

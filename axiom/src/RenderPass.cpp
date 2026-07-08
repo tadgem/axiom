@@ -1,6 +1,10 @@
 #include "../include/Render/RenderPass.hpp"
+
+#include "Core/Profile.hpp"
 rhi::IRenderPassEncoder*
 axm::render_pass::BeginSwapChainRenderPass(AppState& app, rhi::ICommandEncoder* cmd, const vec4& clearColour) {
+    PROFILE_SCOPE();
+    
     using namespace rhi;
     RenderPassColorAttachment colorAttachment = { };
     colorAttachment.view = app.m_SwapchainColourImage->getDefaultView();

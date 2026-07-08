@@ -1,5 +1,7 @@
 #include "../include/Render/Shapes.hpp"
 
+#include "Core/Profile.hpp"
+
 f32 cube_pos_norm_uv_vertex_data[288] = {
     -1.000000, 1.000000,  -1.000000, -0.0000,   1.0000,    -0.0000,   0.875000,  0.500000,  1.000000,  1.000000,
     1.000000,  -0.0000,   1.0000,    -0.0000,   0.625000,  0.750000,  1.000000,  1.000000,  -1.000000, -0.0000,
@@ -36,6 +38,7 @@ u32 cube_indices[36] = { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
                          18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 };
 
 axm::shapes::Description axm::shapes::GetCubeShape() {
+    PROFILE_SCOPE();
 
     return { .m_VertexBuffer = &cube_pos_norm_uv_vertex_data[0],
              .m_BufferLength = 288,

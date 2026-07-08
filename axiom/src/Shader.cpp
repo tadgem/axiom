@@ -2,10 +2,13 @@
 #include <array>
 #include "../include/Core/Debug.hpp"
 #include "../include/Core/STL.hpp"
+#include "Core/Profile.hpp"
 
 using namespace rhi;
 
 slang::IModule* GetModule(IDevice* device, const char* name) {
+    PROFILE_SCOPE();
+
     ComPtr<slang::IBlob> diagnostics = { };
 
     slang::IModule* shaderModule = device->getSlangSession()->loadModule(name, diagnostics.writeRef());
@@ -23,6 +26,8 @@ slang::IModule* GetModule(IDevice* device, const char* name) {
 }
 
 void CreateShaderProgram(IDevice* device, ShaderProgramDesc desc, ComPtr<IShaderProgram>& program, const char* name) {
+    PROFILE_SCOPE();
+
     ComPtr<slang::IBlob> diagnostics = { };
 
     if (SLANG_FAILED(device->createShaderProgram(desc, program.writeRef(), diagnostics.writeRef()))) {
@@ -34,6 +39,7 @@ void CreateShaderProgram(IDevice* device, ShaderProgramDesc desc, ComPtr<IShader
 }
 
 axm::Shader::Shader(IDevice* device, const char* name, const char* vertexEntry, const char* fragEntry) : m_Name(name) {
+    PROFILE_SCOPE();
 
     slang::IModule* shaderModule = GetModule(device, name);
 
@@ -58,6 +64,8 @@ axm::Shader::Shader(IDevice* device, const char* name, const char* vertexEntry, 
     CreateShaderProgram(device, programDesc, m_Program, name);
 }
 axm::Shader::Shader(rhi::IDevice* device, const char* name, const char* computeEntry) : m_Name(name) {
+    PROFILE_SCOPE();
+    
     slang::IModule* shaderModule = GetModule(device, name);
 
     if (!shaderModule) {

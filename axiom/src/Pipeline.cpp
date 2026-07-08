@@ -1,12 +1,15 @@
 #include "../include/Render/Pipeline.hpp"
 #include <vector>
 #include "../include/Core/Debug.hpp"
+#include "Core/Profile.hpp"
 
 rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice* device,
                                                                       const Span<rhi::Format>& colourFormats,
                                                                       const rhi::DepthStencilDesc& depthTarget,
                                                                       const Shader& shader,
                                                                       rhi::IInputLayout* inputLayout) {
+    PROFILE_SCOPE();
+    
 
     Vector<rhi::ColorTargetDesc> colorTargets;
     colorTargets.resize(colourFormats.size());

@@ -1,10 +1,13 @@
 #include "../include/Assets/AssetManager.hpp"
 
+#include "Core/Profile.hpp"
+
 namespace axm {
     AssetHandle AssetLoadInfo::ToHandle() const { return { path, type }; }
 
     bool
     AssetManager::ProvideAssetFactory(const AssetType& type, LoadAssetCallback onLoad, UnloadAssetCallback onUnload) {
+        PROFILE_SCOPE();
         if (p_AssetFactories.find(type) != p_AssetFactories.end()) {
             return false;
         }
@@ -17,6 +20,7 @@ namespace axm {
 
     AssetHandle
     AssetManager::LoadAsset(const String& path, const AssetType& assetType, OnAssetLoadedCallback onAssetLoaded) {
+        PROFILE_SCOPE();
         if (!Filesystem::exists(path.c_str())) {
             return { };
         }
@@ -53,6 +57,7 @@ namespace axm {
     }
 
     void AssetManager::UnloadAsset(const AssetHandle& handle) {
+        PROFILE_SCOPE();
         // Asset is not loaded
         if (p_LoadedAssets.contains(handle)) {
             return;
@@ -70,6 +75,7 @@ namespace axm {
     }
 
     Asset* AssetManager::GetAsset(const AssetHandle& handle) {
+        PROFILE_SCOPE();
         if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
             return nullptr;
         }
@@ -78,6 +84,7 @@ namespace axm {
     }
 
     AssetLoadProgress AssetManager::GetAssetLoadProgress(const AssetHandle& handle) {
+        PROFILE_SCOPE();
         for (auto& queued: p_QueuedLoads) {
             if (queued.ToHandle() == handle) {
                 return AssetLoadProgress::Loading;
@@ -101,25 +108,32 @@ namespace axm {
     }
 
     bool AssetManager::AnyAssetsLoading() const {
+        PROFILE_SCOPE();
         return !p_PendingLoadTasks.empty() || !p_PendingSyncCallbacks.empty() || !p_PendingUnloadCallbacks.empty()
                || !p_QueuedLoads.empty();
     }
 
-    bool AssetManager::AnyAssetsUnloading() const { return !p_PendingUnloadCallbacks.empty(); }
+    bool AssetManager::AnyAssetsUnloading() const {
+        PROFILE_SCOPE();
+        return !p_PendingUnloadCallbacks.empty();
+    }
 
     void AssetManager::WaitAllAssets() {
+        PROFILE_SCOPE();
         while (AnyAssetsLoading()) {
             Update();
         }
     }
 
     void AssetManager::WaitAllUnloads() {
+        PROFILE_SCOPE();
         while (AnyAssetsUnloading()) {
             Update();
         }
     }
 
     void AssetManager::UnloadAllAssets() {
+        PROFILE_SCOPE();
         Vector<AssetHandle> assetsRemaining { };
 
         for (auto& [handle, asset]: p_LoadedAssets) {
@@ -134,6 +148,7 @@ namespace axm {
     }
 
     void AssetManager::Update() {
+        PROFILE_SCOPE();
         if (!AnyAssetsLoading()) {
             return;
         }
@@ -144,12 +159,14 @@ namespace axm {
     }
 
     void AssetManager::Shutdown() {
+        PROFILE_SCOPE();
         WaitAllAssets();
         WaitAllUnloads();
         UnloadAllAssets();
     }
 
     void AssetManager::HandleCallbacks() {
+        PROFILE_SCOPE();
         u16 processedCallbacks = 0;
         Vector<AssetHandle> clears;
 
@@ -215,6 +232,7 @@ namespace axm {
     }
 
     void AssetManager::HandlePendingLoads() {
+        PROFILE_SCOPE();
         while (p_PendingLoadTasks.size() <= kMaxAsyncTasksInFlight && !p_QueuedLoads.empty()) {
             auto& info = p_QueuedLoads.front();
             DispatchAssetLoadTask(info.ToHandle(), info);
@@ -227,6 +245,7 @@ namespace axm {
     // have a feeling this is very memory inefficient.
 
     void AssetManager::HandleAsyncTasks() {
+        PROFILE_SCOPE();
         Vector<AssetHandle> finished;
         for (auto& [handle, future]: p_PendingLoadTasks) {
             if (IsFutureReady(future)) {
@@ -258,6 +277,7 @@ namespace axm {
     }
 
     void AssetManager::DispatchAssetLoadTask(const AssetHandle& handle, AssetLoadInfo& info) {
+        PROFILE_SCOPE();
         if (p_AssetFactories.find(handle.m_AssetType) == p_AssetFactories.end()) {
             return;
         }
@@ -267,6 +287,7 @@ namespace axm {
     }
 
     void AssetManager::TransitionAssetToLoaded(const AssetHandle& handle, Asset* asset_to_transition) {
+        PROFILE_SCOPE();
         p_LoadedAssets.emplace(handle, std::move(Unique<Asset>(asset_to_transition)));
 
         // TODO: Log Asset Loaded

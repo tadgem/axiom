@@ -1,4 +1,5 @@
 #include <array>
+#include "Core/Profile.hpp"
 #include "axiom.hpp"
 
 AXM_OVERRIDE_GLOBAL_NEW(false)
@@ -87,6 +88,8 @@ int main() {
 
         renderPassEncoder->end();
         init.m_Queue->submit(commandEncoder->finish());
+
+        profiler::ProfilerImGuiWindow();
 
         if (ImGui::Begin("Hello!")) {
             ImGui::DragFloat3("Position", &position.x);

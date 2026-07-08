@@ -36,4 +36,8 @@ namespace axm {
         void ProfilerImGuiWindow(const AppState& e);
     }
 }
+#ifdef __FUNCTION__
 #define PROFILE_SCOPE() axm::profiler::ScopedTimer __FUNCTION__timer = axm::profiler::ScopedTimer(__FUNCTION__)
+#else
+#define PROFILE_SCOPE() axm::profiler::ScopedTimer __func__timer = axm::profiler::ScopedTimer(__func__)
+#endif

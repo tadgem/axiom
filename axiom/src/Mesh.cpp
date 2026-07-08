@@ -7,16 +7,16 @@ axm::Mesh axm::meshes::CreateMeshFromData(rhi::IDevice* device,
                                           u64 vertexDataSize,
                                           const u32* indexData,
                                           u64 numIndices,
-                                          rhi::ComPtr<rhi::IInputLayout> layout,
+                                          const vertex::Layout& inputLayout,
                                           const char* label) {
 
-    auto vertexBuffer = buffer::CreateVertexBuffer(device, vertexDataSize, vertexData);
+    auto vertexBuffer = buffer::CreateVertexBuffer(device, vertexDataSize, vertexData, label);
 
-    auto indexBuffer = buffer::CreateIndexBuffer(device, numIndices, indexData);
+    auto indexBuffer = buffer::CreateIndexBuffer(device, numIndices, indexData, label);
 
     return { .m_VertexBuffer = vertexBuffer,
              .m_IndexBuffer = indexBuffer,
-             .m_InputLayout = layout,
+             .m_InputLayout = inputLayout,
              .m_IndexCount = numIndices };
 }
 

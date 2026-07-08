@@ -1,13 +1,25 @@
 #pragma once
-#include "Viewport.hpp"
+#include "Render/Vertex.hpp"
+#include "Render/Viewport.hpp"
 #include "slang-rhi.h"
 
 namespace axm {
+
+    struct CPUMesh
+    {
+        String m_Name;
+        void* m_CPUMemory;
+        const vertex::Layout& m_Layout;
+
+        CPUMesh(String name, void* data, const vertex::Layout& layout) :
+            m_Name(std::move(name)), m_CPUMemory(data), m_Layout(layout) { };
+    };
+
     struct Mesh
     {
         rhi::ComPtr<rhi::IBuffer> m_VertexBuffer;
         rhi::ComPtr<rhi::IBuffer> m_IndexBuffer;
-        rhi::ComPtr<rhi::IInputLayout> m_InputLayout;
+        const vertex::Layout& m_InputLayout;
 
         u64 m_IndexCount;
     };
@@ -18,7 +30,7 @@ namespace axm {
                                 u64 vertexDataSize,
                                 const u32* indexData,
                                 u64 numIndices,
-                                rhi::ComPtr<rhi::IInputLayout> inputLayout,
+                                const vertex::Layout& inputLayout,
                                 const char* label = "AnonMesh");
 
 

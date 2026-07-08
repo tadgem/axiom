@@ -39,7 +39,7 @@ int main() {
                                                cubeShapeDef.m_BufferLength * sizeof(f32),
                                                cubeShapeDef.m_IndexBuffer,
                                                cubeShapeDef.m_NumIndices * sizeof(u32),
-                                               posNormalUvLayout.m_DeviceInputLayout);
+                                               posNormalUvLayout);
 
     Shader cube = Shader(init.m_Device, "resources/shaders/cube");
 

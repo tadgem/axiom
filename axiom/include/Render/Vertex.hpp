@@ -19,6 +19,8 @@ namespace axm {
             rhi::VertexStreamDesc m_VertexStream;
             rhi::ComPtr<rhi::IInputLayout> m_DeviceInputLayout;
 
+            Layout() = default;
+
             template <size_t ElemCount>
             Layout(size_t dataElemSize,
                    Array<rhi::InputElementDesc, ElemCount> inputElements,

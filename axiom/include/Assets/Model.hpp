@@ -2,17 +2,14 @@
 
 #include "Core/STL.hpp"
 #include "Render/Mesh.hpp"
-
+#include "Render/Texture.hpp"
 namespace axm {
 
-    struct CPUMesh
-    {
-        void* m_CPUMemory;
-    };
 
     class Model
     {
     public:
-        static Model CreateModelFromFile(const String& path);
+        Vector<Mesh> m_Meshes;
+        Vector<Texture> m_Textures;
     };
 } // namespace axm

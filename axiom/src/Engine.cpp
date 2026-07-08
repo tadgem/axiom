@@ -2,7 +2,7 @@
 #include "Core/Debug.hpp"
 #include "Core/STL.hpp"
 #include "Core/Utils.hpp"
-
+#include "Misc/TanklagerTTF.hpp"
 #define SDL_MAIN_HANDLED
 
 
@@ -177,6 +177,9 @@ axm::AppState axm::engine::Init() {
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
+    ImGui::GetIO().Fonts->AddFontFromMemoryTTF(
+            (void*) &Tanklager_Kompakt_ttf[0], sizeof(Tanklager_Kompakt_ttf) / sizeof(Tanklager_Kompakt_ttf[0]), 18.0f);
+
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForOther(window);
     if (!ImGui_ImplSlangRHI_Init(device, surface->getInfo().preferredFormat)) {
@@ -296,7 +299,7 @@ axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rh
 
 axm::AppState axm::AppState::BAD() {
     PROFILE_SCOPE();
-    
+
     return { .m_OK = false,
              .m_Running = false,
              .m_AssetManager = AssetManager(),

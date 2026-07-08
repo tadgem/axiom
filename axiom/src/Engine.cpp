@@ -158,6 +158,7 @@ axm::AppState axm::engine::Init() {
     surfaceConfig.width = width;
     surfaceConfig.height = height;
     surfaceConfig.format = Format::Undefined;
+    surfaceConfig.vsync = true;
     if (SLANG_FAILED(surface->configure(surfaceConfig))) {
         AXM_LOG("Failed to configure surface");
         SDL_DestroyWindow(window);
@@ -237,7 +238,7 @@ void axm::engine::Quit(const AppState& e) {
 }
 void axm::engine::PreFrame(AppState& e) {
     PROFILE_SCOPE();
-
+    e.m_FrameTimer.Reset();
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
@@ -271,6 +272,7 @@ void axm::engine::PostFrame(AppState& e) {
     passEncoder->end();
     e.m_Queue->submit(commandEncoder->finish());
     e.m_Surface->present();
+    e.m_DeltaTime = e.m_FrameTimer.ElapsedMillisecondsF();
 
     AXM_FLUSH_LOG();
 }

@@ -1,11 +1,12 @@
 #include "Core/Profile.hpp"
+#include "Core/Engine.hpp"
 
 #include "imgui.h"
 namespace axm {
     static HashMap<const char*, profiler::ProfilerItem> g_ProfilerItems = { };
 }
 axm::profiler::ScopedTimer::ScopedTimer(const char* label) : m_Label(label) { }
-axm::profiler::ScopedTimer::ScopedTimer(std::source_location loc) : m_Label(loc.function_name()) { }
+// axm::profiler::ScopedTimer::ScopedTimer(std::source_location loc) : m_Label(loc.function_name()) { }
 
 axm::profiler::ScopedTimer::~ScopedTimer() {
 
@@ -72,7 +73,7 @@ struct CompareItemsFromMap
 };
 
 
-void axm::profiler::ProfilerImGuiWindow() {
+void axm::profiler::ProfilerImGuiWindow(const AppState& e) {
 
     constexpr ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter
                                       | ImGuiTableFlags_BordersV | ImGuiTableFlags_Reorderable
@@ -90,12 +91,13 @@ void axm::profiler::ProfilerImGuiWindow() {
     }
 
     ImGui::Begin("Axiom Profiler Stats");
+    ImGui::Text("Frame Time : %.2f, FPS : %.2f", e.m_DeltaTime, 1000.0 / e.m_DeltaTime);
     if (ImGui::BeginTable("Axiom Profiler Stats", 4, flags)) {
 
         ImGui::TableSetupColumn("Label");
-        ImGui::TableSetupColumn("Mean Duration (ns)");
-        ImGui::TableSetupColumn("Min Duration (ns)");
-        ImGui::TableSetupColumn("Max Duration (ns)");
+        ImGui::TableSetupColumn("Mean Duration (ms)");
+        ImGui::TableSetupColumn("Min Duration (ms)");
+        ImGui::TableSetupColumn("Max Duration (ms)");
 
         if (ImGuiTableSortSpecs* sort_specs = ImGui::TableGetSortSpecs()) {
             if (sort_specs->SpecsDirty) {
@@ -113,11 +115,11 @@ void axm::profiler::ProfilerImGuiWindow() {
             ImGui::TableNextColumn();
             ImGui::TextUnformatted(label);
             ImGui::TableNextColumn();
-            ImGui::Text("%f", stats.m_MeanDuration);
+            ImGui::Text("%.4f ms", stats.m_MeanDuration / 1000000.0);
             ImGui::TableNextColumn();
-            ImGui::Text("%f", stats.m_MinDuration);
+            ImGui::Text("%.4f ms", stats.m_MinDuration / 1000000.0);
             ImGui::TableNextColumn();
-            ImGui::Text("%f", stats.m_MaxDuration);
+            ImGui::Text("%.4f ms", stats.m_MaxDuration / 1000000.0);
             ImGui::TableNextRow();
         }
         ImGui::EndTable();

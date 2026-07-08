@@ -89,7 +89,7 @@ int main() {
         renderPassEncoder->end();
         init.m_Queue->submit(commandEncoder->finish());
 
-        profiler::ProfilerImGuiWindow();
+        profiler::ProfilerImGuiWindow(init);
 
         if (ImGui::Begin("Hello!")) {
             ImGui::DragFloat3("Position", &position.x);

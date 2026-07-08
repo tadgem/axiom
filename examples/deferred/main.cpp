@@ -7,10 +7,10 @@ using namespace axm;
 
 
 mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
-    mat4 model = maths::GetModelMatrix(pos, euler, scale);
-    mat4 view = maths::Translate(vec3 { 0.0f, 0.0f, 0.0f });
-    mat4 proj = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
-    auto modelView = maths::Multiply(view, model);
+    const auto model = maths::GetModelMatrix(pos, euler, scale);
+    const auto view = maths::Translate(vec3 { 0.0f, 0.0f, 0.0f });
+    const auto proj = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
+    const auto modelView = maths::Multiply(view, model);
     return maths::Multiply(proj, modelView);
 }
 

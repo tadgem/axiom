@@ -1,5 +1,5 @@
-#include "axiom.hpp"
 #include <array>
+#include "axiom.hpp"
 
 AXM_OVERRIDE_GLOBAL_NEW(false)
 
@@ -7,10 +7,10 @@ using namespace axm;
 
 
 mat4 GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
-    mat4 model  = maths::GetModelMatrix(pos, euler, scale);
-    mat4 view   = maths::Translate(vec3{0.0f, 0.0f, 0.0f});
-    mat4 proj   = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
-    auto modelView     = maths::Multiply(view, model);
+    mat4 model = maths::GetModelMatrix(pos, euler, scale);
+    mat4 view = maths::Translate(vec3 { 0.0f, 0.0f, 0.0f });
+    mat4 proj = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
+    auto modelView = maths::Multiply(view, model);
     return maths::Multiply(proj, modelView);
 }
 
@@ -20,56 +20,44 @@ int main() {
     constexpr u32 width = 1280;
     constexpr u32 height = 720;
 
-    Timer initTimer = {};
+    Timer initTimer = { };
 
     AppState init = engine::Init();
 
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
-    vec3 position = {};
-    vec3 euler = {};
-    vec3 scale = {1.0, 1.0, 1.0};
-    auto mvp    = GetMVP(position, euler, scale);
+    vec3 position = { };
+    vec3 euler = { };
+    vec3 scale = { 1.0, 1.0, 1.0 };
+    auto mvp = GetMVP(position, euler, scale);
 
-    auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout(init.m_Device);
+    auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
+    posNormalUvLayout.BuildDeviceLayout(init.m_Device);
     auto cubeShapeDef = shapes::GetCubeShape();
-    auto cubeMesh = meshes::CreateMeshFromData(
-        init.m_Device,
-        cubeShapeDef.m_VertexBuffer,
-        cubeShapeDef.m_BufferLength * sizeof(f32),
-        cubeShapeDef.m_IndexBuffer,
-        cubeShapeDef.m_NumIndices * sizeof(u32),
-        posNormalUvLayout
-    );
+    auto cubeMesh = meshes::CreateMeshFromData(init.m_Device,
+                                               cubeShapeDef.m_VertexBuffer,
+                                               cubeShapeDef.m_BufferLength * sizeof(f32),
+                                               cubeShapeDef.m_IndexBuffer,
+                                               cubeShapeDef.m_NumIndices * sizeof(u32),
+                                               posNormalUvLayout.m_DeviceInputLayout);
 
     Shader cube = Shader(init.m_Device, "resources/shaders/cube");
 
-    Array formats = {
-        init.m_Surface->getInfo().preferredFormat
-    };
+    Array formats = { init.m_Surface->getInfo().preferredFormat };
 
     auto pipeline = pipeline::CreateRasterPipeline(
-        init.m_Device,
-        formats,
-        init.m_DepthStencilDesc,
-        cube,
-        posNormalUvLayout
-    );
+            init.m_Device, formats, init.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
 
     auto cpuTextureData = textures::LoadCPUTextureDataFromFile("resources/textures/crate.jpg");
 
-    auto gpuTexture = textures::CreateTexture2D(
-        init.m_Device,
-        cpuTextureData.m_Data,
-        rhi::Format::RGBA8Unorm,
-        cpuTextureData.m_Width, cpuTextureData.m_Height
-    );
+    auto gpuTexture = textures::CreateTexture2D(init.m_Device,
+                                                cpuTextureData.m_Data,
+                                                rhi::Format::RGBA8Unorm,
+                                                cpuTextureData.m_Width,
+                                                cpuTextureData.m_Height);
 
     auto sampler = textures::CreateSampler(
-        init.m_Device,
-        rhi::TextureFilteringMode::Linear,
-        rhi::TextureAddressingMode::ClampToEdge
-    );
+            init.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::ClampToEdge);
 
     cpuTextureData.Release();
 
@@ -80,7 +68,6 @@ int main() {
     AXM_FLUSH_LOG();
 
     auto viewport = viewports::GetFullscreenViewport(init.m_Window);
-
 
     while (init.m_Running) {
         engine::PreFrame(init);
@@ -98,8 +85,6 @@ int main() {
         meshes ::DrawMesh(viewport, cubeMesh, renderPassEncoder);
 
 
-
-
         renderPassEncoder->end();
         init.m_Queue->submit(commandEncoder->finish());
 
@@ -114,5 +99,4 @@ int main() {
     }
 
     engine::Quit(init);
-
 }

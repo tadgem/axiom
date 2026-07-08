@@ -1,8 +1,8 @@
 #include "Core/Engine.hpp"
+#include "ArchivoRegularTTF.h"
 #include "Core/Debug.hpp"
 #include "Core/STL.hpp"
 #include "Core/Utils.hpp"
-#include "Misc/TanklagerTTF.hpp"
 #define SDL_MAIN_HANDLED
 
 
@@ -177,8 +177,13 @@ axm::AppState axm::engine::Init() {
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
-    ImGui::GetIO().Fonts->AddFontFromMemoryTTF(
-            (void*) &Tanklager_Kompakt_ttf[0], sizeof(Tanklager_Kompakt_ttf) / sizeof(Tanklager_Kompakt_ttf[0]), 18.0f);
+    static ImFontConfig config { };
+    config.FontDataOwnedByAtlas = false;
+
+    ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*) &archivo_regular_ttf[0],
+                                               sizeof(archivo_regular_ttf) / sizeof(archivo_regular_ttf[0]),
+                                               14.0f,
+                                               &config);
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForOther(window);

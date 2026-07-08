@@ -48,21 +48,21 @@ struct CompareItemsFromMap
 
             f64 delta = 0;
             switch (spec->ColumnIndex) {
-                case 0: // Mean Duration
+                case 1: // Mean Duration
                     delta = (a.m_MeanDuration - b.m_MeanDuration);
                     break;
-                case 1: // Min Duration
+                case 2: // Min Duration
                     delta = a.m_MinDuration - b.m_MinDuration;
                     break;
-                case 2: // Max Duration
-                    delta = b.m_MaxDuration - a.m_MaxDuration;
+                case 3: // Max Duration
+                    delta = b.m_MaxDuration > a.m_MaxDuration ? 1.0f : -1.0f;
                     break;
             }
             if (delta != 0) {
                 if (spec->SortDirection == ImGuiSortDirection_Ascending) {
-                    return delta < 0;
+                    return delta < 0.0f;
                 } else {
-                    return delta > 0;
+                    return delta > 0.0f;
                 }
             }
         }

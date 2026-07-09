@@ -26,7 +26,7 @@ namespace axm {
         }
 
         const String wd(Filesystem::current_path().string());
-        String tmp_path = path;
+        String       tmp_path = path;
         if (path.find(wd) != std::string::npos) {
             tmp_path.erase(tmp_path.find(wd), wd.length());
 
@@ -38,7 +38,7 @@ namespace axm {
             }
         }
 
-        AssetHandle handle(tmp_path, assetType);
+        AssetHandle   handle(tmp_path, assetType);
         AssetLoadInfo loadInfo { tmp_path, assetType };
 
         for (auto& queued_load: p_QueuedLoads) {
@@ -167,7 +167,7 @@ namespace axm {
 
     void AssetManager::HandleCallbacks() {
         PROFILE_SCOPE();
-        u16 processedCallbacks = 0;
+        u16                 processedCallbacks = 0;
         Vector<AssetHandle> clears;
 
         for (auto& [handle, asset]: p_PendingSyncCallbacks) {
@@ -204,7 +204,7 @@ namespace axm {
 
                 if (transient) {
                     AssetTransientData* t = std::get<AssetTransientData*>(p_PendingSyncCallbacks[handle].m_Next);
-                    Asset* a = t->m_AssetDataPtr;
+                    Asset*              a = t->m_AssetDataPtr;
                     TransitionAssetToLoaded(handle, a);
                     AXM_DELETE(t);
                 }

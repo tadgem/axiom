@@ -48,9 +48,9 @@ namespace axm {
         };
     };
 
-    using vec2 = vec2_t<f32>;
-    using vec3 = vec3_t<f32>;
-    using vec4 = vec4_t<f32>;
+    using vec2  = vec2_t<f32>;
+    using vec3  = vec3_t<f32>;
+    using vec4  = vec4_t<f32>;
 
     using vec2u = vec2_t<u32>;
     using vec3u = vec3_t<u32>;
@@ -60,14 +60,14 @@ namespace axm {
     template <typename DecimalType>
     struct mat4x4_t
     {
-        DecimalType m[4][4];
+        DecimalType     m[4][4];
 
         static mat4x4_t Identity() {
             mat4x4_t m = { };
-            m.m[0][0] = 1.0f;
-            m.m[1][1] = 1.0f;
-            m.m[2][2] = 1.0f;
-            m.m[3][3] = 1.0f;
+            m.m[0][0]  = 1.0f;
+            m.m[1][1]  = 1.0f;
+            m.m[2][2]  = 1.0f;
+            m.m[3][3]  = 1.0f;
             return m;
         }
     };
@@ -104,9 +104,9 @@ namespace axm {
         mat4x4_t<DecimalType> Translate(const vec3_t<DecimalType>& p) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
-            m.m[0][3] = p.x;
-            m.m[1][3] = p.y;
-            m.m[2][3] = p.z;
+            m.m[0][3]               = p.x;
+            m.m[1][3]               = p.y;
+            m.m[2][3]               = p.z;
 
             return m;
         }
@@ -115,9 +115,9 @@ namespace axm {
         mat4x4_t<DecimalType> Scale(const vec3_t<DecimalType>& s) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
-            m.m[0][0] = s.x;
-            m.m[1][1] = s.y;
-            m.m[2][2] = s.z;
+            m.m[0][0]               = s.x;
+            m.m[1][1]               = s.y;
+            m.m[2][2]               = s.z;
 
             return m;
         }
@@ -126,13 +126,13 @@ namespace axm {
         mat4x4_t<DecimalType> RotateX(const DecimalType& xAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
-            DecimalType c = cosf(xAngle);
-            DecimalType s = sinf(xAngle);
+            DecimalType           c = cosf(xAngle);
+            DecimalType           s = sinf(xAngle);
 
-            m.m[1][1] = c;
-            m.m[1][2] = -s;
-            m.m[2][1] = s;
-            m.m[2][2] = c;
+            m.m[1][1]               = c;
+            m.m[1][2]               = -s;
+            m.m[2][1]               = s;
+            m.m[2][2]               = c;
 
             return m;
         }
@@ -141,13 +141,13 @@ namespace axm {
         mat4x4_t<DecimalType> RotateY(const DecimalType& yAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
-            DecimalType c = cosf(yAngle);
-            DecimalType s = sinf(yAngle);
+            DecimalType           c = cosf(yAngle);
+            DecimalType           s = sinf(yAngle);
 
-            m.m[0][0] = c;
-            m.m[0][2] = s;
-            m.m[2][0] = -s;
-            m.m[2][2] = c;
+            m.m[0][0]               = c;
+            m.m[0][2]               = s;
+            m.m[2][0]               = -s;
+            m.m[2][2]               = c;
 
             return m;
         }
@@ -156,13 +156,13 @@ namespace axm {
         mat4x4_t<DecimalType> RotateZ(const DecimalType& zAngle) {
             mat4x4_t<DecimalType> m = mat4x4_t<DecimalType>::Identity();
 
-            DecimalType c = cosf(zAngle);
-            DecimalType s = sinf(zAngle);
+            DecimalType           c = cosf(zAngle);
+            DecimalType           s = sinf(zAngle);
 
-            m.m[0][0] = c;
-            m.m[0][1] = -s;
-            m.m[1][0] = s;
-            m.m[1][1] = c;
+            m.m[0][0]               = c;
+            m.m[0][1]               = -s;
+            m.m[1][0]               = s;
+            m.m[1][1]               = c;
 
             return m;
         }
@@ -179,16 +179,16 @@ namespace axm {
         template <typename DecimalType>
         mat4x4_t<DecimalType>
         PerspectiveFOV(DecimalType fovRad, DecimalType aspect, DecimalType near, DecimalType far) {
-            mat4x4_t<DecimalType> m = { };
+            mat4x4_t<DecimalType> m   = { };
 
-            DecimalType g = 1.0f / tanf(fovRad * 0.5f);
+            DecimalType           g   = 1.0f / tanf(fovRad * 0.5f);
 
-            auto nmf = near - far;
-            m.m[0][0] = g / aspect;
-            m.m[1][1] = g;
-            m.m[2][2] = far / nmf;
-            m.m[2][3] = (near * far) / nmf;
-            m.m[3][2] = -1.0f;
+            auto                  nmf = near - far;
+            m.m[0][0]                 = g / aspect;
+            m.m[1][1]                 = g;
+            m.m[2][2]                 = far / nmf;
+            m.m[2][3]                 = (near * far) / nmf;
+            m.m[3][2]                 = -1.0f;
 
             return m;
         }

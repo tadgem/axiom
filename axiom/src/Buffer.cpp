@@ -6,11 +6,11 @@ axm::buffer::CreateVertexBuffer(rhi::IDevice* device, u64 size, const void* data
     using namespace rhi;
     PROFILE_SCOPE();
 
-    BufferDesc desc = { };
-    desc.size = size;
-    desc.usage = BufferUsage::VertexBuffer;
+    BufferDesc desc   = { };
+    desc.size         = size;
+    desc.usage        = BufferUsage::VertexBuffer;
     desc.defaultState = ResourceState::VertexBuffer;
-    desc.label = label;
+    desc.label        = label;
 
     ComPtr<IBuffer> buffer;
     if (SLANG_FAILED(device->createBuffer(desc, data, buffer.writeRef()))) {
@@ -25,11 +25,11 @@ axm::buffer::CreateIndexBuffer(rhi::IDevice* device, u64 size, const void* data,
     using namespace rhi;
     PROFILE_SCOPE();
 
-    BufferDesc desc = { };
-    desc.size = size;
-    desc.usage = BufferUsage::IndexBuffer;
+    BufferDesc desc   = { };
+    desc.size         = size;
+    desc.usage        = BufferUsage::IndexBuffer;
     desc.defaultState = ResourceState::IndexBuffer;
-    desc.label = label;
+    desc.label        = label;
 
     ComPtr<IBuffer> buffer;
     if (SLANG_FAILED(device->createBuffer(desc, data, buffer.writeRef()))) {

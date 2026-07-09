@@ -37,11 +37,11 @@ inline rhi::WindowHandle GetNativeWindowHandle(SDL_Window* window) {
 
 constexpr const char* UNKNOWN_MSG = "UNKNOWN";
 
-const char* GetSlangRHIDebugMessageType(const rhi::DebugMessageType& messageType) {
+const char*           GetSlangRHIDebugMessageType(const rhi::DebugMessageType& messageType) {
     PROFILE_SCOPE();
 
-    constexpr const char* INFO_MSG = "INFO";
-    constexpr const char* WARN_MSG = "WARN";
+    constexpr const char* INFO_MSG  = "INFO";
+    constexpr const char* WARN_MSG  = "WARN";
     constexpr const char* ERROR_MSG = "ERROR";
 
     switch (messageType) {
@@ -59,9 +59,9 @@ const char* GetSlangRHIDebugMessageType(const rhi::DebugMessageType& messageType
 const char* GetSlangRHIDebugMessageSource(const rhi::DebugMessageSource& messageType) {
     PROFILE_SCOPE();
 
-    constexpr const char* LAYER_MSG = "LAYER";
+    constexpr const char* LAYER_MSG  = "LAYER";
     constexpr const char* DRIVER_MSG = "DRIVER";
-    constexpr const char* SLANG_MSG = "SLANG";
+    constexpr const char* SLANG_MSG  = "SLANG";
 
     switch (messageType) {
         case rhi::DebugMessageSource::Layer:
@@ -79,9 +79,9 @@ const char* GetSlangRHIDebugMessageSource(const rhi::DebugMessageSource& message
 class SlangRHIDebugCallback : public rhi::IDebugCallback
 {
 public:
-    SLANG_NO_THROW void SLANG_MCALL handleMessage(rhi::DebugMessageType type,
+    SLANG_NO_THROW void SLANG_MCALL handleMessage(rhi::DebugMessageType   type,
                                                   rhi::DebugMessageSource source,
-                                                  const char* message) override {
+                                                  const char*             message) override {
         PROFILE_SCOPE();
         AXM_LOG("SlangRHI : {} : {} : {}",
                 GetSlangRHIDebugMessageType(type),
@@ -112,22 +112,22 @@ axm::AppState axm::engine::Init() {
         return AppState::BAD();
     }
 
-    IDevice* device = nullptr;
-    DeviceType deviceTypes[] = { DeviceType::Vulkan, DeviceType::D3D11, DeviceType::D3D12, DeviceType::Metal };
+    IDevice*        device        = nullptr;
+    DeviceType      deviceTypes[] = { DeviceType::Vulkan, DeviceType::D3D11, DeviceType::D3D12, DeviceType::Metal };
 
-    IDebugCallback* dbg = AXM_NEW(SlangRHIDebugCallback);
+    IDebugCallback* dbg           = AXM_NEW(SlangRHIDebugCallback);
     Unique<IDebugCallback> debugCallback(dbg);
 
     for (auto type: deviceTypes) {
         if (getRHI()->isDeviceTypeSupported(type)) {
-            DeviceDesc deviceDesc = { };
-            deviceDesc.deviceType = type;
-            deviceDesc.debugCallback = debugCallback.get();
-            deviceDesc.enableValidation = true;
+            DeviceDesc deviceDesc              = { };
+            deviceDesc.deviceType              = type;
+            deviceDesc.debugCallback           = debugCallback.get();
+            deviceDesc.enableValidation        = true;
 
             Array<Feature, 2> requiredFeatures = { Feature::Surface, Feature::Rasterization };
-            deviceDesc.requiredFeatureCount = static_cast<uint32_t>(requiredFeatures.size());
-            deviceDesc.requiredFeatures = requiredFeatures.data();
+            deviceDesc.requiredFeatureCount    = static_cast<uint32_t>(requiredFeatures.size());
+            deviceDesc.requiredFeatures        = requiredFeatures.data();
 
             if (SLANG_SUCCEEDED(getRHI()->createDevice(deviceDesc, &device))) {
                 AXM_LOG("Selected Rendering Backend : {}", getRHI()->getDeviceTypeName(type));
@@ -155,10 +155,10 @@ axm::AppState axm::engine::Init() {
     }
 
     SurfaceConfig surfaceConfig = { };
-    surfaceConfig.width = width;
-    surfaceConfig.height = height;
-    surfaceConfig.format = Format::Undefined;
-    surfaceConfig.vsync = true;
+    surfaceConfig.width         = width;
+    surfaceConfig.height        = height;
+    surfaceConfig.format        = Format::Undefined;
+    surfaceConfig.vsync         = true;
     if (SLANG_FAILED(surface->configure(surfaceConfig))) {
         AXM_LOG("Failed to configure surface");
         SDL_DestroyWindow(window);
@@ -202,26 +202,26 @@ axm::AppState axm::engine::Init() {
         return { };
     }
 
-    ITexture* depthTexture = Utils::CreateDepthTexture(device, 1280, 720);
+    ITexture*        depthTexture     = Utils::CreateDepthTexture(device, 1280, 720);
 
     DepthStencilDesc depthStencilDesc = { };
-    depthStencilDesc.format = Format::D32Float;
-    depthStencilDesc.depthTestEnable = true;
+    depthStencilDesc.format           = Format::D32Float;
+    depthStencilDesc.depthTestEnable  = true;
     depthStencilDesc.depthWriteEnable = true;
-    depthStencilDesc.depthFunc = ComparisonFunc::LessEqual;
+    depthStencilDesc.depthFunc        = ComparisonFunc::LessEqual;
 
 
-    return { .m_OK = true,
-             .m_Running = true,
-             .m_AssetManager = AssetManager(),
-             .m_DepthStencilDesc = depthStencilDesc,
-             .m_Window = window,
-             .m_Device = device,
-             .m_Surface = surface,
-             .m_Queue = graphicsQueue,
+    return { .m_OK                   = true,
+             .m_Running              = true,
+             .m_AssetManager         = AssetManager(),
+             .m_DepthStencilDesc     = depthStencilDesc,
+             .m_Window               = window,
+             .m_Device               = device,
+             .m_Surface              = surface,
+             .m_Queue                = graphicsQueue,
              .m_SwapchainColourImage = nullptr,
-             .m_SwapchainDepthImage = depthTexture,
-             .m_DebugCallback = std::move(debugCallback) };
+             .m_SwapchainDepthImage  = depthTexture,
+             .m_DebugCallback        = std::move(debugCallback) };
 }
 
 void axm::engine::Quit(const AppState& e) {
@@ -265,7 +265,7 @@ void axm::engine::PostFrame(AppState& e) {
 
     ImGui::Render();
     auto commandEncoder = e.m_Queue->createCommandEncoder();
-    auto passEncoder = BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
+    auto passEncoder    = BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
 
     ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
 
@@ -281,25 +281,25 @@ rhi::IRenderPassEncoder*
 axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rhi::LoadOp loadOp) {
     PROFILE_SCOPE();
 
-    rhi::RenderPassColorAttachment colorAttachment = { };
-    colorAttachment.view = e.m_SwapchainColourImage->getDefaultView();
-    colorAttachment.loadOp = loadOp;
-    colorAttachment.storeOp = rhi::StoreOp::Store;
-    colorAttachment.clearValue[0] = 0.0f;
-    colorAttachment.clearValue[1] = 0.0f;
-    colorAttachment.clearValue[2] = 0.0f;
-    colorAttachment.clearValue[3] = 1.0f;
+    rhi::RenderPassColorAttachment colorAttachment        = { };
+    colorAttachment.view                                  = e.m_SwapchainColourImage->getDefaultView();
+    colorAttachment.loadOp                                = loadOp;
+    colorAttachment.storeOp                               = rhi::StoreOp::Store;
+    colorAttachment.clearValue[0]                         = 0.0f;
+    colorAttachment.clearValue[1]                         = 0.0f;
+    colorAttachment.clearValue[2]                         = 0.0f;
+    colorAttachment.clearValue[3]                         = 1.0f;
 
     rhi::RenderPassDepthStencilAttachment depthAttachment = { };
-    depthAttachment.view = e.m_SwapchainDepthImage->getDefaultView();
-    depthAttachment.depthLoadOp = rhi::LoadOp::Clear;
-    depthAttachment.depthStoreOp = rhi::StoreOp::Store;
-    depthAttachment.depthClearValue = 1.0f;
+    depthAttachment.view                                  = e.m_SwapchainDepthImage->getDefaultView();
+    depthAttachment.depthLoadOp                           = rhi::LoadOp::Clear;
+    depthAttachment.depthStoreOp                          = rhi::StoreOp::Store;
+    depthAttachment.depthClearValue                       = 1.0f;
 
-    rhi::RenderPassDesc renderPass = { };
-    renderPass.colorAttachments = &colorAttachment;
-    renderPass.colorAttachmentCount = 1;
-    renderPass.depthStencilAttachment = &depthAttachment;
+    rhi::RenderPassDesc renderPass                        = { };
+    renderPass.colorAttachments                           = &colorAttachment;
+    renderPass.colorAttachmentCount                       = 1;
+    renderPass.depthStencilAttachment                     = &depthAttachment;
 
     return cmd->beginRenderPass(renderPass);
 }
@@ -307,14 +307,14 @@ axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rh
 axm::AppState axm::AppState::BAD() {
     PROFILE_SCOPE();
 
-    return { .m_OK = false,
-             .m_Running = false,
-             .m_AssetManager = AssetManager(),
-             .m_DepthStencilDesc = { },
-             .m_Window = nullptr,
-             .m_Device = nullptr,
-             .m_Surface = nullptr,
-             .m_Queue = nullptr,
+    return { .m_OK                   = false,
+             .m_Running              = false,
+             .m_AssetManager         = AssetManager(),
+             .m_DepthStencilDesc     = { },
+             .m_Window               = nullptr,
+             .m_Device               = nullptr,
+             .m_Surface              = nullptr,
+             .m_Queue                = nullptr,
              .m_SwapchainColourImage = nullptr,
-             .m_SwapchainDepthImage = nullptr };
+             .m_SwapchainDepthImage  = nullptr };
 }

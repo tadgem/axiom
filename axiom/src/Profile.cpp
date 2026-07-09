@@ -36,7 +36,7 @@ static axm::Vector<const char*> g_ProfilerItemLabelsSorted;
 struct CompareItemsFromMap
 {
     const axm::HashMap<const char*, axm::profiler::ProfilerItem>& Map;
-    const ImGuiTableSortSpecs* Specs;
+    const ImGuiTableSortSpecs*                                    Specs;
 
     CompareItemsFromMap(const axm::HashMap<const char*, axm::profiler::ProfilerItem>& map,
                         const ImGuiTableSortSpecs* specs) : Map(map), Specs(specs) { }
@@ -45,9 +45,9 @@ struct CompareItemsFromMap
         const profiler::ProfilerItem& a = Map.at(key_a);
         const profiler::ProfilerItem& b = Map.at(key_b);
         for (int n = 0; n < Specs->SpecsCount; n++) {
-            const ImGuiTableColumnSortSpecs* spec = &Specs->Specs[n];
+            const ImGuiTableColumnSortSpecs* spec  = &Specs->Specs[n];
 
-            f64 delta = 0;
+            f64                              delta = 0;
             switch (spec->ColumnIndex) {
                 case 1: // Mean Duration
                     delta = (a.m_MeanDuration - b.m_MeanDuration);

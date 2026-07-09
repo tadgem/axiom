@@ -15,7 +15,7 @@ namespace axm {
     struct AssetHandle
     {
         AssetType m_AssetType;
-        str_hash m_PathHash;
+        str_hash  m_PathHash;
 
         AssetHandle();
         AssetHandle(const String& p, const AssetType& type);
@@ -34,7 +34,7 @@ namespace axm {
     struct SerializableAssetHandle
     {
         AssetHandle m_Handle;
-        String m_Path;
+        String      m_Path;
 
         SerializableAssetHandle(const String& p, const AssetType& type);
     };
@@ -45,7 +45,7 @@ namespace axm {
         Asset(const String& path, const AssetType& type);
         virtual ~Asset() = default;
 
-        const String m_Path;
+        const String      m_Path;
         const AssetHandle m_Handle;
     };
 
@@ -53,7 +53,7 @@ namespace axm {
     class AssetT : public Asset
     {
     public:
-        AssetDataType m_Data;
+        AssetDataType              m_Data;
 
         static constexpr AssetType kAssetEnumType = AssetTypeEnum;
 

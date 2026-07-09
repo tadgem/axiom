@@ -56,8 +56,8 @@ namespace axm {
 
     template <typename Type, typename... Args>
     Unique<Type> MakeUnique(Args&&... args) {
-        void* memory_loc = mi_malloc(sizeof(Type));
-        Unique<Type> ptr = Unique<Type>(new (memory_loc) Type(std::forward<Args>(args)...));
+        void*        memory_loc = mi_malloc(sizeof(Type));
+        Unique<Type> ptr        = Unique<Type>(new (memory_loc) Type(std::forward<Args>(args)...));
         return std::move(ptr);
     }
 

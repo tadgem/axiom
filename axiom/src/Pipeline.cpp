@@ -3,13 +3,13 @@
 #include "../include/Core/Debug.hpp"
 #include "Core/Profile.hpp"
 
-rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice* device,
-                                                                      const Span<rhi::Format>& colourFormats,
+rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice*                device,
+                                                                      const Span<rhi::Format>&     colourFormats,
                                                                       const rhi::DepthStencilDesc& depthTarget,
-                                                                      const Shader& shader,
-                                                                      rhi::IInputLayout* inputLayout) {
+                                                                      const Shader&                shader,
+                                                                      rhi::IInputLayout*           inputLayout) {
     PROFILE_SCOPE();
-    
+
 
     Vector<rhi::ColorTargetDesc> colorTargets;
     colorTargets.resize(colourFormats.size());
@@ -19,12 +19,12 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
     }
 
     rhi::RenderPipelineDesc pipelineDesc = { };
-    pipelineDesc.program = shader.m_Program;
-    pipelineDesc.inputLayout = inputLayout;
-    pipelineDesc.targets = colorTargets.data();
-    pipelineDesc.targetCount = colorTargets.size();
-    pipelineDesc.depthStencil = depthTarget;
-    pipelineDesc.label = shader.m_Name;
+    pipelineDesc.program                 = shader.m_Program;
+    pipelineDesc.inputLayout             = inputLayout;
+    pipelineDesc.targets                 = colorTargets.data();
+    pipelineDesc.targetCount             = colorTargets.size();
+    pipelineDesc.depthStencil            = depthTarget;
+    pipelineDesc.label                   = shader.m_Name;
     rhi::ComPtr<rhi::IRenderPipeline> pipeline;
 
     if (SLANG_FAILED(device->createRenderPipeline(pipelineDesc, pipeline.writeRef()))) {

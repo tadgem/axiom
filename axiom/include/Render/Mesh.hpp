@@ -7,8 +7,8 @@ namespace axm {
 
     struct CPUMesh
     {
-        String m_Name;
-        void* m_CPUMemory;
+        String                m_Name;
+        void*                 m_CPUMemory;
         const vertex::Layout& m_Layout;
 
         CPUMesh(String name, void* data, const vertex::Layout& layout) :
@@ -19,19 +19,19 @@ namespace axm {
     {
         rhi::ComPtr<rhi::IBuffer> m_VertexBuffer;
         rhi::ComPtr<rhi::IBuffer> m_IndexBuffer;
-        const vertex::Layout& m_InputLayout;
+        const vertex::Layout&     m_InputLayout;
 
-        u64 m_IndexCount;
+        u64                       m_IndexCount;
     };
 
     namespace meshes {
-        Mesh CreateMeshFromData(rhi::IDevice* device,
-                                const void* vertexData,
-                                u64 vertexDataSize,
-                                const u32* indexData,
-                                u64 numIndices,
+        Mesh CreateMeshFromData(rhi::IDevice*         device,
+                                const void*           vertexData,
+                                u64                   vertexDataSize,
+                                const u32*            indexData,
+                                u64                   numIndices,
                                 const vertex::Layout& inputLayout,
-                                const char* label = "AnonMesh");
+                                const char*           label = "AnonMesh");
 
 
         void DrawMesh(const Viewport& viewPort, const Mesh& mesh, rhi::IRenderPassEncoder* renderPassEncoder);

@@ -13,7 +13,7 @@ namespace axm {
         class ScopedTimer
         {
         public:
-            Timer m_Timer;
+            Timer       m_Timer;
             const char* m_Label;
 
             ScopedTimer(const char* label);
@@ -33,7 +33,7 @@ namespace axm {
         // (need thread ID to identify which bin to place in, plus a way to find entries if stored as array)
         static HashMap<const char*, ProfilerItem> g_ProfilerItems;
 
-        void ProfilerImGuiWindow(const AppState& e);
+        void                                      ProfilerImGuiWindow(const AppState& e);
     }
 }
 #ifdef __FUNCTION__

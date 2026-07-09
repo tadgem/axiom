@@ -10,14 +10,14 @@ namespace axm {
     public:
         typedef HighResolutionClock::time_point TimePoint;
 
-        TimePoint m_Start;
+        TimePoint                               m_Start;
 
         Timer() : m_Start(HighResolutionClock::now()) { }
 
         NO_DISCARD auto Elapsed() const { return HighResolutionClock::now() - m_Start; }
-        void Reset() { m_Start = HighResolutionClock::now(); }
+        void            Reset() { m_Start = HighResolutionClock::now(); }
 
-        NO_DISCARD i64 ElapsedMilliseconds() const {
+        NO_DISCARD i64  ElapsedMilliseconds() const {
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(Elapsed());
             return static_cast<i64>(ms.count());
         }
@@ -30,14 +30,14 @@ namespace axm {
         NO_DISCARD f64 ElapsedMillisecondsF() const {
 
             auto ns_raw = std::chrono::duration_cast<std::chrono::nanoseconds>(Elapsed());
-            auto ns_f = static_cast<f64>(ns_raw.count());
+            auto ns_f   = static_cast<f64>(ns_raw.count());
             return ns_f / 1000000.0;
         }
 
         NO_DISCARD f64 ElapsedNanosecondsF() const {
 
             auto ns_raw = std::chrono::duration_cast<std::chrono::nanoseconds>(Elapsed());
-            auto ns_f = static_cast<f64>(ns_raw.count());
+            auto ns_f   = static_cast<f64>(ns_raw.count());
             return ns_f;
         }
     };

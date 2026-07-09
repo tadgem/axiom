@@ -10,13 +10,13 @@ namespace axm {
     {
     public:
         explicit Shader(rhi::IDevice* device,
-                        const char* name,
-                        const char* vertexEntry = "vertexMain",
-                        const char* fragEntry = "fragmentMain");
+                        const char*   name,
+                        const char*   vertexEntry = "vertexMain",
+                        const char*   fragEntry   = "fragmentMain");
 
         explicit Shader(rhi::IDevice* device, const char* name, const char* computeEntry);
 
-        const char* m_Name;
+        const char*                      m_Name;
         rhi::ComPtr<rhi::IShaderProgram> m_Program;
     };
 
@@ -25,10 +25,10 @@ namespace axm {
     class ShaderDataInterface
     {
     public:
-        rhi::ShaderCursor m_SlangCursor;
+        rhi::ShaderCursor                 m_SlangCursor;
         rhi::ComPtr<rhi::IRenderPipeline> m_RenderPipeline;
 
-        ShaderDataInterface(rhi::IRenderPassEncoder* renderPassEncoder,
+        ShaderDataInterface(rhi::IRenderPassEncoder*                 renderPassEncoder,
                             const rhi::ComPtr<rhi::IRenderPipeline>& pipeline);
 
         template <typename T>

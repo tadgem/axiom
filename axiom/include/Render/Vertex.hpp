@@ -15,14 +15,14 @@ namespace axm {
         class Layout
         {
         public:
-            Vector<rhi::InputElementDesc> m_InputElements;
-            rhi::VertexStreamDesc m_VertexStream;
+            Vector<rhi::InputElementDesc>  m_InputElements;
+            rhi::VertexStreamDesc          m_VertexStream;
             rhi::ComPtr<rhi::IInputLayout> m_DeviceInputLayout;
 
             Layout() = default;
 
             template <size_t ElemCount>
-            Layout(size_t dataElemSize,
+            Layout(size_t                                  dataElemSize,
                    Array<rhi::InputElementDesc, ElemCount> inputElements,
                    u32 instanceDataStepRate = 0) : m_VertexStream({ }), m_DeviceInputLayout(nullptr) {
 
@@ -39,7 +39,7 @@ namespace axm {
 
             template <typename VertexElementType, size_t ElementCount>
             static Layout BuildLayout(Array<rhi::InputElementDesc, ElementCount> inputElements,
-                                      u32 instanceDataStepRate = 0) {
+                                      u32                                        instanceDataStepRate = 0) {
 
                 return Layout(sizeof(VertexElementType), inputElements, instanceDataStepRate);
             }
@@ -57,12 +57,12 @@ namespace axm {
             void BuildDeviceLayout(rhi::IDevice* device) {
                 using namespace rhi;
 
-                VertexStreamDesc vertexStreams[] = { m_VertexStream };
+                VertexStreamDesc vertexStreams[]  = { m_VertexStream };
 
-                InputLayoutDesc inputLayoutDesc = { };
-                inputLayoutDesc.inputElements = m_InputElements.data();
+                InputLayoutDesc  inputLayoutDesc  = { };
+                inputLayoutDesc.inputElements     = m_InputElements.data();
                 inputLayoutDesc.inputElementCount = m_InputElements.size();
-                inputLayoutDesc.vertexStreams = vertexStreams;
+                inputLayoutDesc.vertexStreams     = vertexStreams;
                 // TODO: will we need more than one stream of vertices?
                 inputLayoutDesc.vertexStreamCount = 1;
 
@@ -75,9 +75,9 @@ namespace axm {
 
         struct PosNormalUV
         {
-            vec3 m_Pos;
-            vec3 m_Normal;
-            vec2 m_UV;
+            vec3          m_Pos;
+            vec3          m_Normal;
+            vec2          m_UV;
 
             static Layout GetInputLayout() {
                 using namespace rhi;

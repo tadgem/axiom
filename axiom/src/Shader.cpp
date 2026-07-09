@@ -9,9 +9,9 @@ using namespace rhi;
 slang::IModule* GetModule(IDevice* device, const char* name) {
     PROFILE_SCOPE();
 
-    ComPtr<slang::IBlob> diagnostics = { };
+    ComPtr<slang::IBlob> diagnostics  = { };
 
-    slang::IModule* shaderModule = device->getSlangSession()->loadModule(name, diagnostics.writeRef());
+    slang::IModule*      shaderModule = device->getSlangSession()->loadModule(name, diagnostics.writeRef());
 
     if (diagnostics) {
         AXM_LOG("Shader Compilation Messages: {}", static_cast<const char*>(diagnostics->getBufferPointer()));
@@ -55,17 +55,17 @@ axm::Shader::Shader(IDevice* device, const char* name, const char* vertexEntry, 
 
     Array<slang::IComponentType*, 2> entryPoints = { vertexEntryPoint, fragmentEntryPoint };
 
-    ShaderProgramDesc programDesc = { };
-    programDesc.linkingStyle = LinkingStyle::SingleProgram;
-    programDesc.slangEntryPoints = entryPoints.data();
-    programDesc.slangEntryPointCount = entryPoints.size();
-    programDesc.slangGlobalScope = shaderModule;
+    ShaderProgramDesc                programDesc = { };
+    programDesc.linkingStyle                     = LinkingStyle::SingleProgram;
+    programDesc.slangEntryPoints                 = entryPoints.data();
+    programDesc.slangEntryPointCount             = entryPoints.size();
+    programDesc.slangGlobalScope                 = shaderModule;
 
     CreateShaderProgram(device, programDesc, m_Program, name);
 }
 axm::Shader::Shader(rhi::IDevice* device, const char* name, const char* computeEntry) : m_Name(name) {
     PROFILE_SCOPE();
-    
+
     slang::IModule* shaderModule = GetModule(device, name);
 
     if (!shaderModule) {
@@ -76,17 +76,17 @@ axm::Shader::Shader(rhi::IDevice* device, const char* name, const char* computeE
     slang::IEntryPoint* computeEntryPoint = nullptr;
     shaderModule->findEntryPointByName(computeEntry, &computeEntryPoint);
 
-    Array<slang::IComponentType*, 1> entryPoint = { computeEntryPoint };
+    Array<slang::IComponentType*, 1> entryPoint  = { computeEntryPoint };
 
-    ShaderProgramDesc programDesc = { };
-    programDesc.linkingStyle = LinkingStyle::SingleProgram;
-    programDesc.slangEntryPoints = entryPoint.data();
-    programDesc.slangEntryPointCount = entryPoint.size();
-    programDesc.slangGlobalScope = shaderModule;
+    ShaderProgramDesc                programDesc = { };
+    programDesc.linkingStyle                     = LinkingStyle::SingleProgram;
+    programDesc.slangEntryPoints                 = entryPoint.data();
+    programDesc.slangEntryPointCount             = entryPoint.size();
+    programDesc.slangGlobalScope                 = shaderModule;
 
     CreateShaderProgram(device, programDesc, m_Program, name);
 }
 
-axm::ShaderDataInterface::ShaderDataInterface(IRenderPassEncoder* renderPassEncoder,
+axm::ShaderDataInterface::ShaderDataInterface(IRenderPassEncoder*            renderPassEncoder,
                                               const ComPtr<IRenderPipeline>& pipeline) :
     m_SlangCursor(rhi::ShaderCursor(renderPassEncoder->bindPipeline(pipeline))), m_RenderPipeline(pipeline) { }

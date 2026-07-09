@@ -45,7 +45,7 @@ namespace axm {
         bool operator!=(const STLMimallocAllocator<U>&) const {
             return false;
         }
-        T* allocate(const size_t n) const { return static_cast<T*>(mi_malloc(sizeof(T))); }
+        T*   allocate(const size_t n) const { return static_cast<T*>(mi_malloc(sizeof(T))); }
         void deallocate(T* const p, size_t) const { mi_free((void*) p); }
     };
 

@@ -15,7 +15,7 @@ axm::Mesh axm::meshes::CreateMeshFromData(rhi::IDevice*         device,
 
     auto vertexBuffer = buffer::CreateVertexBuffer(device, vertexDataSize, vertexData, label);
 
-    auto indexBuffer  = buffer::CreateIndexBuffer(device, numIndices, indexData, label);
+    auto indexBuffer  = buffer::CreateIndexBuffer(device, numIndices * sizeof(u32), indexData, label);
 
     return { .m_VertexBuffer = vertexBuffer,
              .m_IndexBuffer  = indexBuffer,

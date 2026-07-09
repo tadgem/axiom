@@ -59,7 +59,7 @@ namespace axm {
     void AssetManager::UnloadAsset(const AssetHandle& handle) {
         PROFILE_SCOPE();
         // Asset is not loaded
-        if (p_LoadedAssets.contains(handle)) {
+        if (!p_LoadedAssets.contains(handle)) {
             return;
         }
 
@@ -288,18 +288,18 @@ namespace axm {
 
     void AssetManager::TransitionAssetToLoaded(const AssetHandle& handle, Asset* asset_to_transition) {
         PROFILE_SCOPE();
-        p_LoadedAssets.emplace(handle, std::move(Unique<Asset>(asset_to_transition)));
-
-        // TODO: Log Asset Loaded
-        if (p_AssetLoadCallbacks.find(handle) == p_AssetLoadCallbacks.end()) {
+        if (p_LoadedAssets.contains(handle)) {
             AXM_LOG("Asset {} already loaded", asset_to_transition->m_Path);
             return;
         }
+        p_LoadedAssets.emplace(handle, std::move(Unique<Asset>(asset_to_transition)));
 
-        for (auto& [ah, loaded_callback]: p_AssetLoadCallbacks) {
-            loaded_callback(p_LoadedAssets[ah].get());
+        // No callbacks with this asset
+        if (!p_AssetLoadCallbacks.contains(handle)) {
+            return;
         }
 
+        p_AssetLoadCallbacks[handle](p_LoadedAssets[handle].get());
         p_AssetLoadCallbacks.erase(handle);
     }
 } // namespace axm

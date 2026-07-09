@@ -85,7 +85,7 @@ namespace axm {
         AssetTransientT(Asset* data, const IntermediateDataType& inter) :
             AssetTransientData(data), m_TransientData(inter) { }
 
-        AssetT<AssetDataType, AssetTypeEnum> get_concrete_asset() {
+        AssetT<AssetDataType, AssetTypeEnum> GetConcreteAsset() {
             return static_cast<AssetT<AssetDataType, AssetTypeEnum>>(m_AssetDataPtr);
         }
     };
@@ -98,7 +98,6 @@ namespace axm {
 template <>
 struct std::hash<axm::AssetHandle>
 {
-
     size_t operator()(const axm::AssetHandle& ah) const noexcept {
         return std::hash<str_hash>()(ah.m_PathHash) ^ std::hash<u8>()(static_cast<u8>(ah.m_AssetType));
     }

@@ -3,23 +3,10 @@
 #include "Core/Profile.hpp"
 
 namespace axm {
-    AssetHandle AssetLoadInfo::ToHandle() const { return { path, type }; }
-
-    bool
-    AssetManager::ProvideAssetFactory(const AssetType& type, LoadAssetCallback onLoad, UnloadAssetCallback onUnload) {
-        PROFILE_SCOPE();
-        if (p_AssetFactories.find(type) != p_AssetFactories.end()) {
-            return false;
-        }
-
-        const Pair funcs { onLoad, onUnload };
-
-        p_AssetFactories[type] = funcs;
-        return true;
-    }
+    AssetHandle AssetLoadInfo::ToHandle() const { return { m_Path, m_AssetType }; }
 
     AssetHandle
-    AssetManager::LoadAsset(const String& path, const AssetType& assetType, OnAssetLoadedCallback onAssetLoaded) {
+    AssetManager::LoadAsset(const String& path, const AssetType& assetType, const OnLoadedFn& onAssetLoaded) {
         PROFILE_SCOPE();
         if (!Filesystem::exists(path.c_str())) {
             return { };
@@ -39,7 +26,7 @@ namespace axm {
         }
 
         AssetHandle   handle(tmp_path, assetType);
-        AssetLoadInfo loadInfo { tmp_path, assetType };
+        AssetLoadInfo loadInfo { .m_Path = tmp_path, .m_AssetType = assetType, .m_OnLoadedCallback = onAssetLoaded };
 
         for (auto& queued_load: p_QueuedLoads) {
             if (loadInfo == queued_load) {
@@ -50,7 +37,7 @@ namespace axm {
         p_QueuedLoads.push_back(loadInfo);
 
         if (onAssetLoaded != nullptr) {
-            p_AssetLoadCallbacks.emplace(handle, onAssetLoaded);
+            p_InProgressAssetLoads.push_back(handle);
         }
 
         return handle;
@@ -71,7 +58,7 @@ namespace axm {
         }
 
         // Enqueue unload
-        p_PendingUnloadCallbacks.emplace(handle, p_AssetFactories[handle.m_AssetType].second);
+        p_PendingUnloads.push_back(handle);
     }
 
     Asset* AssetManager::GetAsset(const AssetHandle& handle) {
@@ -91,12 +78,11 @@ namespace axm {
             }
         }
 
-        if (p_PendingLoadTasks.find(handle) != p_PendingLoadTasks.end()
-            || p_PendingSyncCallbacks.find(handle) != p_PendingSyncCallbacks.end()) {
+        if (p_PendingLoadTasks.contains(handle) || p_PendingSyncCallbacks.contains(handle)) {
             return AssetLoadProgress::Loading;
         }
 
-        if (p_PendingUnloadCallbacks.find(handle) != p_PendingUnloadCallbacks.end()) {
+        if (std::find(p_PendingUnloads.begin(), p_PendingUnloads.end(), handle) != p_PendingUnloads.end()) {
             return AssetLoadProgress::Unloading;
         }
 
@@ -109,13 +95,13 @@ namespace axm {
 
     bool AssetManager::AnyAssetsLoading() const {
         PROFILE_SCOPE();
-        return !p_PendingLoadTasks.empty() || !p_PendingSyncCallbacks.empty() || !p_PendingUnloadCallbacks.empty()
+        return !p_PendingLoadTasks.empty() || !p_PendingSyncCallbacks.empty() || !p_PendingUnloads.empty()
                || !p_QueuedLoads.empty();
     }
 
     bool AssetManager::AnyAssetsUnloading() const {
         PROFILE_SCOPE();
-        return !p_PendingUnloadCallbacks.empty();
+        return !p_PendingUnloads.empty();
     }
 
     void AssetManager::WaitAllAssets() {
@@ -181,7 +167,9 @@ namespace axm {
                 // does asset have any intermediate steps?
                 if (std::holds_alternative<AssetTransientData*>(asset.m_Next)) {
                     // has transient
-                    asset.m_SyncAssetCallbacks.back()(std::get<AssetTransientData*>(asset.m_Next));
+                    auto* t = std::get<AssetTransientData*>(asset.m_Next);
+                    p_AssetFactories[handle.m_AssetType]->ProcessAssetTransient(t, t->m_CurrentStep);
+                    asset.m_SyncAssetCallbacks.back()();
                     asset.m_SyncAssetCallbacks.pop_back();
                     processedCallbacks++;
                     transient = true;
@@ -216,7 +204,7 @@ namespace axm {
 
         clears.clear();
 
-        for (auto& [handle, callback]: p_PendingUnloadCallbacks) {
+        for (auto& [handle, callback]: p_PendingUnloads) {
             if (processedCallbacks == kCallbackTasksPerUpdate)
                 break;
             callback(p_LoadedAssets[handle].get());
@@ -225,7 +213,7 @@ namespace axm {
         }
 
         for (auto& handle: clears) {
-            p_PendingUnloadCallbacks.erase(handle);
+            p_PendingUnloads.erase(handle);
             p_LoadedAssets[handle].reset();
             p_LoadedAssets.erase(handle);
         }
@@ -257,7 +245,7 @@ namespace axm {
             AssetLoadResult asyncReturn = p_PendingLoadTasks[handle].get();
             // enqueue any new loads
             for (auto& newLoad: asyncReturn.m_NewAssetTasks) {
-                LoadAsset(newLoad.path, newLoad.type);
+                LoadAsset(newLoad.m_Path, newLoad.m_AssetType);
             }
 
             if (asyncReturn.m_SyncAssetCallbacks.empty()
@@ -281,9 +269,13 @@ namespace axm {
         if (p_AssetFactories.find(handle.m_AssetType) == p_AssetFactories.end()) {
             return;
         }
-        p_PendingLoadTasks.emplace(
-                handle,
-                std::move(std::async(std::launch::async, p_AssetFactories[handle.m_AssetType].first, info.path)));
+
+        auto*                                    factory = p_AssetFactories[handle.m_AssetType].get();
+
+        Function<AssetLoadResult, const String&> fn
+                = [factory](const String& path) { return factory->LoadAsset(path); };
+
+        p_PendingLoadTasks.emplace(handle, std::move(std::async(std::launch::async, fn, info.m_Path)));
     }
 
     void AssetManager::TransitionAssetToLoaded(const AssetHandle& handle, Asset* asset_to_transition) {
@@ -295,11 +287,12 @@ namespace axm {
         p_LoadedAssets.emplace(handle, std::move(Unique<Asset>(asset_to_transition)));
 
         // No callbacks with this asset
-        if (!p_AssetLoadCallbacks.contains(handle)) {
+        auto it = std::find(p_InProgressAssetLoads.begin(), p_InProgressAssetLoads.end(), handle);
+        if (it == p_InProgressAssetLoads.end()) {
             return;
         }
 
-        p_AssetLoadCallbacks[handle](p_LoadedAssets[handle].get());
-        p_AssetLoadCallbacks.erase(handle);
+        p_InProgressAssetLoads[handle](p_LoadedAssets[handle].get());
+        p_InProgressAssetLoads.erase(handle);
     }
 } // namespace axm

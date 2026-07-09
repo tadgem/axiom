@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
+#include <functional>
 #include <future>
 #include <memory>
 #include <span>
@@ -31,6 +32,9 @@ namespace axm {
 
     template <typename Type1, typename... Others>
     using Variant = std::variant<Type1, Others...>;
+
+    template <typename ReturnType, typename... Params>
+    using Function = std::function<ReturnType(Params...)>;
 
     template <typename Type>
     using Unique = std::unique_ptr<Type, mimalloc_default_delete<Type>>;

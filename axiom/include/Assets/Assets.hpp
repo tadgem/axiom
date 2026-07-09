@@ -70,8 +70,11 @@ namespace axm {
     class AssetTransientData
     {
     public:
-        Asset* m_AssetDataPtr;
-        AssetTransientData(Asset* asset) : m_AssetDataPtr(asset) { }
+        Asset*          m_AssetDataPtr;
+        const AssetType m_AssetType;
+        u16             m_CurrentStep;
+
+        AssetTransientData(Asset* asset, AssetType t) : m_AssetDataPtr(asset), m_AssetType(t), m_CurrentStep(0) { }
 
         virtual ~AssetTransientData() = default;
     };
@@ -82,11 +85,11 @@ namespace axm {
     public:
         IntermediateDataType m_TransientData;
 
-        AssetTransientT(Asset* data, const IntermediateDataType& inter) :
-            AssetTransientData(data), m_TransientData(inter) { }
+        AssetTransientT(Asset* data, IntermediateDataType&& inter) :
+            AssetTransientData(data, AssetTypeEnum), m_TransientData(std::move(inter)) { }
 
-        AssetT<AssetDataType, AssetTypeEnum> GetConcreteAsset() {
-            return static_cast<AssetT<AssetDataType, AssetTypeEnum>>(m_AssetDataPtr);
+        AssetT<AssetDataType, AssetTypeEnum>* GetConcreteAsset() {
+            return static_cast<AssetT<AssetDataType, AssetTypeEnum>*>(m_AssetDataPtr);
         }
     };
 

@@ -2,54 +2,78 @@
 #include "Assets/Assets.hpp"
 #include "Core/Prim.hpp"
 
+#define AXM_HAS_TRANSIENT true
+
 namespace axm {
+
+    /// <summary>
+    /// Asset callback type defs
+    /// </summary>
+    using InterFn      = void (*)(AssetTransientData*);
+    using OnLoadedFn   = Function<void, Asset*>;
+    using OnUnloadedFn = void (*)(Asset*);
 
     struct AssetLoadInfo
     {
-        String                 path;
-        AssetType              type;
+        String     m_Path;
+        AssetType  m_AssetType;
+        OnLoadedFn m_OnLoadedCallback;
 
-        bool                   operator==(const AssetLoadInfo& o) const { return path == o.path && type == o.type; }
 
+        bool operator==(const AssetLoadInfo& o) const { return m_Path == o.m_Path && m_AssetType == o.m_AssetType; }
         AssetLoadInfo&         operator=(const AssetLoadInfo& o) = default;
-
-        bool                   operator<(const AssetLoadInfo& o) const { return path.size() < o.path.size(); }
+        bool                   operator<(const AssetLoadInfo& o) const { return m_Path.size() < o.m_Path.size(); }
 
         NO_DISCARD AssetHandle ToHandle() const;
     };
 
     enum class AssetLoadProgress { NotLoaded, Loading, Loaded, Unloading };
 
-    /// <summary>
-    /// Asset callback type defs
-    /// </summary>
-    using AssetIntermediateCallback = void (*)(AssetTransientData*);
-    using OnAssetLoadedCallback     = void (*)(Asset*);
-    using OnAssetUnloadedCallback   = void (*)(Asset*);
 
     struct AssetLoadResult
     {
-        // Asset may return an intermediate _or_ the full asset.
-        Variant<Asset*, AssetTransientData*> m_Next;
-        // additional assets that may be required to completely load this asset
-        Vector<AssetLoadInfo> m_NewAssetTasks;
-        // synchronous tasks associated with this asset e.g. submit tex mem to GPu
-        Vector<AssetIntermediateCallback> m_SyncAssetCallbacks;
+        Variant<Asset*, AssetTransientData*> m_Next; // may be final asset or transient while factory processes N steps
+        Vector<AssetLoadInfo>                m_NewAssetTasks; // new assets to be loaded (e.g. model requests new tex)
+        u16                                  m_TransientSteps; // number of steps for transient asset in factory
     };
 
     using LoadAssetCallback   = AssetLoadResult (*)(const String& path);
     using UnloadAssetCallback = void (*)(Asset* a);
+
+    class AssetFactory
+    {
+    public:
+        const AssetType m_AssetType;
+        const bool      m_HasTransient;
+
+        AssetFactory(AssetType assetType, bool hasTransient) : m_AssetType(assetType), m_HasTransient(hasTransient) { };
+
+        virtual AssetLoadResult LoadAsset(const String& path) const = 0;
+        virtual void            UnloadAsset(Asset* asset) const     = 0;
+        virtual void            ProcessAssetTransient(AssetTransientData* data, u16 step) const { };
+
+        virtual ~AssetFactory() = default;
+    };
 
     class AssetManager
     {
     public:
         AssetManager() = default;
 
-        bool ProvideAssetFactory(const AssetType& type, LoadAssetCallback onLoad, UnloadAssetCallback onUnload);
+        template <AssetType AssetTypeEnum, typename T, typename... Args>
+        bool AddAssetFactory(Args&&... args) {
+            static_assert(std::is_base_of<AssetFactory, T>() && "Provided type is not an AssetFactory");
+            if (p_AssetFactories.contains(AssetTypeEnum)) {
+                AXM_LOG("Asset Manager : Already have a provided factory for type {}", typeid(AssetTypeEnum).name());
+                return false;
+            }
+
+            p_AssetFactories.emplace(AssetTypeEnum, MakeUnique<T>(std::forward<Args>(args)...));
+            return true;
+        }
 
         AssetHandle
-               LoadAsset(const String& path, const AssetType& assetType, OnAssetLoadedCallback onAssetLoaded = nullptr);
-
+               LoadAsset(const String& path, const AssetType& assetType, const OnLoadedFn& onAssetLoaded = nullptr);
         void   UnloadAsset(const AssetHandle& handle);
         Asset* GetAsset(const AssetHandle& handle);
 
@@ -92,22 +116,22 @@ namespace axm {
 
     protected:
         friend struct Engine;
-        HashMap<AssetType, Pair<LoadAssetCallback, UnloadAssetCallback>> p_AssetFactories;
-        HashMap<AssetHandle, Future<AssetLoadResult>>                    p_PendingLoadTasks;
-        HashMap<AssetHandle, Unique<Asset>>                              p_LoadedAssets;
-        HashMap<AssetHandle, AssetLoadResult>                            p_PendingSyncCallbacks;
-        HashMap<AssetHandle, OnAssetUnloadedCallback>                    p_PendingUnloadCallbacks;
-        HashMap<AssetHandle, OnAssetLoadedCallback>                      p_AssetLoadCallbacks;
-        Vector<AssetLoadInfo>                                            p_QueuedLoads;
+        HashMap<AssetType, Unique<AssetFactory>>      p_AssetFactories;
+        HashMap<AssetHandle, Future<AssetLoadResult>> p_PendingLoadTasks;
+        HashMap<AssetHandle, Unique<Asset>>           p_LoadedAssets;
+        HashMap<AssetHandle, AssetLoadResult>         p_PendingSyncCallbacks;
+        Vector<AssetHandle>                           p_PendingUnloads;
+        Vector<AssetHandle>                           p_InProgressAssetLoads;
+        Vector<AssetLoadInfo>                         p_QueuedLoads;
 
-        static constexpr u16                                             kCallbackTasksPerUpdate = 1;
-        static constexpr u16                                             kMaxAsyncTasksInFlight  = 8;
+        static constexpr u16                          kCallbackTasksPerUpdate = 1;
+        static constexpr u16                          kMaxAsyncTasksInFlight  = 8;
 
-        void                                                             HandleCallbacks();
+        void                                          HandleCallbacks();
 
-        void                                                             HandlePendingLoads();
+        void                                          HandlePendingLoads();
 
-        void                                                             HandleAsyncTasks();
+        void                                          HandleAsyncTasks();
 
         void DispatchAssetLoadTask(const AssetHandle& handle, AssetLoadInfo& info);
 

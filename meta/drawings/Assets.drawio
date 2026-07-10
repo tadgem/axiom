@@ -1,0 +1,97 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="FnFWZbE7ZlbQKTp7YN0P">
+    <mxGraphModel dx="978" dy="545" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="AssetHandle&lt;div&gt;- str_hash hash&lt;/div&gt;&lt;div&gt;- AssetType type&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="120" x="20" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-9" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="CbtUNqUuHTxz3UPBp3nv-8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="60" />
+              <mxPoint x="380" y="60" />
+              <mxPoint x="380" y="80" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-17" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="CbtUNqUuHTxz3UPBp3nv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="60" />
+              <mxPoint x="685" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-20" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="CbtUNqUuHTxz3UPBp3nv-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="AssetManager" vertex="1">
+          <mxGeometry height="30" width="120" x="470" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="LoadAsset (String path, AssetType type, Fn callback)" vertex="1">
+          <mxGeometry height="30" width="230" x="258" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="AssetLoadInfo&lt;div&gt;- String path&lt;/div&gt;&lt;div&gt;- AssetType type&lt;/div&gt;&lt;div&gt;- Fn loadCallback&amp;nbsp;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-14" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="685" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="UnloadAsset (String path, AssetType type, Fn callback)" vertex="1">
+          <mxGeometry height="30" width="230" x="570" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Enqueue AssetLoadInfo&lt;br&gt;to PendingUnloads" vertex="1">
+          <mxGeometry height="30" width="136" x="617" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-18" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="CbtUNqUuHTxz3UPBp3nv-12" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="373" y="120" as="sourcePoint" />
+            <mxPoint x="373" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Enqueue AssetLoadInfo to PendingLoads" vertex="1">
+          <mxGeometry height="30" width="136" x="305" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Update" vertex="1">
+          <mxGeometry height="20" width="50" x="505" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-24" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="CbtUNqUuHTxz3UPBp3nv-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-25" connectable="0" parent="CbtUNqUuHTxz3UPBp3nv-24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Inherits" vertex="1">
+          <mxGeometry relative="1" x="-0.2619" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Asset&lt;div&gt;- AssetHandle handle&lt;/div&gt;&lt;div&gt;- String Path&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="120" x="20" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Asset&amp;lt;T&amp;gt;&lt;div&gt;- T Data&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="120" x="20" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-23" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;innerLoopWaypoints=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="CbtUNqUuHTxz3UPBp3nv-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-32" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="CbtUNqUuHTxz3UPBp3nv-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="AssetIntermediate&lt;div&gt;- u32 currentStep&lt;/div&gt;&lt;div&gt;- u32 numSteps&lt;/div&gt;&lt;div&gt;- Asset* asset&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-30" edge="1" parent="1" source="CbtUNqUuHTxz3UPBp3nv-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;innerLoopWaypoints=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="CbtUNqUuHTxz3UPBp3nv-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-31" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="AssetIntermediate&amp;lt;T1, T2&amp;gt;&lt;div&gt;- T2 intermediateData&lt;/div&gt;&lt;div&gt;- T1* GetConcreteAsset()&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="155" x="2.5" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="CbtUNqUuHTxz3UPBp3nv-33" parent="1" style="whiteSpace=wrap;html=1;" value="AssetFactory&lt;div&gt;- AssetIntermediate* LoadAsset(AssetLoadInfo info)&lt;/div&gt;&lt;div&gt;- void UnloadAsset(AssetLoadInfo info)&lt;/div&gt;&lt;div&gt;- void ProcessAssetTransient(AssetTransient* trans)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="320" x="280" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

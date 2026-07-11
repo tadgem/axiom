@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="FnFWZbE7ZlbQKTp7YN0P">
-    <mxGraphModel dx="2020" dy="1201" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
+    <mxGraphModel dx="515" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -142,7 +142,12 @@
           <mxGeometry height="44.12" width="159.86" x="10.139999999999986" y="480" as="geometry" />
         </mxCell>
         <mxCell id="wtl3C56WJfreoB9_a5E1-76" edge="1" parent="wtl3C56WJfreoB9_a5E1-79" source="wtl3C56WJfreoB9_a5E1-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="wtl3C56WJfreoB9_a5E1-27">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="240" />
+              <mxPoint x="320" y="240" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="wtl3C56WJfreoB9_a5E1-22" parent="wtl3C56WJfreoB9_a5E1-79" style="rounded=0;whiteSpace=wrap;html=1;" value="for $A of N PendingLoads" vertex="1">
           <mxGeometry height="40" width="120" x="170" y="190" as="geometry" />

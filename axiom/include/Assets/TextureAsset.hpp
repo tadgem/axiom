@@ -13,9 +13,9 @@ namespace axm {
 
         TextureAssetFactory(rhi::ComPtr<rhi::IDevice> gpuDevice);
 
-        AssetLoadResult LoadAsset(const String& path) const override;
-        void            UnloadAsset(Asset* asset) const override;
-        void            ProcessAssetTransient(AssetTransientData* data, u16 step) const override;
+        NO_DISCARD AssetLoadResult LoadAsset(const String& path) const override;
+        void                       UnloadAsset(Asset* asset) const override;
+        void                       ProcessAssetTransient(AssetTransient* data) const override;
 
 
     public:

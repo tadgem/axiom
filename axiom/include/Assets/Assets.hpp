@@ -67,26 +67,28 @@ namespace axm {
     /// phases e.g. load texture from disk to ram -> transfer from ram to GPU Once
     /// AssetIntermediate has finished, the asset is moved to the ready state.
     /// </summary>
-    class AssetTransientData
+    class AssetTransient
     {
     public:
         Asset*          m_AssetDataPtr;
         const AssetType m_AssetType;
         u16             m_CurrentStep;
+        u16             m_NumSteps;
 
-        AssetTransientData(Asset* asset, AssetType t) : m_AssetDataPtr(asset), m_AssetType(t), m_CurrentStep(0) { }
+        AssetTransient(Asset* asset, AssetType t) :
+            m_AssetDataPtr(asset), m_AssetType(t), m_CurrentStep(0), m_NumSteps(0) { }
 
-        virtual ~AssetTransientData() = default;
+        virtual ~AssetTransient() = default;
     };
 
     template <typename AssetDataType, typename IntermediateDataType, AssetType AssetTypeEnum>
-    class AssetTransientT : public AssetTransientData
+    class AssetTransientT : public AssetTransient
     {
     public:
         IntermediateDataType m_TransientData;
 
         AssetTransientT(Asset* data, IntermediateDataType&& inter) :
-            AssetTransientData(data, AssetTypeEnum), m_TransientData(std::move(inter)) { }
+            AssetTransient(data, AssetTypeEnum), m_TransientData(std::move(inter)) { }
 
         AssetT<AssetDataType, AssetTypeEnum>* GetConcreteAsset() {
             return static_cast<AssetT<AssetDataType, AssetTypeEnum>*>(m_AssetDataPtr);

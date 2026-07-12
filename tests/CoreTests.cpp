@@ -99,11 +99,32 @@ TestResult AssetManager_CanProcessTransient(AppState* e) {
     return TestResult::Pass();
 }
 
+TestResult AssetManager_NoFactoryForAssetType(AppState* e) {
+
+    e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
+
+    AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(), "Texture load should not have been enqueued, no factory");
+
+    return TestResult::Pass();
+}
+
+
+TestResult AssetManager_NonExistantAssetNotEnqueued(AppState* e) {
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_Device);
+    e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
+
+    AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(), "Texture load should not have been enqueued, file does not exist");
+
+    return TestResult::Pass();
+}
+
 AXM_BEGIN_TESTS("Core Tests")
 
 AXM_ADD_TEST(AssetManager_CanProvideFactory)
 AXM_ADD_TEST(AssetManager_CanLoadAsset)
 AXM_ADD_TEST(AssetManager_CanUnloadAsset)
 AXM_ADD_TEST(AssetManager_CanProcessTransient)
+AXM_ADD_TEST(AssetManager_NoFactoryForAssetType)
+AXM_ADD_TEST(AssetManager_NonExistantAssetNotEnqueued)
 
 AXM_END_TESTS()

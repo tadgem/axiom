@@ -11,6 +11,12 @@ namespace axm {
             return { };
         }
 
+        if(!p_AssetFactories.contains(assetType))
+        {
+            AXM_LOG_ERROR("AssetManager : No factory provided for asset load with type {}", assetType);
+            return {};
+        }
+
         // remove working directory from path (if it is part of the provided path)
         const String wd(Filesystem::current_path().string());
         String       tmp_path = path;

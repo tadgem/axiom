@@ -9,9 +9,9 @@ namespace axm {
     class TextureAssetFactory : public AssetFactory
     {
     public:
-        rhi::ComPtr<rhi::IDevice> m_Device;
+        rhi::IDevice* m_Device;
 
-        TextureAssetFactory(rhi::ComPtr<rhi::IDevice> gpuDevice);
+        explicit TextureAssetFactory(rhi::IDevice* gpuDevice);
 
         NO_DISCARD AssetLoadResult LoadAsset(const String& path) const override;
         void                       UnloadAsset(Asset* asset) const override;

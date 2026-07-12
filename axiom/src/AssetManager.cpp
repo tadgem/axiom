@@ -200,6 +200,7 @@ namespace axm {
             }
         }
     }
+
     void AssetManager::HandleTransients(u16& remainingTasks) {
         PROFILE_SCOPE();
         auto bound = std::min(static_cast<size_t>(remainingTasks), p_InFlightTransients.size());
@@ -219,6 +220,7 @@ namespace axm {
             remainingTasks--;
         }
     }
+
     void AssetManager::HandleUnloads(u16& remainingTasks) {
         PROFILE_SCOPE();
         auto bound = std::min(static_cast<size_t>(remainingTasks), p_QueuedUnloads.size());
@@ -229,12 +231,19 @@ namespace axm {
             p_AssetFactories[type]->UnloadAsset(p_LoadedAssets[handle].get());
 
             p_LoadedAssets.erase(handle);
+            p_QueuedUnloads.erase(p_QueuedUnloads.begin());
             remainingTasks--;
         }
     }
 
     void AssetManager::TransitionAssetToLoaded(Asset* asset, OnLoadedFn loadCallback) {
         PROFILE_SCOPE();
+
+        if (asset == nullptr) {
+            AXM_LOG_ERROR("TransitionAssetToLoaded : Asset is nullptr!");
+            return;
+        }
+
         p_LoadedAssets.emplace(asset->m_Handle, Unique<Asset>(asset));
 
         if (loadCallback != nullptr) {

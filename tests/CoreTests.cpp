@@ -33,7 +33,7 @@ TestResult AssetManager_CanProvideFactory(AppState* e) {
 }
 
 TestResult AssetManager_CanLoadAsset(AppState* e) {
-    TestAssetFactory* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
+    e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
     while (e->m_AssetManager.AnyAssetsLoading()) {
@@ -50,9 +50,60 @@ TestResult AssetManager_CanLoadAsset(AppState* e) {
     return TestResult::Pass();
 }
 
+TestResult AssetManager_CanUnloadAsset(AppState* e) {
+    e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
+
+    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
+
+    while (e->m_AssetManager.AnyAssetsLoading()) {
+        e->m_AssetManager.Update();
+    }
+
+    auto*       binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
+    AssetHandle handle = binary->m_Handle;
+
+    AXM_TEST_ASSERT(binary, "Binary Asset not valid");
+
+    e->m_AssetManager.UnloadAsset(handle);
+
+    while (e->m_AssetManager.AnyAssetsUnloading()) {
+        e->m_AssetManager.Update();
+    }
+
+    binary = e->m_AssetManager.GetAsset<TestBinaryAsset>(handle);
+
+    AXM_TEST_ASSERT(!binary, "Binary asset should not be valid, it has been unloaded")
+
+    return TestResult::Pass();
+}
+
+TestResult AssetManager_CanProcessTransient(AppState* e) {
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_Device);
+
+    e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
+
+    AXM_TEST_ASSERT(e->m_AssetManager.AnyAssetsLoading(), "Texture load should have been enqueued");
+
+    int count = 0;
+
+    while (e->m_AssetManager.AnyAssetsLoading()) {
+        e->m_AssetManager.Update();
+        count++;
+    }
+
+    TextureAsset* texture = e->m_AssetManager.GetAsset<TextureAsset>("test_resources/checkerboard.jpg");
+
+    AXM_TEST_ASSERT(texture, "Texture should be loaded after asset manager signals no more loading ops.")
+    AXM_TEST_ASSERT(texture->m_Data.m_GPUTexture != nullptr, "a GPU Texture should have been allocated for this load");
+
+    return TestResult::Pass();
+}
+
 AXM_BEGIN_TESTS("Core Tests")
 
 AXM_ADD_TEST(AssetManager_CanProvideFactory)
 AXM_ADD_TEST(AssetManager_CanLoadAsset)
+AXM_ADD_TEST(AssetManager_CanUnloadAsset)
+AXM_ADD_TEST(AssetManager_CanProcessTransient)
 
 AXM_END_TESTS()

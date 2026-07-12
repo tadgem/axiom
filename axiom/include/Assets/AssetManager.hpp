@@ -54,15 +54,16 @@ namespace axm {
         AssetManager() = default;
 
         template <AssetType AssetTypeEnum, typename T, typename... Args>
-        bool AddAssetFactory(Args&&... args) {
+        T* AddAssetFactory(Args&&... args) {
             static_assert(std::is_base_of<AssetFactory, T>() && "Provided type is not an AssetFactory");
             if (p_AssetFactories.contains(AssetTypeEnum)) {
                 AXM_LOG("Asset Manager : Already have a provided factory for type {}", typeid(AssetTypeEnum).name());
-                return false;
+                return static_cast<T*>(p_AssetFactories[AssetTypeEnum].get());
             }
 
-            p_AssetFactories.emplace(AssetTypeEnum, MakeUnique<T>(std::forward<Args>(args)...));
-            return true;
+            T* f = AXM_NEW(T, std::forward<Args>(args)...);
+            p_AssetFactories.emplace(AssetTypeEnum, Unique<AssetFactory>(f));
+            return static_cast<T*>(p_AssetFactories[AssetTypeEnum].get());
         }
 
         AssetHandle LoadAsset(const String& path, const AssetType& assetType, const OnLoadedFn& onLoaded = nullptr);
@@ -137,9 +138,6 @@ namespace axm {
         void                                     HandleAsyncTasks(u16& remainingTasks);
         void                                     HandleTransients(u16& remainingTasks);
         void                                     HandleUnloads(u16& remainingTasks);
-
-
-    private:
-        void TransitionAssetToLoaded(Asset* asset, OnLoadedFn loadCallback);
+        void                                     TransitionAssetToLoaded(Asset* asset, OnLoadedFn loadCallback);
     };
 } // namespace axm

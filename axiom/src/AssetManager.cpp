@@ -87,7 +87,8 @@ namespace axm {
 
     bool AssetManager::AnyAssetsLoading() const {
         PROFILE_SCOPE();
-        return !p_QueuedUnloads.empty() || !p_QueuedLoads.empty();
+        return !p_QueuedUnloads.empty() || !p_QueuedLoads.empty() || !p_InFlightLoads.empty()
+               || !p_InFlightTransients.empty();
     }
 
     bool AssetManager::AnyAssetsUnloading() const {
@@ -149,7 +150,7 @@ namespace axm {
     void AssetManager::HandlePendingLoads(u16& remainingTasks) {
         PROFILE_SCOPE();
 
-        auto bound = std::min(static_cast<size_t>(remainingTasks), p_InFlightLoads.size());
+        auto bound = std::min(static_cast<size_t>(remainingTasks), p_QueuedLoads.size());
 
         for (auto i = 0; i < bound; i++) {
             // get first load info

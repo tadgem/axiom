@@ -11,7 +11,7 @@ public:
     TestAssetFactory() : AssetFactory(AssetType::Binary) { }
 
     NO_DISCARD AssetLoadResult LoadAsset(const String& path) const override {
-        return AssetLoadResult { .m_Next = AXM_NEW(TestBinaryAsset, path, Utils::LoadBinaryFromPath(path)) };
+        return AssetLoadResult { .m_Next = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path))) };
     }
     void UnloadAsset(Asset* asset) const override {
         auto* b = dynamic_cast<TestBinaryAsset*>(asset);

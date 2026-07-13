@@ -21,10 +21,22 @@ public:
     ~TestAssetFactory() override = default;
 };
 
+class FailAssetFactory : public AssetFactory
+{
+public:
+    FailAssetFactory() : AssetFactory(AssetType::Binary) { }
+
+    NO_DISCARD AssetLoadResult LoadAsset(const String& path) const override {
+        return AssetLoadResult { .m_Next = AssetErrorMessage { .m_Message = "ERROR" } };
+    }
+    void UnloadAsset(Asset* asset) const override { }
+    void ProcessAssetTransient(AssetTransient* data) const override { }
+    ~FailAssetFactory() override = default;
+};
+
 TestResult AssetManager_CanProvideFactory(AppState* e) {
 
-
-    TestAssetFactory* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
+    const auto* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
     AXM_TEST_ASSERT(factory, "BinaryAsset asset factory not invoked!");
@@ -40,7 +52,7 @@ TestResult AssetManager_CanLoadAsset(AppState* e) {
         e->m_AssetManager.Update();
     }
 
-    auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
+    const auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
 
     AXM_TEST_ASSERT(binary->m_Data.size() == 16, "Binary Asset not expected size");
     AXM_TEST_ASSERT(binary->m_Data[0] == '0', "Expected first binary blob to be 0");
@@ -59,8 +71,8 @@ TestResult AssetManager_CanUnloadAsset(AppState* e) {
         e->m_AssetManager.Update();
     }
 
-    auto*       binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
-    AssetHandle handle = binary->m_Handle;
+    const auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
+    const auto  handle = binary->m_Handle;
 
     AXM_TEST_ASSERT(binary, "Binary Asset not valid");
 
@@ -84,14 +96,11 @@ TestResult AssetManager_CanProcessTransient(AppState* e) {
 
     AXM_TEST_ASSERT(e->m_AssetManager.AnyAssetsLoading(), "Texture load should have been enqueued");
 
-    int count = 0;
-
     while (e->m_AssetManager.AnyAssetsLoading()) {
         e->m_AssetManager.Update();
-        count++;
     }
 
-    TextureAsset* texture = e->m_AssetManager.GetAsset<TextureAsset>("test_resources/checkerboard.jpg");
+    const auto* texture = e->m_AssetManager.GetAsset<TextureAsset>("test_resources/checkerboard.jpg");
 
     AXM_TEST_ASSERT(texture, "Texture should be loaded after asset manager signals no more loading ops.")
     AXM_TEST_ASSERT(texture->m_Data.m_GPUTexture != nullptr, "a GPU Texture should have been allocated for this load");
@@ -113,7 +122,23 @@ TestResult AssetManager_NonExistantAssetNotEnqueued(AppState* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_Device);
     e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
 
-    AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(), "Texture load should not have been enqueued, file does not exist");
+    AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(),
+                    "Texture load should not have been enqueued, file does not exist");
+
+    return TestResult::Pass();
+}
+
+TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AppState* e) {
+    e->m_AssetManager.AddAssetFactory<AssetType::Binary, FailAssetFactory>();
+    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
+
+    while (e->m_AssetManager.AnyAssetsLoading()) {
+        e->m_AssetManager.Update();
+    }
+
+    const auto* asset = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
+
+    AXM_TEST_ASSERT(!asset, "Failed asset load should not mark asset as loaded");
 
     return TestResult::Pass();
 }
@@ -126,5 +151,5 @@ AXM_ADD_TEST(AssetManager_CanUnloadAsset)
 AXM_ADD_TEST(AssetManager_CanProcessTransient)
 AXM_ADD_TEST(AssetManager_NoFactoryForAssetType)
 AXM_ADD_TEST(AssetManager_NonExistantAssetNotEnqueued)
-
+AXM_ADD_TEST(AssetManager_FailedFactoryDoesNotLoadAsset)
 AXM_END_TESTS()

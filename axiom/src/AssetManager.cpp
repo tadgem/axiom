@@ -11,10 +11,9 @@ namespace axm {
             return { };
         }
 
-        if(!p_AssetFactories.contains(assetType))
-        {
-            AXM_LOG_ERROR("AssetManager : No factory provided for asset load with type {}", assetType);
-            return {};
+        if (!p_AssetFactories.contains(assetType)) {
+            AXM_LOG_ERROR("AssetManager : No factory provided for asset load with type {}", static_cast<u8>(assetType));
+            return { };
         }
 
         // remove working directory from path (if it is part of the provided path)
@@ -167,7 +166,9 @@ namespace axm {
             // p_PendingLoadTasks.emplace(handle, std::move(std::async(std::launch::async, fn, info.m_Path)));
             auto fn = [factory](const String& path) { return factory->LoadAsset(path); };
 
-            p_InFlightLoads.push_back({ .m_Task         = std::async(std::launch::async, fn, loadInfo.m_Path),
+            p_InFlightLoads.push_back({ .m_Path         = loadInfo.m_Path,
+                                        .m_AssetType    = loadInfo.m_AssetType,
+                                        .m_Task         = std::async(std::launch::async, fn, loadInfo.m_Path),
                                         .m_LoadCallback = p_QueuedLoads.front().m_OnLoadedCallback });
             // erase queued load
             p_QueuedLoads.erase(p_QueuedLoads.begin());
@@ -194,13 +195,21 @@ namespace axm {
                     // decrement in case we had a callback to process
                     remainingTasks--;
                 }
-                // otherwise add transient to list for processing
-                else {
+                // if transient, add to list for processing
+                else if (std::holds_alternative<AssetTransient*>(result.m_Next)) {
                     auto* transient = std::get<AssetTransient*>(result.m_Next);
 
                     p_InFlightTransients.push_back({ .m_Transient    = Unique<AssetTransient>(transient),
                                                      .m_LoadCallback = p_InFlightLoads.front().m_LoadCallback });
                 }
+                // error
+                else {
+                    const auto error = std::get<AssetErrorMessage>(result.m_Next);
+                    AXM_LOG_ERROR("AssetManager : Failed to load asset : {} : {}",
+                                  p_InFlightLoads.front().m_Path,
+                                  error.m_Message);
+                }
+
                 p_InFlightLoads.erase(p_InFlightLoads.begin());
                 remainingTasks--;
             }

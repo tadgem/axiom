@@ -27,11 +27,17 @@ namespace axm {
 
     enum class AssetState { NotLoaded, Loading, Loaded, Unloading };
 
+    struct AssetErrorMessage
+    {
+        String m_Message;
+    };
+
 
     struct AssetLoadResult
     {
-        Variant<Asset*, AssetTransient*> m_Next; // may be final asset or transient while factory processes N steps
-        Vector<AssetLoadInfo>            m_NewAssetTasks; // new assets to be loaded (e.g. model requests new tex)
+        Variant<Asset*, AssetTransient*, AssetErrorMessage>
+                              m_Next; // may be final asset or transient while factory processes N steps
+        Vector<AssetLoadInfo> m_NewAssetTasks; // new assets to be loaded (e.g. model requests new tex)
     };
 
     class AssetFactory
@@ -119,6 +125,8 @@ namespace axm {
 
         struct AsyncAssetData
         {
+            String                  m_Path;
+            AssetType               m_AssetType;
             Future<AssetLoadResult> m_Task;
             OnLoadedFn              m_LoadCallback;
         };

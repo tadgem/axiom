@@ -18,9 +18,8 @@ axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const String& path) con
     // SPECIFICALLY, we need to downcast a AssetTransient<T> to a AssetTransient*
     // so that the code that inspects on the variant (m_Next) does not fall apart.
 
-    transient->m_NumSteps     = 1;
-    transient->m_AssetDataPtr = dynamic_cast<Asset*>(textureAsset);
-    result.m_Next             = dynamic_cast<AssetTransient*>(transient);
+    transient->m_NumSteps = 1;
+    result.m_Next         = dynamic_cast<AssetTransient*>(transient);
     return result;
 }
 void axm::TextureAssetFactory::UnloadAsset(Asset* asset) const { }

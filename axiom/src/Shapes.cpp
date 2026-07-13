@@ -38,7 +38,7 @@ u32                      cube_indices[36] = { 0,  1,  2,  3,  4,  5,  6,  7,  8,
                                               18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 };
 
 axm::shapes::Description axm::shapes::GetCubeShape() {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     return { .m_VertexBuffer = &cube_pos_norm_uv_vertex_data[0],
              .m_BufferLength = 288,

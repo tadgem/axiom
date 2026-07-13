@@ -3,7 +3,7 @@
 
 namespace axm {
     str_hash HashString(const String& input) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         static auto hasher = std::hash<String>();
         return hasher(input);
     }

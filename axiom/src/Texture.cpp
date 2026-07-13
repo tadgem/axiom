@@ -7,7 +7,7 @@
 #include "stb_image.h"
 
 axm::Texture axm::textures::CreateTexture2D(rhi::IDevice* device, const void* data, rhi::Format format, u32 w, u32 h) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     rhi::TextureDesc textureDesc    = { };
     textureDesc.type                = rhi::TextureType::Texture2D;
@@ -45,7 +45,7 @@ axm::Texture axm::textures::CreateTexture2D(rhi::IDevice* device, const void* da
 axm::Texture        axm::Texture::BAD() { return { .m_GPUTexture = nullptr, .m_TextureView = nullptr }; }
 void                axm::CPUTextureData::Release() const { stbi_image_free(m_Data); }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     int   texWidth, texHeight, texChannels;
     auto* pixels = stbi_load_from_memory(static_cast<stbi_uc const*>(data),
@@ -58,7 +58,7 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size
     return { .m_Data = pixels, .m_Width = texWidth, .m_Height = texHeight, .m_NumChannels = texChannels };
 }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const char* path) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
     int   texWidth, texHeight, texChannels;
     auto* pixels = stbi_load(path, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
@@ -67,7 +67,7 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const char* path) 
 rhi::ComPtr<rhi::ISampler> axm::textures::CreateSampler(rhi::IDevice*              device,
                                                         rhi::TextureFilteringMode  filter,
                                                         rhi::TextureAddressingMode addressMode) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     using namespace rhi;
     SamplerDesc samplerDesc  = { };

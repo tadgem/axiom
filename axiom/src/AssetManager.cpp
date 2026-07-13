@@ -6,7 +6,7 @@ namespace axm {
     AssetHandle AssetLoadInfo::ToHandle() const { return { m_Path, m_AssetType }; }
 
     AssetHandle AssetManager::LoadAsset(const String& path, const AssetType& assetType, const OnLoadedFn& onLoaded) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         if (!Filesystem::exists(path.c_str())) {
             return { };
         }
@@ -45,7 +45,7 @@ namespace axm {
     }
 
     void AssetManager::UnloadAsset(const AssetHandle& handle) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         // Asset is not loaded
         if (!p_LoadedAssets.contains(handle)) {
             return;
@@ -63,7 +63,7 @@ namespace axm {
     }
 
     Asset* AssetManager::GetAsset(const AssetHandle& handle) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         if (p_LoadedAssets.find(handle) == p_LoadedAssets.end()) {
             return nullptr;
         }
@@ -72,7 +72,7 @@ namespace axm {
     }
 
     AssetState AssetManager::GetAssetLoadProgress(const AssetHandle& handle) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         for (auto& queued: p_QueuedLoads) {
             if (queued.ToHandle() == handle) {
                 return AssetState::Loading;
@@ -91,32 +91,32 @@ namespace axm {
     }
 
     bool AssetManager::AnyAssetsLoading() const {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         return !p_QueuedUnloads.empty() || !p_QueuedLoads.empty() || !p_InFlightLoads.empty()
                || !p_InFlightTransients.empty();
     }
 
     bool AssetManager::AnyAssetsUnloading() const {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         return !p_QueuedUnloads.empty();
     }
 
     void AssetManager::WaitAllAssets() {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         while (AnyAssetsLoading()) {
             Update();
         }
     }
 
     void AssetManager::WaitAllUnloads() {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         while (AnyAssetsUnloading()) {
             Update();
         }
     }
 
     void AssetManager::UnloadAllAssets() {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         Vector<AssetHandle> assetsRemaining { };
 
         for (auto& [handle, asset]: p_LoadedAssets) {
@@ -131,7 +131,7 @@ namespace axm {
     }
 
     void AssetManager::Update() {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         if (!AnyAssetsLoading()) {
             return;
         }
@@ -146,14 +146,14 @@ namespace axm {
     }
 
     void AssetManager::Shutdown() {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         WaitAllAssets();
         WaitAllUnloads();
         UnloadAllAssets();
     }
 
     void AssetManager::HandlePendingLoads(u16& remainingTasks) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
 
         auto bound = std::min(static_cast<size_t>(remainingTasks), p_QueuedLoads.size());
 
@@ -177,7 +177,7 @@ namespace axm {
     }
 
     void AssetManager::HandleAsyncTasks(u16& remainingTasks) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         auto bound = std::min(static_cast<size_t>(remainingTasks), p_InFlightLoads.size());
 
         for (auto i = 0; i < bound; i++) {
@@ -217,7 +217,7 @@ namespace axm {
     }
 
     void AssetManager::HandleTransients(u16& remainingTasks) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         auto bound = std::min(static_cast<size_t>(remainingTasks), p_InFlightTransients.size());
         for (auto i = 0; i < bound; i++) {
             // Process one step of the first of the in flight transients
@@ -237,7 +237,7 @@ namespace axm {
     }
 
     void AssetManager::HandleUnloads(u16& remainingTasks) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         auto bound = std::min(static_cast<size_t>(remainingTasks), p_QueuedUnloads.size());
 
         for (auto i = 0; i < bound; i++) {
@@ -252,7 +252,7 @@ namespace axm {
     }
 
     void AssetManager::TransitionAssetToLoaded(Asset* asset, OnLoadedFn loadCallback) {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
 
         if (asset == nullptr) {
             AXM_LOG_ERROR("TransitionAssetToLoaded : Asset is nullptr!");

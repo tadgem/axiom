@@ -8,7 +8,7 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
                                                                       const rhi::DepthStencilDesc& depthTarget,
                                                                       const Shader&                shader,
                                                                       rhi::IInputLayout*           inputLayout) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
 
     Vector<rhi::ColorTargetDesc> colorTargets;

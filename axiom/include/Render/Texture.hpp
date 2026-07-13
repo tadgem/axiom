@@ -5,17 +5,19 @@
 
 namespace axm {
 
-    enum class TextureMapType {
-        Unknown,
+    enum TextureMapType {
+        Unknown = -1,
         Diffuse,
         Normal,
         Specular,
         Metallic,
         Opacity,
+        Height,
         Displacement,
         Roughness,
         AO,
         Emissive,
+        Count
     };
 
     struct Texture

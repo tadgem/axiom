@@ -1,9 +1,12 @@
 #pragma once
 
-#include "Assets/Assets.hpp"
+#include "Assets/AssetManager.hpp"
 #include "Core/STL.hpp"
 #include "Render/Mesh.hpp"
 #include "Render/Texture.hpp"
+
+struct aiScene;
+
 namespace axm {
 
 
@@ -28,6 +31,25 @@ namespace axm {
         };
 
         Vector<Mesh>          m_Meshes;
-        Vector<MaterialEntry> m_TextureHandles;
+        Vector<MaterialEntry> m_Materials;
     };
+
+    using ModelAsset          = AssetT<Model, AssetType::Model>;
+    using ModelAssetTransient = AssetTransientT<Model, const aiScene*, AssetType::Model>;
+
+    class ModelAssetFactory : public AssetFactory
+    {
+    public:
+        rhi::IDevice* m_Device;
+
+        explicit ModelAssetFactory(rhi::IDevice* gpuDevice);
+
+        NO_DISCARD AssetLoadResult LoadAsset(const String& path) const override;
+        void                       UnloadAsset(Asset* asset) const override;
+        void                       ProcessAssetTransient(AssetTransient* data) const override;
+
+        static Vector<AssetHandle>
+        ProcessSceneMaterials(const String& directory, const aiScene* scene, ModelAsset* model);
+    };
+
 } // namespace axm

@@ -19,8 +19,10 @@ namespace axm {
 
         AssetHandle();
         AssetHandle(const String& p, const AssetType& type);
-
-        bool operator==(const AssetHandle& o) const {
+        AssetHandle(const str_hash& hash, const AssetType& type);
+        static AssetHandle BAD;
+        
+        bool               operator==(const AssetHandle& o) const {
             return m_AssetType == o.m_AssetType && m_PathHash == o.m_PathHash;
         }
 

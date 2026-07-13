@@ -4,7 +4,7 @@
 rhi::ComPtr<rhi::IBuffer>
 axm::buffer::CreateVertexBuffer(rhi::IDevice* device, u64 size, const void* data, const char* label) {
     using namespace rhi;
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     BufferDesc desc   = { };
     desc.size         = size;
@@ -23,7 +23,7 @@ axm::buffer::CreateVertexBuffer(rhi::IDevice* device, u64 size, const void* data
 rhi::ComPtr<rhi::IBuffer>
 axm::buffer::CreateIndexBuffer(rhi::IDevice* device, u64 size, const void* data, const char* label) {
     using namespace rhi;
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     BufferDesc desc   = { };
     desc.size         = size;

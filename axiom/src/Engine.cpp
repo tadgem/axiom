@@ -19,7 +19,7 @@
 #endif
 
 inline rhi::WindowHandle GetNativeWindowHandle(SDL_Window* window) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
 #if SLANG_WINDOWS_FAMILY
     HWND hwnd = (HWND) SDL_GetPointerProperty(
@@ -38,7 +38,7 @@ inline rhi::WindowHandle GetNativeWindowHandle(SDL_Window* window) {
 constexpr const char* UNKNOWN_MSG = "UNKNOWN";
 
 const char*           GetSlangRHIDebugMessageType(const rhi::DebugMessageType& messageType) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     constexpr const char* INFO_MSG  = "INFO";
     constexpr const char* WARN_MSG  = "WARN";
@@ -57,7 +57,7 @@ const char*           GetSlangRHIDebugMessageType(const rhi::DebugMessageType& m
 }
 
 const char* GetSlangRHIDebugMessageSource(const rhi::DebugMessageSource& messageType) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     constexpr const char* LAYER_MSG  = "LAYER";
     constexpr const char* DRIVER_MSG = "DRIVER";
@@ -82,7 +82,7 @@ public:
     SLANG_NO_THROW void SLANG_MCALL handleMessage(rhi::DebugMessageType   type,
                                                   rhi::DebugMessageSource source,
                                                   const char*             message) override {
-        PROFILE_SCOPE();
+        PROFILE_SCOPE()
         AXM_LOG("SlangRHI : {} : {} : {}",
                 GetSlangRHIDebugMessageType(type),
                 GetSlangRHIDebugMessageSource(source),
@@ -94,7 +94,7 @@ public:
 
 axm::AppState axm::engine::Init() {
     using namespace rhi;
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     SDL_SetMainReady();
 
@@ -225,7 +225,7 @@ axm::AppState axm::engine::Init() {
 }
 
 void axm::engine::Quit(const AppState& e) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     e.m_Queue->waitOnHost();
 
@@ -237,7 +237,7 @@ void axm::engine::Quit(const AppState& e) {
     SDL_Quit();
 }
 void axm::engine::PreFrame(AppState& e) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
     e.m_FrameTimer.Reset();
     SDL_Event event;
 
@@ -261,7 +261,7 @@ void axm::engine::PreFrame(AppState& e) {
 }
 
 void axm::engine::PostFrame(AppState& e) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     ImGui::Render();
     auto commandEncoder = e.m_Queue->createCommandEncoder();
@@ -279,7 +279,7 @@ void axm::engine::PostFrame(AppState& e) {
 
 rhi::IRenderPassEncoder*
 axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rhi::LoadOp loadOp) {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     rhi::RenderPassColorAttachment colorAttachment        = { };
     colorAttachment.view                                  = e.m_SwapchainColourImage->getDefaultView();
@@ -305,7 +305,7 @@ axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rh
 }
 
 axm::AppState axm::AppState::BAD() {
-    PROFILE_SCOPE();
+    PROFILE_SCOPE()
 
     return { .m_OK                   = false,
              .m_Running              = false,

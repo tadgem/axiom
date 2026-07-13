@@ -4,6 +4,20 @@
 #include "slang-rhi.h"
 
 namespace axm {
+
+    enum class TextureMapType {
+        Unknown,
+        Diffuse,
+        Normal,
+        Specular,
+        Metallic,
+        Opacity,
+        Displacement,
+        Roughness,
+        AO,
+        Emissive,
+    };
+
     struct Texture
     {
         rhi::ITexture*     m_GPUTexture;

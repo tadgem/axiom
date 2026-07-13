@@ -10,8 +10,24 @@ namespace axm {
     class Model
     {
     public:
-        Vector<Mesh>                  m_Meshes;
-        Vector<AssetHandle>           m_TextureHandles;
-        HashMap<AssetHandle, Texture> m_Textures;
+        struct MaterialEntry
+        {
+            struct Map
+            {
+                TextureMapType m_MapType;
+                AssetHandle    m_Handle;
+            };
+
+            Vector<Map> m_TextureMaps;
+        };
+
+        struct MeshEntry
+        {
+            Mesh m_Mesh;
+            u16  m_MaterialIndex;
+        };
+
+        Vector<Mesh>          m_Meshes;
+        Vector<MaterialEntry> m_TextureHandles;
     };
 } // namespace axm

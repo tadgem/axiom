@@ -51,7 +51,7 @@ add_subdirectory(axiom)
 # TODO : Allow tests and examples to be defined in subdirectories
 # issue with required DLLs not being copied to correct directory
 
-add_axiom_test(axiom-tests-core tests/CoreTests.cpp)
+add_axiom_test(axiom-tests-assets tests/AssetTests.cpp)
 
 add_axiom_example(axiom-example-basic examples/basic/main.cpp)
 add_axiom_example(axiom-example-deferred examples/deferred/main.cpp)

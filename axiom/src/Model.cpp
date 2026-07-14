@@ -88,8 +88,8 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
         return result;
     }
 
-    auto nextAssets = ProcessSceneMaterials(
-            "replace string in assets with a std::filesystem::path", transient->m_TransientData.m_Scene, modelAsset);
+    const auto dir         = String(path.parent_path().string()) + "/";
+    auto       nextAssets  = ProcessSceneMaterials(dir, transient->m_TransientData.m_Scene, modelAsset);
 
 
     transient->m_NumSteps  = transient->m_TransientData.m_Scene->mNumMeshes;

@@ -156,7 +156,13 @@ TestResult AssetManager_ModelAssetLoads(AppState* e) {
 
     const auto* asset = e->m_AssetManager.GetAsset<ModelAsset>(handle);
 
-    AXM_TEST_ASSERT(asset, "Asset should be loaded");
+    AXM_TEST_ASSERT(asset, "Model Asset should be loaded");
+
+    for (auto& material: asset->m_Data.m_Materials) {
+        for (auto map: material.m_TextureMaps) {
+            AXM_TEST_ASSERT(e->m_AssetManager.GetAsset(map.m_Handle), "All associated textures should also be loaded");
+        }
+    }
 
     return TestResult::Pass();
 }

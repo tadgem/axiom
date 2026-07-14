@@ -3,9 +3,10 @@
 #include "Core/Profile.hpp"
 
 namespace axm {
-    AssetHandle AssetLoadInfo::ToHandle() const { return { m_Path, m_AssetType }; }
+    AssetHandle AssetLoadInfo::ToHandle() const { return { String(m_Path.string()), m_AssetType }; }
 
-    AssetHandle AssetManager::LoadAsset(const String& path, const AssetType& assetType, const OnLoadedFn& onLoaded) {
+    AssetHandle
+    AssetManager::LoadAsset(const Filesystem::path& path, const AssetType& assetType, const OnLoadedFn& onLoaded) {
         PROFILE_SCOPE()
         if (!Filesystem::exists(path.c_str())) {
             return { };
@@ -18,8 +19,8 @@ namespace axm {
 
         // remove working directory from path (if it is part of the provided path)
         const String wd(Filesystem::current_path().string());
-        String       tmp_path = path;
-        if (path.find(wd) != std::string::npos) {
+        String       tmp_path = String(path.string());
+        if (tmp_path.find(wd) != std::string::npos) {
             tmp_path.erase(tmp_path.find(wd), wd.length());
 
             for (int i = 0; i < 2; i++) {
@@ -164,7 +165,7 @@ namespace axm {
             auto const* factory = p_AssetFactories[loadInfo.m_AssetType].get();
             // dispatch initial async load task
             // p_PendingLoadTasks.emplace(handle, std::move(std::async(std::launch::async, fn, info.m_Path)));
-            auto fn = [factory](const String& path) { return factory->LoadAsset(path); };
+            auto fn = [factory](const Filesystem::path& path) { return factory->LoadAsset(path); };
 
             p_InFlightLoads.push_back({ .m_Path         = loadInfo.m_Path,
                                         .m_AssetType    = loadInfo.m_AssetType,
@@ -206,7 +207,7 @@ namespace axm {
                 else {
                     const auto error = std::get<AssetErrorMessage>(result.m_Next);
                     AXM_LOG_ERROR("AssetManager : Failed to load asset : {} : {}",
-                                  p_InFlightLoads.front().m_Path,
+                                  p_InFlightLoads.front().m_Path.string().c_str(),
                                   error.m_Message);
                 }
 

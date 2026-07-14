@@ -1,11 +1,11 @@
 
-#include "../include/Assets/Assets.hpp"
+#include "Assets/Assets.hpp"
 
 
 namespace axm {
 
     AssetHandle AssetHandle::BAD = AssetHandle(0, AssetType::Unknown);
-    
+
     SerializableAssetHandle::SerializableAssetHandle(const String& p, const AssetType& type) :
         m_Path(p), m_Handle(p, type) { }
 
@@ -15,6 +15,7 @@ namespace axm {
 
     AssetHandle::AssetHandle(const str_hash& hash, const AssetType& type) : m_PathHash(hash), m_AssetType(type) { }
 
-    Asset::Asset(const String& path, const AssetType& type) : m_Path(path), m_Handle(path, type) { }
+    Asset::Asset(const Filesystem::path& path, const AssetType& type) :
+        m_Path(path), m_Handle(String(path.string()), type) { }
 
 } // namespace axm

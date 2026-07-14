@@ -6,12 +6,12 @@ void OnProcessTextureAssetTransient(axm::AssetTransient* data) { using namespace
 axm::TextureAssetFactory::TextureAssetFactory(rhi::IDevice* gpuDevice) :
     AssetFactory(AssetType::Texture), m_Device(gpuDevice) { }
 
-axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const String& path) const {
+axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path& path) const {
     auto            cpuTexture   = textures::LoadCPUTextureDataFromFile(path.c_str());
 
     AssetLoadResult result       = { };
 
-    auto*           textureAsset = AXM_NEW(TextureAsset, path, { });
+    auto*           textureAsset = AXM_NEW(TextureAsset, String(path.string()), { });
     auto*           transient    = AXM_NEW(TextureAssetTransient, textureAsset, std::move(cpuTexture));
 
     // TODO: Can we enforce this as a compile error?

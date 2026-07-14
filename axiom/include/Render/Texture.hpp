@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Core/Prim.hpp"
+#include "Core/STL.hpp"
 #include "slang-rhi.h"
 
 namespace axm {
@@ -39,7 +39,7 @@ namespace axm {
     namespace textures {
 
         CPUTextureData LoadCPUTextureDataFromMemory(void* data, size_t length);
-        CPUTextureData LoadCPUTextureDataFromFile(const char* path);
+        CPUTextureData LoadCPUTextureDataFromFile(const Filesystem::path& path);
 
         rhi::ComPtr<rhi::ISampler>
         CreateSampler(rhi::IDevice* device, rhi::TextureFilteringMode filter, rhi::TextureAddressingMode addressMode);

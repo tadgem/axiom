@@ -21,7 +21,7 @@ rhi::ITexture* axm::Utils::CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h
     device->createTexture(depthDesc, nullptr, &tex);
     return tex;
 }
-axm::Vector<u8> axm::Utils::LoadBinaryFromPath(const String& path) {
+axm::Vector<u8> axm::Utils::LoadBinaryFromPath(const Filesystem::path& path) {
     PROFILE_SCOPE()
     std::ifstream file { path.c_str(), std::ios::binary | std::ios::ate };
     auto          fileSize = file.tellg();

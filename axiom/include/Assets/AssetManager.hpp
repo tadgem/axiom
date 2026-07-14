@@ -13,14 +13,14 @@ namespace axm {
 
     struct AssetLoadInfo
     {
-        String     m_Path;
-        AssetType  m_AssetType;
-        OnLoadedFn m_OnLoadedCallback;
+        Filesystem::path m_Path;
+        AssetType        m_AssetType;
+        OnLoadedFn       m_OnLoadedCallback = nullptr;
 
 
         bool operator==(const AssetLoadInfo& o) const { return m_Path == o.m_Path && m_AssetType == o.m_AssetType; }
         AssetLoadInfo&         operator=(const AssetLoadInfo& o) = default;
-        bool                   operator<(const AssetLoadInfo& o) const { return m_Path.size() < o.m_Path.size(); }
+        bool                   operator<(const AssetLoadInfo& o) const { return m_Path < o.m_Path; }
 
         NO_DISCARD AssetHandle ToHandle() const;
     };
@@ -47,8 +47,8 @@ namespace axm {
 
         AssetFactory(AssetType assetType) : m_AssetType(assetType) { };
 
-        NO_DISCARD virtual AssetLoadResult LoadAsset(const String& path) const = 0;
-        virtual void                       UnloadAsset(Asset* asset) const     = 0;
+        NO_DISCARD virtual AssetLoadResult LoadAsset(const Filesystem::path& path) const = 0;
+        virtual void                       UnloadAsset(Asset* asset) const               = 0;
         virtual void                       ProcessAssetTransient(AssetTransient* data) const { };
 
         virtual ~AssetFactory() = default;
@@ -72,9 +72,10 @@ namespace axm {
             return static_cast<T*>(p_AssetFactories[AssetTypeEnum].get());
         }
 
-        AssetHandle LoadAsset(const String& path, const AssetType& assetType, const OnLoadedFn& onLoaded = nullptr);
-        void        UnloadAsset(const AssetHandle& handle);
-        Asset*      GetAsset(const AssetHandle& handle);
+        AssetHandle
+             LoadAsset(const Filesystem::path& path, const AssetType& assetType, const OnLoadedFn& onLoaded = nullptr);
+        void UnloadAsset(const AssetHandle& handle);
+        Asset* GetAsset(const AssetHandle& handle);
 
         template <typename AssetType>
         AssetType* GetAsset(const AssetHandle& handle) {
@@ -125,7 +126,7 @@ namespace axm {
 
         struct AsyncAssetData
         {
-            String                  m_Path;
+            Filesystem::path        m_Path;
             AssetType               m_AssetType;
             Future<AssetLoadResult> m_Task;
             OnLoadedFn              m_LoadCallback;

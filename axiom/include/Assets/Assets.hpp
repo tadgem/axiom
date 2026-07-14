@@ -21,7 +21,7 @@ namespace axm {
         AssetHandle(const String& p, const AssetType& type);
         AssetHandle(const str_hash& hash, const AssetType& type);
         static AssetHandle BAD;
-        
+
         bool               operator==(const AssetHandle& o) const {
             return m_AssetType == o.m_AssetType && m_PathHash == o.m_PathHash;
         }
@@ -44,11 +44,11 @@ namespace axm {
     class Asset
     {
     public:
-        Asset(const String& path, const AssetType& type);
+        Asset(const Filesystem::path& path, const AssetType& type);
         virtual ~Asset() = default;
 
-        const String      m_Path;
-        const AssetHandle m_Handle;
+        const Filesystem::path m_Path;
+        const AssetHandle      m_Handle;
     };
 
     template <typename AssetDataType, AssetType AssetTypeEnum>
@@ -59,7 +59,8 @@ namespace axm {
 
         static constexpr AssetType kAssetEnumType = AssetTypeEnum;
 
-        AssetT(const String& path, AssetDataType&& data) : Asset(path, AssetTypeEnum), m_Data(std::move(data)) { };
+        AssetT(const Filesystem::path& path, AssetDataType&& data) :
+            Asset(path, AssetTypeEnum), m_Data(std::move(data)) { };
 
         ~AssetT() override = default;
     };
@@ -91,6 +92,8 @@ namespace axm {
 
         AssetTransientT(Asset* data, IntermediateDataType&& inter) :
             AssetTransient(data, AssetTypeEnum), m_TransientData(std::move(inter)) { }
+
+        AssetTransientT(Asset* data) : AssetTransient(data, AssetTypeEnum), m_TransientData(IntermediateDataType()) { }
 
         AssetT<AssetDataType, AssetTypeEnum>* GetConcreteAsset() {
             return static_cast<AssetT<AssetDataType, AssetTypeEnum>*>(m_AssetDataPtr);

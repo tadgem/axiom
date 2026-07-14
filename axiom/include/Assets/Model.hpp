@@ -4,6 +4,7 @@
 #include "Core/STL.hpp"
 #include "Render/Mesh.hpp"
 #include "Render/Texture.hpp"
+#include "assimp/Importer.hpp"
 
 struct aiScene;
 
@@ -34,8 +35,14 @@ namespace axm {
         Vector<MaterialEntry> m_Materials;
     };
 
+    struct ModelTransientData
+    {
+        Assimp::Importer m_Importer;
+        const aiScene*   m_Scene;
+    };
+
     using ModelAsset          = AssetT<Model, AssetType::Model>;
-    using ModelAssetTransient = AssetTransientT<Model, const aiScene*, AssetType::Model>;
+    using ModelAssetTransient = AssetTransientT<Model, ModelTransientData, AssetType::Model>;
 
     class ModelAssetFactory : public AssetFactory
     {
@@ -44,11 +51,11 @@ namespace axm {
 
         explicit ModelAssetFactory(rhi::IDevice* gpuDevice);
 
-        NO_DISCARD AssetLoadResult LoadAsset(const String& path) const override;
+        NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
         void                       UnloadAsset(Asset* asset) const override;
         void                       ProcessAssetTransient(AssetTransient* data) const override;
 
-        static Vector<AssetHandle>
+        static Vector<AssetLoadInfo>
         ProcessSceneMaterials(const String& directory, const aiScene* scene, ModelAsset* model);
     };
 

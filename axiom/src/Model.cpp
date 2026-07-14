@@ -1,7 +1,6 @@
 #include "Assets/Model.hpp"
-
 #include "Core/Profile.hpp"
-#include "assimp/Importer.hpp"
+#include "Render/Buffer.hpp"
 #include "assimp/cimport.h"
 #include "assimp/mesh.h"
 #include "assimp/postprocess.h"
@@ -35,7 +34,6 @@ static axm::TextureMapType GetTextureTypeFromAssimp(const aiTextureType& t) {
     }
 }
 
-
 static aiTextureType GetAssimpTextureType(const axm::TextureMapType& t) {
     switch (t) {
         case axm::TextureMapType::Diffuse:
@@ -63,88 +61,133 @@ static aiTextureType GetAssimpTextureType(const axm::TextureMapType& t) {
     }
 }
 
-
 axm::ModelAssetFactory::ModelAssetFactory(rhi::IDevice* gpuDevice) :
     AssetFactory(AssetType::Model), m_Device(gpuDevice) { }
 
-axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const String& path) const {
-    Assimp::Importer      importer;
+axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& path) const {
+    PROFILE_SCOPE()
 
-    static constexpr auto flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes
-                                  | aiProcess_GenSmoothNormals | aiProcess_OptimizeGraph | aiProcess_FixInfacingNormals
-                                  | aiProcess_FindInvalidData | aiProcess_GenBoundingBoxes;
+    static constexpr auto IMPORT_FLAGS = aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes
+                                         | aiProcess_GenSmoothNormals | aiProcess_OptimizeGraph
+                                         | aiProcess_FixInfacingNormals | aiProcess_FindInvalidData
+                                         | aiProcess_GenBoundingBoxes;
 
 
-    const auto*     scene  = importer.ReadFile(path.c_str(), flags);
+    AssetLoadResult result     = { };
 
-    AssetLoadResult result = { };
 
-    if (!scene) {
-        result.m_Next = AssetErrorMessage { .m_Message = "ModelAssetFactory : failed to open file at " + path };
+    auto*           modelAsset = AXM_NEW(ModelAsset, String(path.string()), { });
+    auto*           transient  = AXM_NEW(ModelAssetTransient, modelAsset);
+    transient->m_TransientData.m_Scene
+            = transient->m_TransientData.m_Importer.ReadFile(path.string().c_str(), IMPORT_FLAGS);
+
+
+    if (!transient->m_TransientData.m_Scene) {
+        result.m_Next = AssetErrorMessage { .m_Message
+                                            = "ModelAssetFactory : failed to open file at " + String(path.string()) };
         return result;
     }
 
-    auto* modelAsset = AXM_NEW(ModelAsset, path, { });
+    auto nextAssets = ProcessSceneMaterials(
+            "replace string in assets with a std::filesystem::path", transient->m_TransientData.m_Scene, modelAsset);
 
-    auto nextAssets = ProcessSceneMaterials("replace string in assets with a std::filesystem::path", scene, modelAsset);
-    
-    auto* transient = AXM_NEW(ModelAssetTransient, modelAsset, std::move(scene));
 
-    transient->m_NumSteps = scene->mNumMeshes;
-    result.m_Next         = dynamic_cast<AssetTransient*>(transient);
+    transient->m_NumSteps  = transient->m_TransientData.m_Scene->mNumMeshes;
+    result.m_Next          = dynamic_cast<AssetTransient*>(transient);
+    result.m_NewAssetTasks = std::move(nextAssets);
     return result;
 }
-void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const { }
+
+void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const { PROFILE_SCOPE() }
+
 void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
-    AssetFactory::ProcessAssetTransient(data);
-}
-
-axm::Model::MaterialEntry::Map GetMaterialTexture(const axm::String&  directory,
-                                                  aiMaterial*         material,
-                                                  aiTextureType       assimpTextureType,
-                                                  axm::TextureMapType textureType) {
     PROFILE_SCOPE()
-    using namespace axm;
-    uint32_t tex_count = aiGetMaterialTextureCount(material, assimpTextureType);
-    if (tex_count > 0) {
-        aiString resultPath;
-        aiGetMaterialTexture(material, assimpTextureType, 0, &resultPath);
-        const String      final_path = directory + String(resultPath.C_Str());
+    auto*       transient  = dynamic_cast<ModelAssetTransient*>(data);
+    ModelAsset* model      = transient->GetConcreteAsset();
+    auto*       mesh       = transient->m_TransientData.m_Scene->mMeshes[transient->m_CurrentStep++];
 
-        const AssetHandle h(final_path, AssetType::Texture);
+    Vector<f32> vertexData = { };
+    for (auto i = 0; i < mesh->mNumVertices; i++) {
+        // positions
+        vertexData.push_back(mesh->mVertices[i].x);
+        vertexData.push_back(mesh->mVertices[i].y);
+        vertexData.push_back(mesh->mVertices[i].z);
 
-        return { .m_MapType = textureType, .m_Handle = h };
+        // normals
+        if (mesh->HasNormals()) {
+            vertexData.push_back(mesh->mNormals[i].x);
+            vertexData.push_back(mesh->mNormals[i].y);
+            vertexData.push_back(mesh->mNormals[i].z);
+        }
+
+        // todo: support additional tex coords
+        if (mesh->HasTextureCoords(0)) {
+            vertexData.push_back(mesh->mTextureCoords[0][i].x);
+            vertexData.push_back(mesh->mTextureCoords[0][i].y);
+        }
     }
 
-    return { .m_MapType = TextureMapType::Unknown, .m_Handle = AssetHandle::BAD };
+    Vector<u32> indexData = { };
+    for (auto i = 0; i < mesh->mNumFaces; i++) {
+        indexData.push_back(mesh->mFaces[i].mIndices[0]);
+        indexData.push_back(mesh->mFaces[i].mIndices[1]);
+        indexData.push_back(mesh->mFaces[i].mIndices[2]);
+    }
+
+    model->m_Data.m_Meshes.push_back(meshes::CreateMeshFromData(m_Device,
+                                                                vertexData.data(),
+                                                                vertexData.size() * sizeof(f32),
+                                                                indexData.data(),
+                                                                indexData.size() * sizeof(u32),
+                                                                vertex::PosNormalUV::GetInputLayout(),
+                                                                mesh->mName.C_Str()));
 }
 
-axm::Vector<axm::AssetHandle>
+axm::Pair<axm::Model::MaterialEntry::Map, axm::String> GetMaterialTexture(const axm::String&         directory,
+                                                                          const aiMaterial*          material,
+                                                                          const aiTextureType&       assimpTextureType,
+                                                                          const axm::TextureMapType& textureType) {
+    PROFILE_SCOPE()
+    using namespace axm;
+    const auto textureCount = aiGetMaterialTextureCount(material, assimpTextureType);
+    if (textureCount > 0) {
+        aiString resultPath;
+        aiGetMaterialTexture(material, assimpTextureType, 0, &resultPath);
+        const String      finalPath = directory + String(resultPath.C_Str());
+
+        const AssetHandle h(finalPath, AssetType::Texture);
+
+        return { { .m_MapType = textureType, .m_Handle = h }, finalPath };
+    }
+
+    return { { .m_MapType = TextureMapType::Unknown, .m_Handle = AssetHandle::BAD }, "" };
+}
+
+axm::Vector<axm::AssetLoadInfo>
 axm::ModelAssetFactory::ProcessSceneMaterials(const String& directory, const aiScene* scene, ModelAsset* model) {
     // get all materials here
     PROFILE_SCOPE();
-    Vector<AssetHandle> texturesToLoad = { };
+    Vector<AssetLoadInfo> texturesToLoad = { };
 
     for (auto i = 0; i < scene->mNumMaterials; i++) {
-        auto*                material = scene->mMaterials[i];
+        const auto*          material = scene->mMaterials[i];
 
         Model::MaterialEntry entry    = { };
 
         for (auto j = 0; j < TextureMapType::Count; j++) {
-            auto mapType = static_cast<TextureMapType>(j);
-            auto map     = GetMaterialTexture(directory, material, GetAssimpTextureType(mapType), mapType);
+            auto mapType            = static_cast<TextureMapType>(j);
+            const auto& [map, path] = GetMaterialTexture(directory, material, GetAssimpTextureType(mapType), mapType);
+
             if (map.m_Handle != AssetHandle::BAD) {
                 entry.m_TextureMaps.push_back(std::move(map));
-            }
-            if (std::ranges::find(texturesToLoad.begin(), texturesToLoad.end(), map.m_Handle) == texturesToLoad.end()) {
-                texturesToLoad.push_back(map.m_Handle);
+                const auto loadInfo = AssetLoadInfo { .m_Path = path, .m_AssetType = AssetType::Texture };
+                if (std::ranges::find(texturesToLoad.begin(), texturesToLoad.end(), loadInfo) == texturesToLoad.end()) {
+                    texturesToLoad.push_back(loadInfo);
+                }
             }
         }
-
         model->m_Data.m_Materials.push_back(std::move(entry));
     }
 
     return texturesToLoad;
-
-    // get all new textures to load
 }

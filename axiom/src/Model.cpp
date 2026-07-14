@@ -86,10 +86,9 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const String& path) const
 
     auto* modelAsset = AXM_NEW(ModelAsset, path, { });
 
-    ProcessSceneMaterials("replace string in assets with a std::filesystem::path", scene, modelAsset);
-
-
-    auto* transient       = AXM_NEW(ModelAssetTransient, modelAsset, std::move(scene));
+    auto nextAssets = ProcessSceneMaterials("replace string in assets with a std::filesystem::path", scene, modelAsset);
+    
+    auto* transient = AXM_NEW(ModelAssetTransient, modelAsset, std::move(scene));
 
     transient->m_NumSteps = scene->mNumMeshes;
     result.m_Next         = dynamic_cast<AssetTransient*>(transient);
@@ -131,8 +130,8 @@ axm::ModelAssetFactory::ProcessSceneMaterials(const String& directory, const aiS
 
         Model::MaterialEntry entry    = { };
 
-        for (int i = 0; i < TextureMapType::Count; i++) {
-            auto mapType = static_cast<TextureMapType>(i);
+        for (auto j = 0; j < TextureMapType::Count; j++) {
+            auto mapType = static_cast<TextureMapType>(j);
             auto map     = GetMaterialTexture(directory, material, GetAssimpTextureType(mapType), mapType);
             if (map.m_Handle != AssetHandle::BAD) {
                 entry.m_TextureMaps.push_back(std::move(map));
@@ -145,7 +144,7 @@ axm::ModelAssetFactory::ProcessSceneMaterials(const String& directory, const aiS
         model->m_Data.m_Materials.push_back(std::move(entry));
     }
 
-    return { };
+    return texturesToLoad;
 
     // get all new textures to load
 }

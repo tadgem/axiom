@@ -59,9 +59,10 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size
 }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::path& path) {
     PROFILE_SCOPE()
+    auto  newPath = path.u8string();
     int   texWidth, texHeight, texChannels;
     auto* pixels = stbi_load(
-            reinterpret_cast<const char*>(path.c_str()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+            reinterpret_cast<const char*>(newPath.c_str()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
     return { .m_Data = pixels, .m_Width = texWidth, .m_Height = texHeight, .m_NumChannels = texChannels };
 }

@@ -154,8 +154,6 @@ TestResult AssetManager_ModelAssetLoads(AppState* e) {
     while (e->m_AssetManager.AnyAssetsLoading()) {
         NAMED_SCOPE(AssetTickLoadingModel)
         e->m_AssetManager.Update();
-
-        AXM_LOG_INFO("Tick took : {} ms", AssetTickLoadingModel_timer.m_Timer.ElapsedMillisecondsF());
     }
 
     const auto* asset = e->m_AssetManager.GetAsset<ModelAsset>(handle);

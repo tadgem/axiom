@@ -238,6 +238,7 @@ void axm::engine::Quit(const AppState& e) {
 }
 void axm::engine::PreFrame(AppState& e) {
     PROFILE_SCOPE()
+    e.m_AssetManager.Update();
     e.m_FrameTimer.Reset();
     SDL_Event event;
 

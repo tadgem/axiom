@@ -28,10 +28,10 @@ namespace axm {
         struct MeshEntry
         {
             Mesh m_Mesh;
-            u16  m_MaterialIndex;
+            u32  m_MaterialIndex;
         };
 
-        Vector<Mesh>          m_Meshes;
+        Vector<MeshEntry>     m_Meshes;
         Vector<MaterialEntry> m_Materials;
     };
 

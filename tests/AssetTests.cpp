@@ -1,5 +1,6 @@
 #include "Assets/Model.hpp"
 #include "AxiomTestFramework.hpp"
+#include "Core/Profile.hpp"
 
 using namespace axm;
 
@@ -151,7 +152,10 @@ TestResult AssetManager_ModelAssetLoads(AppState* e) {
     const auto handle = e->m_AssetManager.LoadAsset("test_resources/sponza_low/Sponza.gltf", AssetType::Model);
 
     while (e->m_AssetManager.AnyAssetsLoading()) {
+        NAMED_SCOPE(AssetTickLoadingModel)
         e->m_AssetManager.Update();
+
+        AXM_LOG_INFO("Tick took : {} ms", AssetTickLoadingModel_timer.m_Timer.ElapsedMillisecondsF());
     }
 
     const auto* asset = e->m_AssetManager.GetAsset<ModelAsset>(handle);

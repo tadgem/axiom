@@ -72,5 +72,10 @@ namespace axm {
 
     namespace Filesystem = std::filesystem;
 
+    using Path           = Filesystem::path;
+
+
     str_hash HashString(const String& input);
+
+    str_hash HashPath(const Filesystem::path& path);
 } // namespace axm

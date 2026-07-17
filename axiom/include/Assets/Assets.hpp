@@ -18,6 +18,7 @@ namespace axm {
         str_hash  m_PathHash;
 
         AssetHandle();
+        AssetHandle(const Filesystem::path& path, const AssetType& type);
         AssetHandle(const String& p, const AssetType& type);
         AssetHandle(const str_hash& hash, const AssetType& type);
         static AssetHandle BAD;

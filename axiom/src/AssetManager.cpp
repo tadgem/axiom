@@ -18,21 +18,23 @@ namespace axm {
         }
 
         // remove working directory from path (if it is part of the provided path)
-        const String wd(Filesystem::current_path().string());
-        String       tmp_path = String(path.string());
-        if (tmp_path.find(wd) != std::string::npos) {
-            tmp_path.erase(tmp_path.find(wd), wd.length());
+        // const String wd(Filesystem::current_path().string());
+        // String       tmp_path = String(path.string());
+        // if (tmp_path.find(wd) != String::npos) {
+        //     tmp_path.erase(tmp_path.find(wd), wd.length());
+        //
+        //     for (int i = 0; i < 2; i++) {
+        //         if (tmp_path[0] != '\\' && tmp_path[0] != '/') {
+        //             break;
+        //         }
+        //         tmp_path.erase(0, 1);
+        //     }
+        // }
 
-            for (int i = 0; i < 2; i++) {
-                if (tmp_path[0] != '\\' && tmp_path[0] != '/') {
-                    break;
-                }
-                tmp_path.erase(0, 1);
-            }
-        }
-
-        AssetHandle   handle(tmp_path, assetType);
-        AssetLoadInfo loadInfo { .m_Path = tmp_path, .m_AssetType = assetType, .m_OnLoadedCallback = onLoaded };
+        AssetHandle   handle(path, assetType);
+        AssetLoadInfo loadInfo { .m_Path             = String(path.string()),
+                                 .m_AssetType        = assetType,
+                                 .m_OnLoadedCallback = onLoaded };
 
         for (auto& queued_load: p_QueuedLoads) {
             if (loadInfo == queued_load) {
@@ -207,7 +209,7 @@ namespace axm {
                 else {
                     const auto error = std::get<AssetErrorMessage>(result.m_Next);
                     AXM_LOG_ERROR("AssetManager : Failed to load asset : {} : {}",
-                                  p_InFlightLoads.front().m_Path.string().c_str(),
+                                  p_InFlightLoads.front().m_Path.string(),
                                   error.m_Message);
                 }
 

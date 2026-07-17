@@ -41,3 +41,5 @@ namespace axm {
 #else
 #define PROFILE_SCOPE() axm::profiler::ScopedTimer __func__timer = axm::profiler::ScopedTimer(__func__);
 #endif
+
+#define NAMED_SCOPE(name) axm::profiler::ScopedTimer name##_timer = axm::profiler::ScopedTimer(#name);

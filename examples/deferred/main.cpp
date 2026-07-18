@@ -49,7 +49,7 @@ static glm::mat4 GetGlmModel(const glm::vec3& pos, const glm::vec3& euler, const
 static glm::mat4 GetGlmMVP(const glm::vec3& pos, const glm::vec3& euler, const glm::vec3& scale) {
     const auto model = GetGlmModel(pos, euler, scale);
     const auto view  = glm::translate(glm::mat4(1.0f), -glm::vec3(0.01f));
-    const auto proj  = glm::perspectiveRH_ZO(glm::radians(60.0f), 1280.0f / 720.0f, 0.1f, 500.0f);
+    const auto proj  = glm::perspectiveRH_ZO(glm::radians(60.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     return proj * view * model;
 }
 

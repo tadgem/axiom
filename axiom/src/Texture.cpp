@@ -14,13 +14,16 @@ axm::Texture axm::textures::CreateTexture2D(rhi::IDevice* device,
                                             const char*   label) {
     PROFILE_SCOPE()
 
+    uint32_t mips                = 1;
+    mips                         = static_cast<uint32_t>(std::floor(std::log2(std::max(w, h)))) + 1;
+
     rhi::TextureDesc textureDesc = { };
     textureDesc.type             = rhi::TextureType::Texture2D;
     textureDesc.size.width       = w;
     textureDesc.size.height      = h;
     textureDesc.size.depth       = 1;
     textureDesc.arrayLength      = 1;
-    textureDesc.mipCount         = 1;
+    textureDesc.mipCount         = mips;
     textureDesc.format           = format;
     textureDesc.usage            = rhi::TextureUsage::ShaderResource;
     textureDesc.defaultState     = rhi::ResourceState::ShaderResource;
@@ -28,13 +31,24 @@ axm::Texture axm::textures::CreateTexture2D(rhi::IDevice* device,
 
     // auto                 formatInfo = rhi::getRHI()->getFormatInfo(format);
 
-    rhi::SubresourceData initData = { };
-    initData.data                 = data;
-    initData.rowPitch             = w * 4;
+    Vector<rhi::SubresourceData> initDatas = { };
 
-    Texture tex                   = { };
+    rhi::SubresourceData         initData  = { };
+    initData.data                          = data;
+    initData.rowPitch                      = w * 4;
+    initDatas.push_back(initData);
+    for (auto i = 1; i <= mips; i++) {
+        auto                 mipWidth = w / i;
+        rhi::SubresourceData mipData  = { };
+        mipData.data                  = data;
+        mipData.rowPitch              = mipWidth * 4;
+        initDatas.push_back(mipData);
+    }
 
-    if (SLANG_FAILED(device->createTexture(textureDesc, &initData, &tex.m_GPUTexture))) {
+
+    Texture tex = { };
+
+    if (SLANG_FAILED(device->createTexture(textureDesc, initDatas.data(), &tex.m_GPUTexture))) {
         AXM_LOG("Failed to create texture.");
         return Texture::BAD();
     }
@@ -53,6 +67,7 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size
     PROFILE_SCOPE()
     // stbi_set_flip_vertically_on_load(true);
     int   texWidth, texHeight, texChannels;
+
     auto* pixels = stbi_load_from_memory(static_cast<stbi_uc const*>(data),
                                          static_cast<int>(length),
                                          &texWidth,

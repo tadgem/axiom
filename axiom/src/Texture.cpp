@@ -51,7 +51,7 @@ axm::Texture        axm::Texture::BAD() { return { .m_GPUTexture = nullptr, .m_T
 void                axm::CPUTextureData::Release() const { stbi_image_free(m_Data); }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length) {
     PROFILE_SCOPE()
-
+    // stbi_set_flip_vertically_on_load(true);
     int   texWidth, texHeight, texChannels;
     auto* pixels = stbi_load_from_memory(static_cast<stbi_uc const*>(data),
                                          static_cast<int>(length),

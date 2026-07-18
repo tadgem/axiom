@@ -38,6 +38,7 @@ void axm::meshes::DrawMesh(const Viewport& viewPort, const Mesh& mesh, rhi::IRen
     renderState.vertexBufferCount       = 1;
     renderState.indexBuffer.buffer      = mesh.m_IndexBuffer;
     renderState.indexFormat             = rhi::IndexFormat::Uint32;
+
     renderPassEncoder->setRenderState(renderState);
 
     rhi::DrawArguments drawArgs = { };

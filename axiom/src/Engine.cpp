@@ -121,14 +121,15 @@ axm::AppState axm::engine::Init() {
 
     for (auto type: deviceTypes) {
         if (getRHI()->isDeviceTypeSupported(type)) {
-            DeviceDesc deviceDesc              = { };
-            deviceDesc.deviceType              = type;
-            deviceDesc.debugCallback           = debugCallback.get();
-            deviceDesc.enableValidation        = true;
+            DeviceDesc deviceDesc                    = { };
+            deviceDesc.deviceType                    = type;
+            deviceDesc.debugCallback                 = debugCallback.get();
+            deviceDesc.enableValidation              = true;
 
-            Array<Feature, 2> requiredFeatures = { Feature::Surface, Feature::Rasterization };
-            deviceDesc.requiredFeatureCount    = static_cast<uint32_t>(requiredFeatures.size());
-            deviceDesc.requiredFeatures        = requiredFeatures.data();
+            Array<Feature, 2> requiredFeatures       = { Feature::Surface, Feature::Rasterization };
+            deviceDesc.requiredFeatureCount          = static_cast<uint32_t>(requiredFeatures.size());
+            deviceDesc.requiredFeatures              = requiredFeatures.data();
+            deviceDesc.slang.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
 
             if (SLANG_SUCCEEDED(getRHI()->createDevice(deviceDesc, &device))) {
                 AXM_LOG("Selected Rendering Backend : {}", getRHI()->getDeviceTypeName(type));

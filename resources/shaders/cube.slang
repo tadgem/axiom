@@ -1,3 +1,5 @@
+#pragma pack_matrix(column_major)
+
 struct VertexInput
 {
     float3 position : POSITION;

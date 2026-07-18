@@ -3,12 +3,18 @@
 #include "Assets/TextureAsset.hpp"
 #include "Core/Profile.hpp"
 #include "axiom.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/matrix_decompose.hpp"
+
 
 AXM_OVERRIDE_GLOBAL_NEW(false)
 
 using namespace axm;
 
-static mat4                       g_MVP;
+static glm::mat4                  g_MVP;
 static rhi::ComPtr<rhi::ISampler> g_Sampler;
 
 static mat4                       GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
@@ -17,6 +23,34 @@ static mat4                       GetMVP(const vec3& pos, const vec3& euler, con
     const auto proj      = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
     const auto modelView = maths::Multiply(view, model);
     return maths::Multiply(proj, modelView);
+}
+
+glm::quat GetQuatFromEuler(glm::vec3 euler) {
+    glm::vec3 eulerRadians = glm::vec3(glm::radians(euler.x), glm::radians(euler.y), glm::radians(euler.z));
+    glm::quat xRotation    = glm::angleAxis(eulerRadians.x, glm::vec3(1, 0, 0));
+    glm::quat yRotation    = glm::angleAxis(eulerRadians.y, glm::vec3(0, 1, 0));
+    glm::quat zRotation    = glm::angleAxis(eulerRadians.z, glm::vec3(0, 0, 1));
+
+    return zRotation * yRotation * xRotation;
+}
+
+static glm::mat4 GetGlmModel(const glm::vec3& pos, const glm::vec3& euler, const glm::vec3& scale) {
+    glm::mat4 modelMatrix   = glm::mat4(1.0);
+
+    modelMatrix             = glm::translate(modelMatrix, pos);
+    glm::quat rot           = GetQuatFromEuler(euler);
+    glm::mat4 localRotation = glm::mat4_cast(rot);
+    glm::mat4 localScale    = glm::mat4(1.0);
+    localScale              = glm::scale(localScale, scale);
+
+    return modelMatrix * localRotation * localScale;
+}
+
+static glm::mat4 GetGlmMVP(const glm::vec3& pos, const glm::vec3& euler, const glm::vec3& scale) {
+    const auto model = GetGlmModel(pos, euler, scale);
+    const auto view  = glm::translate(glm::mat4(1.0f), -glm::vec3(0.01f));
+    const auto proj  = glm::perspectiveRH_ZO(glm::radians(60.0f), 1280.0f / 720.0f, 0.01f, 1000.0f);
+    return proj * view * model;
 }
 
 struct Drawable
@@ -52,10 +86,10 @@ int main() {
     init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_Device);
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
-    vec3 position          = { };
-    vec3 euler             = { };
-    vec3 scale             = { 1.0, 1.0, 1.0 };
-    g_MVP                  = GetMVP(position, euler, scale);
+    glm::vec3 position     = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 euler        = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 scale        = { 1.0, 1.0, 1.0 };
+    g_MVP                  = GetGlmMVP(position, euler, scale);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
     posNormalUvLayout.BuildDeviceLayout(init.m_Device);
@@ -92,7 +126,7 @@ int main() {
 
     while (init.m_Running) {
         engine::PreFrame(init);
-        g_MVP                  = GetMVP(position, euler, scale);
+        g_MVP                  = GetGlmMVP(position, euler, scale);
 
         auto commandEncoder    = init.m_Queue->createCommandEncoder();
         auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(

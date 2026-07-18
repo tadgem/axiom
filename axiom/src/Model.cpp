@@ -70,7 +70,7 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
     static constexpr auto IMPORT_FLAGS = aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes
                                          | aiProcess_GenSmoothNormals | aiProcess_OptimizeGraph
                                          | aiProcess_FixInfacingNormals | aiProcess_FindInvalidData
-                                         | aiProcess_GenBoundingBoxes;
+                                         | aiProcess_GenBoundingBoxes | aiProcess_FlipWindingOrder;
 
 
     AssetLoadResult result     = { };

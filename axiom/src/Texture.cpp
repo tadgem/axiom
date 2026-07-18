@@ -35,13 +35,13 @@ axm::Texture axm::textures::CreateTexture2D(rhi::IDevice* device,
     Texture tex                   = { };
 
     if (SLANG_FAILED(device->createTexture(textureDesc, &initData, &tex.m_GPUTexture))) {
-        AXM_LOG("Failed to create texture");
+        AXM_LOG("Failed to create texture.");
         return Texture::BAD();
     }
 
     tex.m_TextureView = tex.m_GPUTexture->getDefaultView();
     if (!tex.m_TextureView) {
-        AXM_LOG("Failed to acquire texure view");
+        AXM_LOG("Failed to acquire texture view");
         return Texture::BAD();
     }
 
@@ -64,8 +64,9 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size
 }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::path& path) {
     PROFILE_SCOPE()
-    auto  newPath = path.u8string();
-    int   texWidth, texHeight, texChannels;
+    auto newPath = path.u8string();
+    int  texWidth, texHeight, texChannels;
+    stbi_set_flip_vertically_on_load(true);
     auto* pixels = stbi_load(
             reinterpret_cast<const char*>(newPath.c_str()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 

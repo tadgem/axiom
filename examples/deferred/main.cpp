@@ -49,7 +49,7 @@ static glm::mat4 GetGlmModel(const glm::vec3& pos, const glm::vec3& euler, const
 static glm::mat4 GetGlmMVP(const glm::vec3& pos, const glm::vec3& euler, const glm::vec3& scale) {
     const auto model = GetGlmModel(pos, euler, scale);
     const auto view  = glm::translate(glm::mat4(1.0f), -glm::vec3(0.01f));
-    const auto proj  = glm::perspectiveRH_ZO(glm::radians(60.0f), 1280.0f / 720.0f, 0.01f, 1000.0f);
+    const auto proj  = glm::perspectiveRH_ZO(glm::radians(60.0f), 1280.0f / 720.0f, 0.1f, 500.0f);
     return proj * view * model;
 }
 
@@ -88,7 +88,7 @@ int main() {
 
     glm::vec3 position     = { 0.0f, 0.0f, 0.0f };
     glm::vec3 euler        = { 0.0f, 0.0f, 0.0f };
-    glm::vec3 scale        = { 1.0, 1.0, 1.0 };
+    glm::vec3 scale        = glm::vec3(0.16f);
     g_MVP                  = GetGlmMVP(position, euler, scale);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
@@ -102,7 +102,7 @@ int main() {
             init.m_Device, formats, init.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
 
     g_Sampler = textures::CreateSampler(
-            init.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::ClampToEdge);
+            init.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::Wrap);
 
 
     f64 msInitTime = initTimer.ElapsedMillisecondsF();

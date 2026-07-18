@@ -102,9 +102,13 @@ void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const { PROFILE_SCOPE() }
 
 void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
     PROFILE_SCOPE()
-    auto*       transient  = dynamic_cast<ModelAssetTransient*>(data);
-    ModelAsset* model      = transient->GetConcreteAsset();
-    auto*       mesh       = transient->m_TransientData.m_Scene->mMeshes[transient->m_CurrentStep++];
+    auto*       transient = dynamic_cast<ModelAssetTransient*>(data);
+    ModelAsset* model     = transient->GetConcreteAsset();
+    auto*       mesh      = transient->m_TransientData.m_Scene->mMeshes[transient->m_CurrentStep++];
+
+    if (!mesh->HasNormals()) {
+        AXM_LOG_ERROR("Mesh {} does not have any normals", model->m_Path.generic_string());
+    }
 
     Vector<f32> vertexData = { };
     for (auto i = 0; i < mesh->mNumVertices; i++) {
@@ -129,9 +133,13 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
 
     Vector<u32> indexData = { };
     for (auto i = 0; i < mesh->mNumFaces; i++) {
-        indexData.push_back(mesh->mFaces[i].mIndices[0]);
-        indexData.push_back(mesh->mFaces[i].mIndices[1]);
-        indexData.push_back(mesh->mFaces[i].mIndices[2]);
+        if (mesh->mFaces[i].mNumIndices != 3) {
+            AXM_LOG_ERROR("Mesh {} has non triangular face.", model->m_Path.generic_string());
+            continue;
+        }
+        for (unsigned int index = 0; index < mesh->mFaces[i].mNumIndices; index++) {
+            indexData.push_back(static_cast<u32>(mesh->mFaces[i].mIndices[index]));
+        }
     }
 
     auto gpuMesh = meshes::CreateMeshFromData(m_Device,
@@ -141,10 +149,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
                                               indexData.size() * sizeof(u32),
                                               vertex::PosNormalUV::GetInputLayout(),
                                               mesh->mName.C_Str());
-    model->m_Data.m_Meshes.push_back({
-        .m_Mesh = std::move(gpuMesh),
-        .m_MaterialIndex = mesh->mMaterialIndex
-    });
+    model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });
 }
 
 axm::Pair<axm::Model::MaterialEntry::Map, axm::String> GetMaterialTexture(const axm::String&         directory,

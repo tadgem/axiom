@@ -29,7 +29,7 @@ void axm::TextureAssetFactory::ProcessAssetTransient(AssetTransient* data) const
 
     tex->m_Data             = textures::CreateTexture2D(m_Device,
                                             transient->m_TransientData.m_Data,
-                                            rhi::Format::RGBA8Unorm,
+                                            rhi::Format::RGBA8UnormSrgb,
                                             transient->m_TransientData.m_Width,
                                             transient->m_TransientData.m_Height);
     transient->m_CurrentStep++;

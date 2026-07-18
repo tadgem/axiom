@@ -38,8 +38,6 @@ namespace axm {
         void     PreFrame(AppState& e);
         void     PostFrame(AppState& e);
 
-        rhi::IRenderPassEncoder*
-        BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rhi::LoadOp loadOp = rhi::LoadOp::Clear);
     } // namespace engine
 
 } // namespace axm

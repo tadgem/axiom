@@ -9,6 +9,7 @@
 #include <slang-rhi.h>
 #include <slang.h>
 #include "Core/Profile.hpp"
+#include "Render/RenderPass.hpp"
 #include "SDL3/SDL.h"
 #include "SDL3/SDL_main.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -266,7 +267,8 @@ void axm::engine::PostFrame(AppState& e) {
 
     ImGui::Render();
     auto commandEncoder = e.m_Queue->createCommandEncoder();
-    auto passEncoder    = BeginSwapchainRenderPass(e, commandEncoder, rhi::LoadOp::Load);
+    auto passEncoder
+            = render_pass::BeginSwapChainRenderPass(e, commandEncoder, rhi::LoadOp::Load, rhi::LoadOp::DontCare, false);
 
     ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
 
@@ -276,33 +278,6 @@ void axm::engine::PostFrame(AppState& e) {
     e.m_DeltaTime = e.m_FrameTimer.ElapsedMillisecondsF();
 
     AXM_FLUSH_LOG();
-}
-
-rhi::IRenderPassEncoder*
-axm::engine::BeginSwapchainRenderPass(AppState& e, rhi::ICommandEncoder* cmd, rhi::LoadOp loadOp) {
-    PROFILE_SCOPE()
-
-    rhi::RenderPassColorAttachment colorAttachment        = { };
-    colorAttachment.view                                  = e.m_SwapchainColourImage->getDefaultView();
-    colorAttachment.loadOp                                = loadOp;
-    colorAttachment.storeOp                               = rhi::StoreOp::Store;
-    colorAttachment.clearValue[0]                         = 0.0f;
-    colorAttachment.clearValue[1]                         = 0.0f;
-    colorAttachment.clearValue[2]                         = 0.0f;
-    colorAttachment.clearValue[3]                         = 1.0f;
-
-    rhi::RenderPassDepthStencilAttachment depthAttachment = { };
-    depthAttachment.view                                  = e.m_SwapchainDepthImage->getDefaultView();
-    depthAttachment.depthLoadOp                           = rhi::LoadOp::Clear;
-    depthAttachment.depthStoreOp                          = rhi::StoreOp::Store;
-    depthAttachment.depthClearValue                       = 1.0f;
-
-    rhi::RenderPassDesc renderPass                        = { };
-    renderPass.colorAttachments                           = &colorAttachment;
-    renderPass.colorAttachmentCount                       = 1;
-    renderPass.depthStencilAttachment                     = &depthAttachment;
-
-    return cmd->beginRenderPass(renderPass);
 }
 
 axm::AppState axm::AppState::BAD() {

@@ -11,10 +11,10 @@ using namespace axm;
 static mat4                       g_MVP;
 static rhi::ComPtr<rhi::ISampler> g_Sampler;
 
-mat4                              GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
-    const auto model = maths::GetModelMatrix(pos, euler, scale);
-    const auto view  = maths::Translate(vec3 { 0.0f, 0.0f, 0.0f });
-    const auto proj  = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
+static mat4                       GetMVP(const vec3& pos, const vec3& euler, const vec3& scale) {
+    const auto model     = maths::GetModelMatrix(pos, euler, scale);
+    const auto view      = maths::Translate(vec3 { 0.0f, 0.0f, 0.0f });
+    const auto proj      = maths::PerspectiveFOV(maths::Radians(45.0f), 1.666f, 0.1f, 100.0f);
     const auto modelView = maths::Multiply(view, model);
     return maths::Multiply(proj, modelView);
 }
@@ -26,17 +26,16 @@ struct Drawable
     Mesh        m_Mesh;
 };
 
-void DrawDrawble(rhi::IRenderPassEncoder*                 encoder,
-                 const rhi::ComPtr<rhi::IRenderPipeline>& pipeline,
-                 const Drawable&                          drawable,
-                 const Viewport&                          viewport) {
-    auto cursor = ShaderDataInterface(encoder, pipeline);
+static void DrawDrawble(rhi::IRenderPassEncoder* encoder,
+                        ShaderDataInterface&     shader,
+                        const Drawable&          drawable,
+                        const Viewport&          viewport) {
 
-    cursor.SetData("modelViewProj", g_MVP);
+    shader.SetData("modelViewProj", g_MVP);
     if (drawable.m_Texture) {
-        cursor.SetBinding("diffuse", drawable.m_Texture->m_TextureView);
+        shader.SetBinding("diffuse", drawable.m_Texture->m_TextureView);
     }
-    cursor.SetBinding("diffuseSampler", g_Sampler);
+    shader.SetBinding("diffuseSampler", g_Sampler);
 
     meshes ::DrawMesh(viewport, drawable.m_Mesh, encoder);
 }
@@ -46,7 +45,7 @@ int main() {
     constexpr u32 width     = 1280;
     constexpr u32 height    = 720;
 
-    Timer         initTimer = { };
+    const Timer   initTimer = { };
 
     AppState      init      = engine::Init();
     init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_Device);
@@ -83,10 +82,10 @@ int main() {
     auto drawables = Vector<Drawable> { };
 
     init.m_AssetManager.LoadAsset("resources/models/sponza/Sponza.gltf", AssetType::Model, [&drawables](Asset* asset) {
-        ModelAsset* model = static_cast<ModelAsset*>(asset);
+        const auto* model = dynamic_cast<ModelAsset*>(asset);
 
-        for (auto& entry: model->m_Data.m_Meshes) {
-            auto map = model->m_Data.m_Materials[entry.m_MaterialIndex].m_TextureMaps[TextureMapType::Diffuse];
+        for (const auto& entry: model->m_Data.m_Meshes) {
+            const auto map = model->m_Data.m_Materials[entry.m_MaterialIndex].m_TextureMaps[TextureMapType::Diffuse];
             drawables.push_back({ .m_TextureAsset = map.m_Handle, .m_Texture = nullptr, .m_Mesh = entry.m_Mesh });
         }
     });
@@ -96,16 +95,17 @@ int main() {
         g_MVP                  = GetMVP(position, euler, scale);
 
         auto commandEncoder    = init.m_Queue->createCommandEncoder();
-        auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(init, commandEncoder);
-
+        auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
+                init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
+        auto shader = ShaderDataInterface(renderPassEncoder, pipeline);
         for (auto& drawable: drawables) {
 
             if (drawable.m_Texture == nullptr) {
-                if (auto asset = init.m_AssetManager.GetAsset(drawable.m_TextureAsset)) {
-                    drawable.m_Texture = &static_cast<TextureAsset*>(asset)->m_Data;
+                if (const auto asset = init.m_AssetManager.GetAsset(drawable.m_TextureAsset)) {
+                    drawable.m_Texture = &dynamic_cast<TextureAsset*>(asset)->m_Data;
                 }
             }
-            DrawDrawble(renderPassEncoder, pipeline, drawable, viewport);
+            DrawDrawble(renderPassEncoder, shader, drawable, viewport);
         }
 
         renderPassEncoder->end();

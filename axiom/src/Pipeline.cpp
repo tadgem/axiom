@@ -10,6 +10,12 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
                                                                       rhi::IInputLayout*           inputLayout) {
     PROFILE_SCOPE()
 
+    AXM_LOG("CreateRasterPipeline for shader '{}'", shader.m_Name);
+    AXM_LOG("  depthTarget.depthTestEnable: {}", depthTarget.depthTestEnable);
+    AXM_LOG("  depthTarget.depthWriteEnable: {}", depthTarget.depthWriteEnable);
+    AXM_LOG("  depthTarget.depthFunc: {}", (int)depthTarget.depthFunc);
+    AXM_LOG("  depthTarget.format: {}", (int)depthTarget.format);
+
 
     Vector<rhi::ColorTargetDesc> colorTargets;
     colorTargets.resize(colourFormats.size());

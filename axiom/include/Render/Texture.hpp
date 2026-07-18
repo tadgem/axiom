@@ -44,7 +44,12 @@ namespace axm {
         rhi::ComPtr<rhi::ISampler>
         CreateSampler(rhi::IDevice* device, rhi::TextureFilteringMode filter, rhi::TextureAddressingMode addressMode);
 
-        Texture CreateTexture2D(rhi::IDevice* device, const void* data, rhi::Format format, u32 w, u32 h);
+        Texture CreateTexture2D(rhi::IDevice* device,
+                                const void*   data,
+                                rhi::Format   format,
+                                u32           w,
+                                u32           h,
+                                const char*   label = "UNKNOWN");
     } // namespace textures
 
 } // namespace axm

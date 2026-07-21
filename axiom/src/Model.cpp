@@ -146,7 +146,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
                                               vertexData.data(),
                                               vertexData.size() * sizeof(f32),
                                               indexData.data(),
-                                              indexData.size() * sizeof(u32),
+                                              indexData.size(),
                                               vertex::PosNormalUV::GetInputLayout(),
                                               mesh->mName.C_Str());
     model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });

@@ -7,3 +7,6 @@
 [submodule "submodules/luau"]
 	path = submodules/luau
 	url = https://github.com/luau-lang/luau.git
+[submodule "submodules/jolt"]
+	path = submodules/jolt
+	url = https://github.com/jrouwe/JoltPhysics.git

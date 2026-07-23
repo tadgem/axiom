@@ -25,7 +25,7 @@ void computeMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     float2 uv = (float2(dispatchThreadID.xy) + 0.5) / float2(params.dstSize);
 
     // Sample from the source mip level using bilinear filtering to downsample
-    float4 color = srcTexture.SampleLevel(srcSampler, uv, 0);
+    float4 color = srcTexture.SampleLevel(srcSampler, uv, (float)params.srcMipLevel);
 
     // Write downsampled texel color to target mip level
     dstTexture[dispatchThreadID.xy] = color;

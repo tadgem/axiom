@@ -3,6 +3,7 @@
 #include "Core/Debug.hpp"
 #include "Core/STL.hpp"
 #include "Core/Utils.hpp"
+#include "Render/Pipeline.hpp"
 #define SDL_MAIN_HANDLED
 
 
@@ -10,6 +11,7 @@
 #include <slang.h>
 #include "Core/Profile.hpp"
 #include "Render/RenderPass.hpp"
+#include "Render/Texture.hpp"
 #include "SDL3/SDL.h"
 #include "SDL3/SDL_main.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -212,24 +214,42 @@ axm::AppState axm::engine::Init() {
     depthStencilDesc.depthWriteEnable = true;
     depthStencilDesc.depthFunc        = ComparisonFunc::LessEqual;
 
+    Array<String, 1> entries          = { "computeMain" };
+    auto             mips             = Shader(device, "resources/shaders/mips", entries);
+    auto             mipsPipeline     = pipeline::CreateComputePipeline(device, mips);
+    if (!mipsPipeline) {
+        AXM_LOG_ERROR("Failed to create compute pipeline for generating mips.");
+        return AppState::BAD();
+    }
 
-    return { .m_OK                   = true,
-             .m_Running              = true,
-             .m_AssetManager         = AssetManager(),
-             .m_DepthStencilDesc     = depthStencilDesc,
-             .m_Window               = window,
-             .m_Device               = device,
-             .m_Surface              = surface,
-             .m_Queue                = graphicsQueue,
-             .m_SwapchainColourImage = nullptr,
-             .m_SwapchainDepthImage  = depthTexture,
-             .m_DebugCallback        = std::move(debugCallback) };
+    auto sampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
+
+
+    GPU  gpu     = { .m_Device               = device,
+                     .m_Surface              = surface,
+                     .m_Queue                = graphicsQueue,
+                     .m_SwapchainColourImage = nullptr,
+                     .m_SwapchainDepthImage  = depthTexture,
+                     .m_DebugCallback        = std::move(debugCallback),
+                     .m_MipShader            = mips,
+                     .m_MipPipeline          = mipsPipeline,
+                     .m_LinearClampSampler   = sampler };
+
+
+    return {
+        .m_OK               = true,
+        .m_Running          = true,
+        .m_AssetManager     = AssetManager(),
+        .m_DepthStencilDesc = depthStencilDesc,
+        .m_Window           = window,
+        .m_GPU              = std::move(gpu),
+    };
 }
 
 void axm::engine::Quit(const AppState& e) {
     PROFILE_SCOPE()
 
-    e.m_Queue->waitOnHost();
+    e.m_GPU.m_Queue->waitOnHost();
 
     ImGui_ImplSlangRHI_Shutdown();
     ImGui_ImplSDL3_Shutdown();
@@ -260,22 +280,22 @@ void axm::engine::PreFrame(AppState& e) {
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
-    e.m_Surface->acquireNextImage(&e.m_SwapchainColourImage);
+    e.m_GPU.m_Surface->acquireNextImage(&e.m_GPU.m_SwapchainColourImage);
 }
 
 void axm::engine::PostFrame(AppState& e) {
     PROFILE_SCOPE()
 
     ImGui::Render();
-    auto commandEncoder = e.m_Queue->createCommandEncoder();
+    auto commandEncoder = e.m_GPU.m_Queue->createCommandEncoder();
     auto passEncoder
             = render_pass::BeginSwapChainRenderPass(e, commandEncoder, rhi::LoadOp::Load, rhi::LoadOp::DontCare, false);
 
     ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
 
     passEncoder->end();
-    e.m_Queue->submit(commandEncoder->finish());
-    e.m_Surface->present();
+    e.m_GPU.m_Queue->submit(commandEncoder->finish());
+    e.m_GPU.m_Surface->present();
     e.m_DeltaTime = e.m_FrameTimer.ElapsedMillisecondsF();
 
     AXM_FLUSH_LOG();
@@ -284,14 +304,10 @@ void axm::engine::PostFrame(AppState& e) {
 axm::AppState axm::AppState::BAD() {
     PROFILE_SCOPE()
 
-    return { .m_OK                   = false,
-             .m_Running              = false,
-             .m_AssetManager         = AssetManager(),
-             .m_DepthStencilDesc     = { },
-             .m_Window               = nullptr,
-             .m_Device               = nullptr,
-             .m_Surface              = nullptr,
-             .m_Queue                = nullptr,
-             .m_SwapchainColourImage = nullptr,
-             .m_SwapchainDepthImage  = nullptr };
+    return { .m_OK               = false,
+             .m_Running          = false,
+             .m_AssetManager     = AssetManager(),
+             .m_DepthStencilDesc = { },
+             .m_Window           = nullptr,
+             .m_GPU              = GPU() };
 }

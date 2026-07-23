@@ -11,5 +11,8 @@ namespace axm {
                                                                const Shader&                shader,
                                                                rhi::IInputLayout*           inputLayout);
 
+        rhi::ComPtr<rhi::IComputePipeline> CreateComputePipeline(rhi::IDevice*     device,
+                                                                 const Shader&     shader);
+
     };
 } // namespace axm

@@ -13,8 +13,8 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
     AXM_LOG("CreateRasterPipeline for shader '{}'", shader.m_Name);
     AXM_LOG("  depthTarget.depthTestEnable: {}", depthTarget.depthTestEnable);
     AXM_LOG("  depthTarget.depthWriteEnable: {}", depthTarget.depthWriteEnable);
-    AXM_LOG("  depthTarget.depthFunc: {}", (int)depthTarget.depthFunc);
-    AXM_LOG("  depthTarget.format: {}", (int)depthTarget.format);
+    AXM_LOG("  depthTarget.depthFunc: {}", (int) depthTarget.depthFunc);
+    AXM_LOG("  depthTarget.format: {}", (int) depthTarget.format);
 
 
     Vector<rhi::ColorTargetDesc> colorTargets;
@@ -30,11 +30,28 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
     pipelineDesc.targets                 = colorTargets.data();
     pipelineDesc.targetCount             = colorTargets.size();
     pipelineDesc.depthStencil            = depthTarget;
-    pipelineDesc.label                   = shader.m_Name;
+    pipelineDesc.label                   = shader.m_Name.c_str();
     rhi::ComPtr<rhi::IRenderPipeline> pipeline;
 
     if (SLANG_FAILED(device->createRenderPipeline(pipelineDesc, pipeline.writeRef()))) {
         AXM_LOG("Failed to create render pipeline with shader : {}", shader.m_Name);
+        return { };
+    }
+
+    return pipeline;
+}
+
+rhi::ComPtr<rhi::IComputePipeline> axm::pipeline::CreateComputePipeline(rhi::IDevice* device, const Shader& shader) {
+    PROFILE_SCOPE()
+
+    rhi::ComputePipelineDesc pipelineDesc = { };
+    pipelineDesc.program                  = shader.m_Program;
+    pipelineDesc.label                    = shader.m_Name.c_str();
+
+    rhi::ComPtr<rhi::IComputePipeline> pipeline;
+
+    if (SLANG_FAILED(device->createComputePipeline(pipelineDesc, pipeline.writeRef()))) {
+        AXM_LOG("Failed to create compute pipeline with shader : {}", shader.m_Name);
         return { };
     }
 

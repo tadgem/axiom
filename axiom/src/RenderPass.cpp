@@ -11,7 +11,7 @@ rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AppState&   
 
     using namespace rhi;
     RenderPassColorAttachment colorAttachment        = { };
-    colorAttachment.view                             = app.m_SwapchainColourImage->getDefaultView();
+    colorAttachment.view                             = app.m_GPU.m_SwapchainColourImage->getDefaultView();
     colorAttachment.loadOp                           = colourLoadOp;
     colorAttachment.storeOp                          = StoreOp::Store;
     colorAttachment.clearValue[0]                    = clearColour._[0];
@@ -21,7 +21,7 @@ rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AppState&   
 
     RenderPassDepthStencilAttachment depthAttachment = { };
     if (enableDepthTest) {
-        depthAttachment.view            = app.m_SwapchainDepthImage->getDefaultView();
+        depthAttachment.view            = app.m_GPU.m_SwapchainDepthImage->getDefaultView();
         depthAttachment.depthLoadOp     = depthLoadOp;
         depthAttachment.depthStoreOp    = StoreOp::Store;
         depthAttachment.depthClearValue = 1.0f;

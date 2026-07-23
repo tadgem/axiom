@@ -1,5 +1,6 @@
 #pragma once
-#include "../Core/Debug.hpp"
+#include "Core/Debug.hpp"
+#include "Core/STL.hpp"
 #include "slang-rhi.h"
 #include "slang-rhi/shader-cursor.h"
 #include "slang.h"
@@ -9,14 +10,10 @@ namespace axm {
     class Shader
     {
     public:
-        explicit Shader(rhi::IDevice* device,
-                        const char*   name,
-                        const char*   vertexEntry = "vertexMain",
-                        const char*   fragEntry   = "fragmentMain");
+        Shader() = default;
+        explicit Shader(rhi::IDevice* device, const String& name, Span<String> entries);
 
-        explicit Shader(rhi::IDevice* device, const char* name, const char* computeEntry);
-
-        const char*                      m_Name;
+        String                           m_Name;
         rhi::ComPtr<rhi::IShaderProgram> m_Program;
     };
 

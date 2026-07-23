@@ -47,9 +47,9 @@ namespace axm {
     class ModelAssetFactory : public AssetFactory
     {
     public:
-        rhi::IDevice* m_Device;
+        GPU& m_GPU;
 
-        explicit ModelAssetFactory(rhi::IDevice* gpuDevice);
+        explicit ModelAssetFactory(GPU& gpu);
 
         NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
         void                       UnloadAsset(Asset* asset) const override;

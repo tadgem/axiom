@@ -3,8 +3,7 @@
 
 void OnProcessTextureAssetTransient(axm::AssetTransient* data) { using namespace axm; }
 
-axm::TextureAssetFactory::TextureAssetFactory(rhi::IDevice* gpuDevice) :
-    AssetFactory(AssetType::Texture), m_Device(gpuDevice) { }
+axm::TextureAssetFactory::TextureAssetFactory(GPU& gpuDevice) : AssetFactory(AssetType::Texture), m_GPU(gpuDevice) { }
 
 axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path& path) const {
     auto            cpuTexture   = textures::LoadCPUTextureDataFromFile(path.c_str());
@@ -27,7 +26,7 @@ void axm::TextureAssetFactory::ProcessAssetTransient(AssetTransient* data) const
     auto*         transient = dynamic_cast<TextureAssetTransient*>(data);
     TextureAsset* tex       = transient->GetConcreteAsset();
 
-    tex->m_Data             = textures::CreateTexture2D(m_Device,
+    tex->m_Data             = textures::CreateTexture2D(m_GPU,
                                             transient->m_TransientData.m_Data,
                                             rhi::Format::RGBA8UnormSrgb,
                                             transient->m_TransientData.m_Width,

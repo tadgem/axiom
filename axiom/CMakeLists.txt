@@ -9,6 +9,7 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
         ${AXM_SRCS}
+        include/Render/GPU.hpp
 )
 
 # TODO: Cannot activate atm due to werrors in slang-rhi

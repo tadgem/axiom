@@ -1,5 +1,6 @@
 #pragma once
 #include "Assets/AssetManager.hpp"
+#include "Render/GPU.hpp"
 #include "Render/Texture.hpp"
 namespace axm {
 
@@ -9,9 +10,9 @@ namespace axm {
     class TextureAssetFactory : public AssetFactory
     {
     public:
-        rhi::IDevice* m_Device;
+        GPU& m_GPU;
 
-        explicit TextureAssetFactory(rhi::IDevice* gpuDevice);
+        explicit TextureAssetFactory(GPU& gpu);
 
         NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
         void                       UnloadAsset(Asset* asset) const override;

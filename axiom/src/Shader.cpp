@@ -25,7 +25,8 @@ slang::IModule* GetModule(IDevice* device, const char* name) {
     return shaderModule;
 }
 
-void CreateShaderProgram(IDevice* device, ShaderProgramDesc desc, ComPtr<IShaderProgram>& program, const char* name) {
+static void
+CreateShaderProgram(IDevice* device, ShaderProgramDesc desc, ComPtr<IShaderProgram>& program, const axm::String& name) {
     PROFILE_SCOPE()
 
     ComPtr<slang::IBlob> diagnostics = { };
@@ -38,55 +39,36 @@ void CreateShaderProgram(IDevice* device, ShaderProgramDesc desc, ComPtr<IShader
     }
 }
 
-axm::Shader::Shader(IDevice* device, const char* name, const char* vertexEntry, const char* fragEntry) : m_Name(name) {
+
+axm::Shader::Shader(IDevice* device, const String& name, Span<String> entries) : m_Name(name) {
     PROFILE_SCOPE()
 
-    slang::IModule* shaderModule = GetModule(device, name);
+    slang::IModule* shaderModule = GetModule(device, name.c_str());
 
     if (!shaderModule) {
         AXM_LOG("Failed to compile shader : {}", name);
         return;
     }
 
-    slang::IEntryPoint* vertexEntryPoint = nullptr;
-    shaderModule->findEntryPointByName(vertexEntry, &vertexEntryPoint);
-    slang::IEntryPoint* fragmentEntryPoint = nullptr;
-    shaderModule->findEntryPointByName(fragEntry, &fragmentEntryPoint);
+    Vector<slang::IComponentType*> entryPoints = { };
 
-    Array<slang::IComponentType*, 2> entryPoints = { vertexEntryPoint, fragmentEntryPoint };
+    for (const auto& entry: entries) {
+        slang::IEntryPoint* ep = { };
+        shaderModule->findEntryPointByName(entry.c_str(), &ep);
 
-    ShaderProgramDesc                programDesc = { };
-    programDesc.linkingStyle                     = LinkingStyle::SingleProgram;
-    programDesc.slangEntryPoints                 = entryPoints.data();
-    programDesc.slangEntryPointCount             = entryPoints.size();
-    programDesc.slangGlobalScope                 = shaderModule;
-
-    CreateShaderProgram(device, programDesc, m_Program, name);
-}
-axm::Shader::Shader(rhi::IDevice* device, const char* name, const char* computeEntry) : m_Name(name) {
-    PROFILE_SCOPE()
-
-    slang::IModule* shaderModule = GetModule(device, name);
-
-    if (!shaderModule) {
-        AXM_LOG("Failed to compile shader : {}", name);
-        return;
+        if (ep) {
+            entryPoints.push_back(ep);
+        }
     }
 
-    slang::IEntryPoint* computeEntryPoint = nullptr;
-    shaderModule->findEntryPointByName(computeEntry, &computeEntryPoint);
-
-    Array<slang::IComponentType*, 1> entryPoint  = { computeEntryPoint };
-
-    ShaderProgramDesc                programDesc = { };
-    programDesc.linkingStyle                     = LinkingStyle::SingleProgram;
-    programDesc.slangEntryPoints                 = entryPoint.data();
-    programDesc.slangEntryPointCount             = entryPoint.size();
-    programDesc.slangGlobalScope                 = shaderModule;
+    ShaderProgramDesc programDesc    = { };
+    programDesc.linkingStyle         = LinkingStyle::SingleProgram;
+    programDesc.slangEntryPoints     = entryPoints.data();
+    programDesc.slangEntryPointCount = entryPoints.size();
+    programDesc.slangGlobalScope     = shaderModule;
 
     CreateShaderProgram(device, programDesc, m_Program, name);
 }
-
 axm::ShaderDataInterface::ShaderDataInterface(IRenderPassEncoder*            renderPassEncoder,
                                               const ComPtr<IRenderPipeline>& pipeline) :
     m_SlangCursor(rhi::ShaderCursor(renderPassEncoder->bindPipeline(pipeline))), m_RenderPipeline(pipeline) { }

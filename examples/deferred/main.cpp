@@ -82,8 +82,8 @@ int main() {
     const Timer   initTimer = { };
 
     AppState      init      = engine::Init();
-    init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_Device);
-    init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_Device);
+    init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
+    init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
     glm::vec3 position     = { 0.0f, 0.0f, 0.0f };
@@ -92,17 +92,18 @@ int main() {
     g_MVP                  = GetGlmMVP(position, euler, scale);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
-    posNormalUvLayout.BuildDeviceLayout(init.m_Device);
+    posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
 
-    Shader cube     = Shader(init.m_Device, "resources/shaders/cube");
+    Array<String, 2> entries  = { "vertexMain", "fragmentMain" };
+    Shader           cube     = Shader(init.m_GPU.m_Device, "resources/shaders/cube", entries);
 
-    Array  formats  = { init.m_Surface->getInfo().preferredFormat };
+    Array            formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
 
-    auto   pipeline = pipeline::CreateRasterPipeline(
-            init.m_Device, formats, init.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
+    auto             pipeline = pipeline::CreateRasterPipeline(
+            init.m_GPU.m_Device, formats, init.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
 
     g_Sampler = textures::CreateSampler(
-            init.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::Wrap);
+            init.m_GPU.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::Wrap);
 
 
     f64 msInitTime = initTimer.ElapsedMillisecondsF();
@@ -128,7 +129,7 @@ int main() {
         engine::PreFrame(init);
         g_MVP                  = GetGlmMVP(position, euler, scale);
 
-        auto commandEncoder    = init.m_Queue->createCommandEncoder();
+        auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
         auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
                 init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
         auto shader = ShaderDataInterface(renderPassEncoder, pipeline);
@@ -143,7 +144,7 @@ int main() {
         }
 
         renderPassEncoder->end();
-        init.m_Queue->submit(commandEncoder->finish());
+        init.m_GPU.m_Queue->submit(commandEncoder->finish());
 
         profiler::ProfilerImGuiWindow(init);
 

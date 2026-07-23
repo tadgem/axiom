@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Core/STL.hpp"
-#include "slang-rhi.h"
+#include "Render/GPU.hpp"
 
 namespace axm {
+
+    class Shader;
 
     enum TextureMapType {
         Unknown = -1,
@@ -44,12 +46,11 @@ namespace axm {
         rhi::ComPtr<rhi::ISampler>
         CreateSampler(rhi::IDevice* device, rhi::TextureFilteringMode filter, rhi::TextureAddressingMode addressMode);
 
-        Texture CreateTexture2D(rhi::IDevice* device,
-                                const void*   data,
-                                rhi::Format   format,
-                                u32           w,
-                                u32           h,
-                                const char*   label = "UNKNOWN");
+        Texture
+        CreateTexture2D(GPU& device, const void* data, rhi::Format format, u32 w, u32 h, const char* label = "UNKNOWN");
+
+        void GenerateMips(GPU& device, Texture& texture);
+
     } // namespace textures
 
 } // namespace axm

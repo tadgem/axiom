@@ -61,8 +61,7 @@ static aiTextureType GetAssimpTextureType(const axm::TextureMapType& t) {
     }
 }
 
-axm::ModelAssetFactory::ModelAssetFactory(rhi::IDevice* gpuDevice) :
-    AssetFactory(AssetType::Model), m_Device(gpuDevice) { }
+axm::ModelAssetFactory::ModelAssetFactory(GPU& gpu) : AssetFactory(AssetType::Model), m_GPU(gpu) { }
 
 axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& path) const {
     PROFILE_SCOPE()
@@ -142,7 +141,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         }
     }
 
-    auto gpuMesh = meshes::CreateMeshFromData(m_Device,
+    auto gpuMesh = meshes::CreateMeshFromData(m_GPU.m_Device,
                                               vertexData.data(),
                                               vertexData.size() * sizeof(f32),
                                               indexData.data(),
@@ -152,10 +151,11 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
     model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });
 }
 
-axm::Pair<axm::Model::MaterialEntry::Map, axm::String> GetMaterialTexture(const axm::String&         directory,
-                                                                          const aiMaterial*          material,
-                                                                          const aiTextureType&       assimpTextureType,
-                                                                          const axm::TextureMapType& textureType) {
+static axm::Pair<axm::Model::MaterialEntry::Map, axm::String>
+GetMaterialTexture(const axm::String&         directory,
+                   const aiMaterial*          material,
+                   const aiTextureType&       assimpTextureType,
+                   const axm::TextureMapType& textureType) {
     PROFILE_SCOPE()
     using namespace axm;
     const auto textureCount = aiGetMaterialTextureCount(material, assimpTextureType);

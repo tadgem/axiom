@@ -18,17 +18,23 @@
 
 // TODO (LiamD) : This should be configured from cmake.
 #define AXM_ENABLE_LOGGING
+#define AXM_FLUSH_EACH_LOG
 #ifdef AXM_ENABLE_LOGGING
 #define AXM_FLUSH_LOG() std::fflush(stdout)
+#ifdef AXM_FLUSH_EACH_LOG
+#define AXM_FLUSH_LOG_EVERY_TIME() AXM_FLUSH_LOG()
+#else
+#define AXM_FLUSH_LOG_EVERY_TIME()
+#endif
 #define AXM_LOG(fmt, ...)                                                                                              \
     std::println("Axiom : " fmt, __VA_ARGS__);                                                                         \
-    AXM_FLUSH_LOG();
+    AXM_FLUSH_LOG_EVERY_TIME();
 #define AXM_LOG_INFO(fmt, ...)                                                                                         \
     std::println("Axiom : INFO : " fmt, __VA_ARGS__);                                                                  \
-    AXM_FLUSH_LOG();
+    AXM_FLUSH_LOG_EVERY_TIME();
 #define AXM_LOG_ERROR(fmt, ...)                                                                                        \
     std::println("Axiom : ERROR : " fmt, __VA_ARGS__);                                                                 \
-    AXM_FLUSH_LOG();
+    AXM_FLUSH_LOG_EVERY_TIME();
 #else
 #define AXM_LOG(fmt, ...)
 #define AXM_LOG_INFO(fmt, ...)

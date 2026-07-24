@@ -2,6 +2,7 @@
 #include "Assets/Model.hpp"
 #include "Assets/TextureAsset.hpp"
 #include "Core/Profile.hpp"
+#include "Render/ImGuiUtils.hpp"
 #include "axiom.hpp"
 
 
@@ -10,15 +11,13 @@ AXM_OVERRIDE_GLOBAL_NEW(false)
 using namespace axm;
 
 static aml::Mat44                 g_MVP;
+static Transform                  g_Transform;
+static Camera                     g_Cam;
 static rhi::ComPtr<rhi::ISampler> g_Sampler;
 
 
-static aml::Mat44                 GetMVP(const aml::Vec3& pos, const aml::Vec3& euler, const aml::Vec3& scale) {
-    const auto model  = Utils::CreateModelMatrix(pos, euler, scale);
-    const auto camPos = aml::Vec3(0.0f, 0.0f, 0.0f);
-    const auto view   = aml::Mat44::sTranslation(camPos);
-    const auto proj = aml::Mat44::sPerspective(aml::DegreesToRadians(60.0f), 1280.0 / 720.0, 0.03f, 10000.0f);
-    return proj * view * model;
+static aml::Mat44                 GetMVP(const Transform& trans, const Camera& cam) {
+    return cam.GetViewProjectionMatrix() * trans.GetModelMatrix();
 }
 namespace {
     struct Drawable
@@ -28,7 +27,8 @@ namespace {
         Mesh        m_Mesh;
     };
 
-    void DrawDrawable(rhi::IRenderPassEncoder*   encoder,
+    void DrawDrawable(GPU&                       gpu,
+                      rhi::IRenderPassEncoder*   encoder,
                       const ShaderDataInterface& shader,
                       const Drawable&            drawable,
                       const Viewport&            viewport) {
@@ -41,6 +41,7 @@ namespace {
 
         meshes ::DrawMesh(viewport, drawable.m_Mesh, encoder);
     }
+
 }
 int main() {
 
@@ -57,7 +58,7 @@ int main() {
     aml::Vec3 position     = { 0.0f, 0.0f, 0.0f };
     aml::Vec3 euler        = { 0.0f, 0.0f, 0.0f };
     aml::Vec3 scale        = aml::Vec3(0.16f, 0.16f, 0.16f);
-    g_MVP                  = GetMVP(position, euler, scale);
+    g_MVP                  = GetMVP(g_Transform, g_Cam);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
     posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
@@ -78,7 +79,6 @@ int main() {
 
     AXM_LOG("Init took {} ms", msInitTime);
     AXM_LOG("Starting Axiom Main Loop");
-    AXM_FLUSH_LOG();
 
     auto viewport  = viewports::GetFullscreenViewport(init.m_Window);
 
@@ -95,7 +95,7 @@ int main() {
 
     while (init.m_Running) {
         engine::PreFrame(init);
-        g_MVP                  = GetMVP(position, euler, scale);
+        g_MVP                  = GetMVP(g_Transform, g_Cam);
 
         auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
         auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
@@ -108,7 +108,7 @@ int main() {
                     drawable.m_Texture = &dynamic_cast<TextureAsset*>(asset)->m_Data;
                 }
             }
-            DrawDrawable(renderPassEncoder, shader, drawable, viewport);
+            DrawDrawable(init.m_GPU, renderPassEncoder, shader, drawable, viewport);
         }
 
         renderPassEncoder->end();
@@ -116,10 +116,9 @@ int main() {
 
         profiler::ProfilerImGuiWindow(init);
 
-        if (ImGui::Begin("Hello!")) {
-            ImGui::DragFloat3("Position", &position.mF32[0]);
-            ImGui::DragFloat3("Euler", &euler.mF32[0]);
-            ImGui::DragFloat3("Scale", &scale.mF32[0]);
+        if (ImGui::Begin("Example (Deferred)")) {
+            ImGuiEx::TransformEdit(g_Transform);
+            ImGuiEx::CameraEdit(g_Cam);
         }
         ImGui::End();
 

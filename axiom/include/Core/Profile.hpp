@@ -1,9 +1,7 @@
 #pragma once
 #include <source_location>
-
 #include "Core/STL.hpp"
 #include "Core/Timer.hpp"
-#include "Engine.hpp"
 
 namespace axm {
 

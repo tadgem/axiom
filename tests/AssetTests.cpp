@@ -6,36 +6,36 @@ using namespace axm;
 
 using TestBinaryAsset = AssetT<DynArray<u8>, AssetType::Binary>;
 
+namespace {
+    class TestAssetFactory : public AssetFactory
+    {
+    public:
+        TestAssetFactory() : AssetFactory(AssetType::Binary) { }
 
-class TestAssetFactory : public AssetFactory
-{
-public:
-    TestAssetFactory() : AssetFactory(AssetType::Binary) { }
+        NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
+            return AssetLoadResult { .m_Next = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path))) };
+        }
+        void UnloadAsset(Asset* asset) const override {
+            auto* b = dynamic_cast<TestBinaryAsset*>(asset);
+            AXM_DELETE(b);
+        }
+        void ProcessAssetTransient(AssetTransient* data) const override { }
+        ~TestAssetFactory() override = default;
+    };
 
-    NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
-        return AssetLoadResult { .m_Next = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path))) };
-    }
-    void UnloadAsset(Asset* asset) const override {
-        auto* b = dynamic_cast<TestBinaryAsset*>(asset);
-        AXM_DELETE(b);
-    }
-    void ProcessAssetTransient(AssetTransient* data) const override { }
-    ~TestAssetFactory() override = default;
-};
+    class FailAssetFactory : public AssetFactory
+    {
+    public:
+        FailAssetFactory() : AssetFactory(AssetType::Binary) { }
 
-class FailAssetFactory : public AssetFactory
-{
-public:
-    FailAssetFactory() : AssetFactory(AssetType::Binary) { }
-
-    NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
-        return AssetLoadResult { .m_Next = AssetErrorMessage { .m_Message = "ERROR" } };
-    }
-    void UnloadAsset(Asset* asset) const override { }
-    void ProcessAssetTransient(AssetTransient* data) const override { }
-    ~FailAssetFactory() override = default;
-};
-
+        NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
+            return AssetLoadResult { .m_Next = AssetErrorMessage { .m_Message = "ERROR" } };
+        }
+        void UnloadAsset(Asset* asset) const override { }
+        void ProcessAssetTransient(AssetTransient* data) const override { }
+        ~FailAssetFactory() override = default;
+    };
+}
 TestResult AssetManager_CanProvideFactory(AppState* e) {
 
     const auto* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
@@ -92,7 +92,7 @@ TestResult AssetManager_CanUnloadAsset(AppState* e) {
 }
 
 TestResult AssetManager_CanProcessTransient(AppState* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_Device);
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
 
     e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
 
@@ -121,7 +121,7 @@ TestResult AssetManager_NoFactoryForAssetType(AppState* e) {
 
 
 TestResult AssetManager_NonExistantAssetNotEnqueued(AppState* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_Device);
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
     e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
 
     AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(),
@@ -146,8 +146,8 @@ TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AppState* e) {
 }
 
 TestResult AssetManager_ModelAssetLoads(AppState* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(e->m_Device);
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_Device);
+    e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(e->m_GPU);
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
 
     const auto handle = e->m_AssetManager.LoadAsset("test_resources/sponza_low/Sponza.gltf", AssetType::Model);
 

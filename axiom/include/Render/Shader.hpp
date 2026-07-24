@@ -1,7 +1,7 @@
 #pragma once
+#include "Core/Profile.hpp"
 #include "Core/Debug.hpp"
 #include "Core/STL.hpp"
-#include "Core/Profile.hpp"
 #include "slang-rhi.h"
 #include "slang-rhi/shader-cursor.h"
 

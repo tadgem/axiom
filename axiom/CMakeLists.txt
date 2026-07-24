@@ -8,16 +8,9 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/imgui_widgets.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
+        ${THIRD_PARTY_DIRS}/im3d/im3d.cpp
         ${AXM_SRCS}
-        include/Render/GPU.hpp
-        include/Render/Transform.hpp
-        src/Transform.cpp
-        include/Render/Camera.hpp
-        src/Camera.cpp
-        include/Render/ImGuiUtils.hpp
-        src/ImGuiUtils.cpp
-        include/Core/Window.hpp
-        ../tests/EngineTests.cpp
+
 )
 
 # TODO: Cannot activate atm due to werrors in slang-rhi
@@ -39,4 +32,5 @@ target_include_directories(axiom PUBLIC
         ${SDL_INCLUDE_DIRS}
         ${MIMALLOC_INCLUDE_DIRS}
         ${SINGLE_HEADER_INCLUDE_DIRS}
+        ${THIRD_PARTY_DIRS}/im3d
 )

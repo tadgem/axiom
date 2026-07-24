@@ -5,7 +5,7 @@
 
 namespace axm {
 
-    struct AppState;
+    struct AxiomEngine;
     namespace profiler {
 
         class ScopedTimer
@@ -31,7 +31,7 @@ namespace axm {
         // (need thread ID to identify which bin to place in, plus a way to find entries if stored as array)
         static HashMap<const char*, ProfilerItem> g_ProfilerItems;
 
-        void                                      ProfilerImGuiWindow(const AppState& e);
+        void                                      ProfilerImGuiWindow(const AxiomEngine& e);
     }
 }
 #ifdef __FUNCTION__

@@ -71,12 +71,12 @@ namespace axm {
 #define AXM_ADD_TEST(TEST_NAME)                                                                                        \
     {                                                                                                                  \
         AXM_LOG_INFO("Running Test : {}", #TEST_NAME);                                                                 \
-        AppState   engine = engine::Init();                                                                            \
-        axm::Timer timer_##TEST_NAME;                                                                                  \
-        auto       result_##TEST_NAME = TEST_NAME(&engine);                                                            \
-        result_##TEST_NAME.mName      = #TEST_NAME;                                                                    \
-        f64 time_taken_##TEST_NAME    = timer_##TEST_NAME.ElapsedMillisecondsF();                                      \
-        result_##TEST_NAME.mElapsedMs = time_taken_##TEST_NAME;                                                        \
+        AxiomEngine engine = engine::Init();                                                                           \
+        axm::Timer  timer_##TEST_NAME;                                                                                 \
+        auto        result_##TEST_NAME = TEST_NAME(&engine);                                                           \
+        result_##TEST_NAME.mName       = #TEST_NAME;                                                                   \
+        f64 time_taken_##TEST_NAME     = timer_##TEST_NAME.ElapsedMillisecondsF();                                     \
+        result_##TEST_NAME.mElapsedMs  = time_taken_##TEST_NAME;                                                       \
         sResults.push_back(result_##TEST_NAME);                                                                        \
         engine::Quit(engine);                                                                                          \
     }

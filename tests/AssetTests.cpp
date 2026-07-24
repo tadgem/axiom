@@ -13,7 +13,8 @@ namespace {
         TestAssetFactory() : AssetFactory(AssetType::Binary) { }
 
         NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
-            return AssetLoadResult { .m_Next = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path))) };
+            return AssetLoadResult { .m_Next
+                                     = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path))) };
         }
         void UnloadAsset(Asset* asset) const override {
             auto* b = dynamic_cast<TestBinaryAsset*>(asset);
@@ -36,7 +37,7 @@ namespace {
         ~FailAssetFactory() override = default;
     };
 }
-TestResult AssetManager_CanProvideFactory(AppState* e) {
+TestResult AssetManager_CanProvideFactory(AxiomEngine* e) {
 
     const auto* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
@@ -46,7 +47,7 @@ TestResult AssetManager_CanProvideFactory(AppState* e) {
     return TestResult::Pass();
 }
 
-TestResult AssetManager_CanLoadAsset(AppState* e) {
+TestResult AssetManager_CanLoadAsset(AxiomEngine* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
@@ -64,7 +65,7 @@ TestResult AssetManager_CanLoadAsset(AppState* e) {
     return TestResult::Pass();
 }
 
-TestResult AssetManager_CanUnloadAsset(AppState* e) {
+TestResult AssetManager_CanUnloadAsset(AxiomEngine* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
 
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
@@ -91,7 +92,7 @@ TestResult AssetManager_CanUnloadAsset(AppState* e) {
     return TestResult::Pass();
 }
 
-TestResult AssetManager_CanProcessTransient(AppState* e) {
+TestResult AssetManager_CanProcessTransient(AxiomEngine* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
 
     e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
@@ -110,7 +111,7 @@ TestResult AssetManager_CanProcessTransient(AppState* e) {
     return TestResult::Pass();
 }
 
-TestResult AssetManager_NoFactoryForAssetType(AppState* e) {
+TestResult AssetManager_NoFactoryForAssetType(AxiomEngine* e) {
 
     e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
 
@@ -120,7 +121,7 @@ TestResult AssetManager_NoFactoryForAssetType(AppState* e) {
 }
 
 
-TestResult AssetManager_NonExistantAssetNotEnqueued(AppState* e) {
+TestResult AssetManager_NonExistantAssetNotEnqueued(AxiomEngine* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
     e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
 
@@ -130,7 +131,7 @@ TestResult AssetManager_NonExistantAssetNotEnqueued(AppState* e) {
     return TestResult::Pass();
 }
 
-TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AppState* e) {
+TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AxiomEngine* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Binary, FailAssetFactory>();
     e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
@@ -145,7 +146,7 @@ TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AppState* e) {
     return TestResult::Pass();
 }
 
-TestResult AssetManager_ModelAssetLoads(AppState* e) {
+TestResult AssetManager_ModelAssetLoads(AxiomEngine* e) {
     e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(e->m_GPU);
     e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
 

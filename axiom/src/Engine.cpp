@@ -95,7 +95,7 @@ public:
     virtual ~SlangRHIDebugCallback() = default;
 };
 
-axm::AppState axm::engine::Init() {
+axm::AxiomEngine axm::engine::Init() {
     using namespace rhi;
     PROFILE_SCOPE()
 
@@ -105,14 +105,14 @@ axm::AppState axm::engine::Init() {
 
     if (!SDL_Init(kInitFlags)) {
         AXM_LOG("Failed to initialize AXIOM : SDL Init failed.");
-        return AppState::BAD();
+        return AxiomEngine::BAD();
     }
 
     SDL_Window* window = SDL_CreateWindow("AXIOM", 1280, 720, /*SDL_WINDOW_RESIZABLE*/ 0);
     if (!window) {
         AXM_LOG("Failed to initialize AXIOM : SDL Window Creation failed.");
         SDL_Quit();
-        return AppState::BAD();
+        return AxiomEngine::BAD();
     }
 
     IDevice*        device        = nullptr;
@@ -214,7 +214,7 @@ axm::AppState axm::engine::Init() {
     auto             mipsPipeline = pipeline::CreateComputePipeline(device, mips);
     if (!mipsPipeline) {
         AXM_LOG_ERROR("Failed to create compute pipeline for generating mips.");
-        return AppState::BAD();
+        return AxiomEngine::BAD();
     }
 
     DepthStencilDesc depthStencilDesc = { };
@@ -249,7 +249,7 @@ axm::AppState axm::engine::Init() {
     };
 }
 
-void axm::engine::Quit(const AppState& e) {
+void axm::engine::Quit(const AxiomEngine& e) {
     PROFILE_SCOPE()
 
     e.m_GPU.m_Queue->waitOnHost();
@@ -261,7 +261,7 @@ void axm::engine::Quit(const AppState& e) {
     SDL_DestroyWindow(e.m_Window.m_Window);
     SDL_Quit();
 }
-void axm::engine::PreFrame(AppState& e) {
+void axm::engine::PreFrame(AxiomEngine& e) {
     PROFILE_SCOPE()
     e.m_AssetManager.Update();
     e.m_FrameTimer.Reset();
@@ -289,7 +289,7 @@ void axm::engine::PreFrame(AppState& e) {
     e.m_GPU.m_Surface->acquireNextImage(&e.m_GPU.m_SwapchainColourImage);
 }
 
-void axm::engine::PostFrame(AppState& e) {
+void axm::engine::PostFrame(AxiomEngine& e) {
     PROFILE_SCOPE()
 
     ImGui::Render();
@@ -306,14 +306,14 @@ void axm::engine::PostFrame(AppState& e) {
 
     AXM_FLUSH_LOG();
 }
-void axm::engine::OnWindowResized(AppState& e, SDL_Event& ev) {
+void axm::engine::OnWindowResized(AxiomEngine& e, SDL_Event& ev) {
     int w, h;
     SDL_GetWindowSize(e.m_Window.m_Window, &w, &h);
     e.m_Window.m_Width  = static_cast<u32>(w);
     e.m_Window.m_Height = static_cast<u32>(h);
 }
 
-axm::AppState axm::AppState::BAD() {
+axm::AxiomEngine axm::AxiomEngine::BAD() {
     PROFILE_SCOPE()
 
     return { .m_OK = false, .m_Running = false, .m_AssetManager = AssetManager(), .m_Window = nullptr, .m_GPU = GPU() };

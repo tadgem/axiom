@@ -1,7 +1,7 @@
 #include "../include/Render/RenderPass.hpp"
 
 #include "Core/Profile.hpp"
-rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AppState&             app,
+rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AxiomEngine&          app,
                                                                     rhi::ICommandEncoder* cmd,
                                                                     rhi::LoadOp           colourLoadOp,
                                                                     rhi::LoadOp           depthLoadOp,

@@ -7,29 +7,26 @@
 #include "SDL3/SDL.h"
 
 namespace axm {
-    struct AppState
+    struct AxiomEngine
     {
-        bool            m_OK      = false;
-        bool            m_Running = true;
+        bool               m_OK      = false;
+        bool               m_Running = true;
+        Timer              m_FrameTimer;
+        f64                m_DeltaTime;
 
-        Timer           m_FrameTimer;
-        f64             m_DeltaTime;
+        AssetManager       m_AssetManager;
+        Window             m_Window;
+        GPU                m_GPU;
 
-        AssetManager    m_AssetManager;
-
-
-        Window          m_Window;
-        GPU             m_GPU;
-
-        static AppState BAD();
+        static AxiomEngine BAD();
     };
 
     namespace engine {
-        AppState Init();
-        void     Quit(const AppState& e);
-        void     PreFrame(AppState& e);
-        void     PostFrame(AppState& e);
-        void     OnWindowResized(AppState& e, SDL_Event& ev);
+        AxiomEngine Init();
+        void        Quit(const AxiomEngine& e);
+        void        PreFrame(AxiomEngine& e);
+        void        PostFrame(AxiomEngine& e);
+        void        OnWindowResized(AxiomEngine& e, SDL_Event& ev);
 
     } // namespace engine
 

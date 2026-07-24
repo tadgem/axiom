@@ -46,7 +46,7 @@ namespace {
 int main() {
     const Timer initTimer = { };
 
-    AppState    init      = engine::Init();
+    AxiomEngine init      = engine::Init();
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
     init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);

@@ -73,7 +73,7 @@ struct CompareItemsFromMap
 };
 
 
-void axm::profiler::ProfilerImGuiWindow(const AppState& e) {
+void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
 
     constexpr ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter
                                       | ImGuiTableFlags_BordersV | ImGuiTableFlags_Reorderable

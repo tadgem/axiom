@@ -15,10 +15,10 @@ static Transform                  g_Transform;
 static Camera                     g_Cam;
 static rhi::ComPtr<rhi::ISampler> g_Sampler;
 
-
 static aml::Mat44                 GetMVP(const Transform& trans, const Camera& cam) {
     return cam.GetViewProjectionMatrix() * trans.GetModelMatrix();
 }
+
 namespace {
     struct Drawable
     {
@@ -44,31 +44,25 @@ namespace {
 
 }
 int main() {
+    const Timer initTimer = { };
 
-    constexpr u32 width     = 1280;
-    constexpr u32 height    = 720;
-
-    const Timer   initTimer = { };
-
-    AppState      init      = engine::Init();
-    init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
-    init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
+    AppState    init      = engine::Init();
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
-    aml::Vec3 position     = { 0.0f, 0.0f, 0.0f };
-    aml::Vec3 euler        = { 0.0f, 0.0f, 0.0f };
-    aml::Vec3 scale        = aml::Vec3(0.16f, 0.16f, 0.16f);
+    init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
+    init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
+
     g_MVP                  = GetMVP(g_Transform, g_Cam);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
     posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
 
-    Array<String, 2> entries  = { "vertexMain", "fragmentMain" };
-    Shader           cube     = Shader(init.m_GPU.m_Device, "resources/shaders/cube", entries);
+    Shader cube
+            = Shader(init.m_GPU.m_Device, "resources/shaders/cube", Array<String, 2> { "vertexMain", "fragmentMain" });
 
-    Array            formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
+    Array formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
 
-    auto             pipeline = pipeline::CreateRasterPipeline(
+    auto  pipeline = pipeline::CreateRasterPipeline(
             init.m_GPU.m_Device, formats, init.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
 
     g_Sampler = textures::CreateSampler(

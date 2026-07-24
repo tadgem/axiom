@@ -12,6 +12,7 @@
 #include <vector>
 #include "Alloc.hpp"
 #include "Prim.hpp"
+#include "Profile.hpp"
 
 
 namespace axm {
@@ -55,11 +56,13 @@ namespace axm {
     // template utils
     template <typename Type>
     static bool IsFutureReady(Future<Type> const& o) {
+        PROFILE_SCOPE()
         return o.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 
     template <typename Type, typename... Args>
     Unique<Type> MakeUnique(Args&&... args) {
+        PROFILE_SCOPE()
         void*        memory_loc = mi_malloc(sizeof(Type));
         Unique<Type> ptr        = Unique<Type>(new (memory_loc) Type(std::forward<Args>(args)...));
         return std::move(ptr);
@@ -67,6 +70,7 @@ namespace axm {
 
     template <typename Type, typename... Args>
     RCP<Type> MakeRCP(Args&&... args) {
+        PROFILE_SCOPE()
         return std::allocate_shared<Type>(STLMimallocAllocator<Type>(), std::forward<Args>(args)...);
     }
 

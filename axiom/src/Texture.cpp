@@ -145,8 +145,14 @@ void axm::textures::GenerateMips(GPU& gpu, Texture& texture) {
     gpu.m_Queue->submit(commandBuffer);
 }
 
-axm::Texture        axm::Texture::BAD() { return { .m_GPUTexture = nullptr, .m_TextureView = nullptr }; }
-void                axm::CPUTextureData::Release() const { stbi_image_free(m_Data); }
+axm::Texture        axm::Texture::BAD() {
+    PROFILE_SCOPE()
+    return { .m_GPUTexture = nullptr, .m_TextureView = nullptr };
+}
+void                axm::CPUTextureData::Release() const {
+    PROFILE_SCOPE()
+    stbi_image_free(m_Data);
+}
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length) {
     PROFILE_SCOPE()
     // stbi_set_flip_vertically_on_load(true);
@@ -163,7 +169,7 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size
 }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::path& path) {
     PROFILE_SCOPE()
-    auto newPath = path.u8string();
+    auto newPath = path.generic_string();
     int  texWidth, texHeight, texChannels;
     stbi_set_flip_vertically_on_load(true);
     auto* pixels = stbi_load(

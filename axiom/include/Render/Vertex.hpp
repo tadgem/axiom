@@ -5,6 +5,7 @@
 #pragma once
 #include "Core/Debug.hpp"
 #include "Core/Maths.hpp"
+#include "Core/Profile.hpp"
 #include "Core/STL.hpp"
 #include "slang-rhi.h"
 
@@ -25,6 +26,7 @@ namespace axm {
             Layout(size_t                                  dataElemSize,
                    Array<rhi::InputElementDesc, ElemCount> inputElements,
                    u32 instanceDataStepRate = 0) : m_VertexStream({ }), m_DeviceInputLayout(nullptr) {
+                PROFILE_SCOPE()
 
                 m_InputElements.resize(ElemCount);
                 for (auto i = 0; i < ElemCount; i++) {
@@ -41,10 +43,12 @@ namespace axm {
             static Layout BuildLayout(Array<rhi::InputElementDesc, ElementCount> inputElements,
                                       u32                                        instanceDataStepRate = 0) {
 
+                PROFILE_SCOPE()
                 return Layout(sizeof(VertexElementType), inputElements, instanceDataStepRate);
             }
 
             NO_DISCARD size_t GetElementSize() const {
+                PROFILE_SCOPE()
                 size_t size = 0;
 
                 for (auto& e: m_InputElements) {
@@ -56,6 +60,8 @@ namespace axm {
 
             void BuildDeviceLayout(rhi::IDevice* device) {
                 using namespace rhi;
+
+                PROFILE_SCOPE()
 
                 VertexStreamDesc vertexStreams[]  = { m_VertexStream };
 
@@ -81,6 +87,7 @@ namespace axm {
 
             static Layout GetInputLayout() {
                 using namespace rhi;
+                PROFILE_SCOPE()
                 return Layout::BuildLayout<PosNormalUV, 3>({
                         InputElementDesc { "Position", 0, Format::RGB32Float, offsetof(PosNormalUV, m_Pos), 0 },
                         InputElementDesc { "Normal", 1, Format::RGB32Float, offsetof(PosNormalUV, m_Normal), 0 },

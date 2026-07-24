@@ -1,9 +1,9 @@
 #pragma once
 #include "Core/Debug.hpp"
 #include "Core/STL.hpp"
+#include "Core/Profile.hpp"
 #include "slang-rhi.h"
 #include "slang-rhi/shader-cursor.h"
-#include "slang.h"
 
 namespace axm {
 
@@ -30,6 +30,7 @@ namespace axm {
 
         template <typename T>
         void SetData(const char* bindingName, const T& data) const {
+            PROFILE_SCOPE()
             if (m_SlangCursor[bindingName].setData(&data, sizeof(T)) < 0) {
                 AXM_LOG("Failed to set data of type {} at binding {} to pipeline with shader {}",
                         typeid(T).name(),
@@ -39,6 +40,7 @@ namespace axm {
         }
 
         void SetBinding(const char* bindingName, const rhi::Binding& binding) const {
+            PROFILE_SCOPE()
             if (m_SlangCursor[bindingName].setBinding(binding) < 0) {
                 AXM_LOG("Failed to bind {} to pipeline with shader {}", bindingName, m_RenderPipeline->getDesc().label);
             }

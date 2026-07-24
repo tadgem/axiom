@@ -30,7 +30,7 @@ axm::profiler::ScopedTimer::~ScopedTimer() {
     // find bin to put the function in.
 }
 
-static axm::Vector<const char*> g_ProfilerItemLabelsSorted;
+static axm::DynArray<const char*> g_ProfilerItemLabelsSorted;
 
 // Helper struct to allow profiler items to be sorted:
 struct CompareItemsFromMap

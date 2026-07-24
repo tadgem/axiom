@@ -50,7 +50,7 @@ axm::Shader::Shader(IDevice* device, const String& name, Span<String> entries) :
         return;
     }
 
-    Vector<slang::IComponentType*> entryPoints = { };
+    DynArray<slang::IComponentType*> entryPoints = { };
 
     for (const auto& entry: entries) {
         slang::IEntryPoint* ep = { };

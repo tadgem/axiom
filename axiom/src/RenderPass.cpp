@@ -6,7 +6,7 @@ rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AppState&   
                                                                     rhi::LoadOp           colourLoadOp,
                                                                     rhi::LoadOp           depthLoadOp,
                                                                     bool                  enableDepthTest,
-                                                                    const vec4&           clearColour) {
+                                                                    const aml::Vec4&      clearColour) {
     PROFILE_SCOPE()
 
     using namespace rhi;
@@ -14,10 +14,10 @@ rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AppState&   
     colorAttachment.view                             = app.m_GPU.m_SwapchainColourImage->getDefaultView();
     colorAttachment.loadOp                           = colourLoadOp;
     colorAttachment.storeOp                          = StoreOp::Store;
-    colorAttachment.clearValue[0]                    = clearColour._[0];
-    colorAttachment.clearValue[1]                    = clearColour._[1];
-    colorAttachment.clearValue[2]                    = clearColour._[2];
-    colorAttachment.clearValue[3]                    = clearColour._[3];
+    colorAttachment.clearValue[0]                    = clearColour.mF32[0];
+    colorAttachment.clearValue[1]                    = clearColour.mF32[1];
+    colorAttachment.clearValue[2]                    = clearColour.mF32[2];
+    colorAttachment.clearValue[3]                    = clearColour.mF32[3];
 
     RenderPassDepthStencilAttachment depthAttachment = { };
     if (enableDepthTest) {

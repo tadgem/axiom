@@ -21,13 +21,13 @@ rhi::ITexture* axm::Utils::CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h
     device->createTexture(depthDesc, nullptr, &tex);
     return tex;
 }
-axm::Vector<u8> axm::Utils::LoadBinaryFromPath(const Filesystem::path& path) {
+axm::DynArray<u8> axm::Utils::LoadBinaryFromPath(const Filesystem::path& path) {
     PROFILE_SCOPE()
     std::ifstream file { path.c_str(), std::ios::binary | std::ios::ate };
     auto          fileSize = file.tellg();
     file.seekg(std::ios::beg);
 
-    Vector<u8> vec = { };
+    DynArray<u8> vec = { };
     vec.resize(fileSize);
     file.read(reinterpret_cast<char*>(std::data(vec)), fileSize);
 

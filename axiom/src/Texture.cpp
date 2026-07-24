@@ -27,7 +27,7 @@ axm::textures::CreateTexture2D(GPU& gpu, const void* data, rhi::Format format, u
     textureDesc.defaultState               = rhi::ResourceState::ShaderResource;
     textureDesc.label                      = label;
 
-    Vector<rhi::SubresourceData> initDatas = { };
+    DynArray<rhi::SubresourceData> initDatas = { };
 
     initDatas.push_back({ .data = data, .rowPitch = w * 4 });
     for (auto i = 0; i < mips; i++) {

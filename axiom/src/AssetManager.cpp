@@ -120,7 +120,7 @@ namespace axm {
 
     void AssetManager::UnloadAllAssets() {
         PROFILE_SCOPE()
-        Vector<AssetHandle> assetsRemaining { };
+        DynArray<AssetHandle> assetsRemaining { };
 
         for (auto& [handle, asset]: p_LoadedAssets) {
             assetsRemaining.push_back(handle);

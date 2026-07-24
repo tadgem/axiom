@@ -22,7 +22,7 @@ namespace axm {
                 AssetHandle    m_Handle;
             };
 
-            Vector<Map> m_TextureMaps;
+            DynArray<Map> m_TextureMaps;
         };
 
         struct MeshEntry
@@ -31,8 +31,8 @@ namespace axm {
             u32  m_MaterialIndex;
         };
 
-        Vector<MeshEntry>     m_Meshes;
-        Vector<MaterialEntry> m_Materials;
+        DynArray<MeshEntry>     m_Meshes;
+        DynArray<MaterialEntry> m_Materials;
     };
 
     struct ModelTransientData
@@ -55,7 +55,7 @@ namespace axm {
         void                       UnloadAsset(Asset* asset) const override;
         void                       ProcessAssetTransient(AssetTransient* data) const override;
 
-        static Vector<AssetLoadInfo>
+        static DynArray<AssetLoadInfo>
         ProcessSceneMaterials(const String& directory, const aiScene* scene, ModelAsset* model);
     };
 

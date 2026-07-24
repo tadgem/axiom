@@ -19,7 +19,7 @@ namespace axm {
     using String = std::basic_string<char, std::char_traits<char>, mi_stl_allocator<char>>;
 
     template <typename Type, typename Allocator = mi_stl_allocator<Type>>
-    using Vector = std::vector<Type, Allocator>;
+    using DynArray = std::vector<Type, Allocator>;
 
     template <typename Type, size_t N>
     using Array = std::array<Type, N>;

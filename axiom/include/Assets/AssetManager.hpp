@@ -37,7 +37,7 @@ namespace axm {
     {
         Variant<Asset*, AssetTransient*, AssetErrorMessage>
                               m_Next; // may be final asset or transient while factory processes N steps
-        Vector<AssetLoadInfo> m_NewAssetTasks; // new assets to be loaded (e.g. model requests new tex)
+        DynArray<AssetLoadInfo> m_NewAssetTasks; // new assets to be loaded (e.g. model requests new tex)
     };
 
     class AssetFactory
@@ -134,11 +134,11 @@ namespace axm {
 
         HashMap<AssetType, Unique<AssetFactory>> p_AssetFactories;
         HashMap<AssetHandle, Unique<Asset>>      p_LoadedAssets;
-        Vector<AssetHandle>                      p_QueuedUnloads;
-        Vector<AssetLoadInfo>                    p_QueuedLoads;
+        DynArray<AssetHandle>                      p_QueuedUnloads;
+        DynArray<AssetLoadInfo>                    p_QueuedLoads;
 
-        Vector<AsyncAssetData>                   p_InFlightLoads;
-        Vector<AssetTransientData>               p_InFlightTransients;
+        DynArray<AsyncAssetData>                   p_InFlightLoads;
+        DynArray<AssetTransientData>               p_InFlightTransients;
 
         static constexpr u16                     kMaxMainThreadTasksPerTick = 1;
         static constexpr u16                     kMaxAsyncTasksPerTick      = 1;

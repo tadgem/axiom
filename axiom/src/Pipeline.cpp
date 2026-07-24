@@ -17,7 +17,7 @@ rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevi
     AXM_LOG("  depthTarget.format: {}", (int) depthTarget.format);
 
 
-    Vector<rhi::ColorTargetDesc> colorTargets;
+    DynArray<rhi::ColorTargetDesc> colorTargets;
     colorTargets.resize(colourFormats.size());
 
     for (auto i = 0; i < colourFormats.size(); i++) {

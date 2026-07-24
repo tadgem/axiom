@@ -15,9 +15,9 @@ namespace axm {
         class Layout
         {
         public:
-            Vector<rhi::InputElementDesc>  m_InputElements;
-            rhi::VertexStreamDesc          m_VertexStream;
-            rhi::ComPtr<rhi::IInputLayout> m_DeviceInputLayout;
+            DynArray<rhi::InputElementDesc> m_InputElements;
+            rhi::VertexStreamDesc           m_VertexStream;
+            rhi::ComPtr<rhi::IInputLayout>  m_DeviceInputLayout;
 
             Layout() = default;
 
@@ -75,9 +75,9 @@ namespace axm {
 
         struct PosNormalUV
         {
-            vec3          m_Pos;
-            vec3          m_Normal;
-            vec2          m_UV;
+            aml::Float3   m_Pos;
+            aml::Float3   m_Normal;
+            aml::Float2   m_UV;
 
             static Layout GetInputLayout() {
                 using namespace rhi;

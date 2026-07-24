@@ -13,6 +13,6 @@ namespace axm {
                                       f64,
                                       STLMimallocAllocator,
                                       nlohmann::adl_serializer,
-                                      Vector<u8>,
+                                      DynArray<u8>,
                                       void>;
 }

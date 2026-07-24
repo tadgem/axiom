@@ -4,7 +4,7 @@
 
 using namespace axm;
 
-using TestBinaryAsset = AssetT<Vector<u8>, AssetType::Binary>;
+using TestBinaryAsset = AssetT<DynArray<u8>, AssetType::Binary>;
 
 
 class TestAssetFactory : public AssetFactory

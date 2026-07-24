@@ -109,7 +109,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         AXM_LOG_ERROR("Mesh {} does not have any normals", model->m_Path.generic_string());
     }
 
-    Vector<f32> vertexData = { };
+    DynArray<f32> vertexData = { };
     for (auto i = 0; i < mesh->mNumVertices; i++) {
         // positions
         vertexData.push_back(mesh->mVertices[i].x);
@@ -130,7 +130,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         }
     }
 
-    Vector<u32> indexData = { };
+    DynArray<u32> indexData = { };
     for (auto i = 0; i < mesh->mNumFaces; i++) {
         if (mesh->mFaces[i].mNumIndices != 3) {
             AXM_LOG_ERROR("Mesh {} has non triangular face.", model->m_Path.generic_string());
@@ -172,11 +172,11 @@ GetMaterialTexture(const axm::String&         directory,
     return { { .m_MapType = TextureMapType::Unknown, .m_Handle = AssetHandle::BAD }, "" };
 }
 
-axm::Vector<axm::AssetLoadInfo>
+axm::DynArray<axm::AssetLoadInfo>
 axm::ModelAssetFactory::ProcessSceneMaterials(const String& directory, const aiScene* scene, ModelAsset* model) {
     // get all materials here
     PROFILE_SCOPE();
-    Vector<AssetLoadInfo> texturesToLoad = { };
+    DynArray<AssetLoadInfo> texturesToLoad = { };
 
     for (auto i = 0; i < scene->mNumMaterials; i++) {
         const auto*          material = scene->mMaterials[i];

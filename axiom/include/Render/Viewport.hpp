@@ -5,7 +5,7 @@
 namespace axm {
     struct Viewport
     {
-        vec2u m_Size;
+        aml::Float2 m_Size;
     };
 
     namespace viewports {

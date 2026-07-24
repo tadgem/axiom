@@ -41,7 +41,10 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking")
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable ASSIMP tests (removed the dir)")
 add_subdirectory(third_party/assimp)
 
-#
+# Jolt
+set(JPH_BUILD_SHARED_LIBS OFF CACHE BOOL "Disable Jolt shared libs")
+set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "Disable Jolt static MSVC runtime library" FORCE)
+add_subdirectory(submodules/jolt/Build)
 
 # Third Party Single Headers
 set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_headers)

@@ -21,6 +21,7 @@ target_link_libraries(axiom PUBLIC
         assimp
         flecs_static
         mimalloc-static
+        Jolt
 )
 
 target_include_directories(axiom PUBLIC

@@ -29,6 +29,7 @@ axm::buffer::CreateIndexBuffer(rhi::IDevice* device, u64 size, const void* data,
     desc.size         = size;
     desc.usage        = BufferUsage::IndexBuffer;
     desc.defaultState = ResourceState::IndexBuffer;
+    desc.format       = Format::R32Uint;
     desc.label        = label;
 
     ComPtr<IBuffer> buffer;

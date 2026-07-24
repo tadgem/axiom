@@ -33,5 +33,5 @@ float4 fragmentMain(VertexOutput input) : SV_Target
     float4 col = diffuse.Sample(diffuseSampler, input.uv);
     //float4 col = float4( input.uv, 0.0, 1.0 );
 
-    return col;
+    return float4(pow(col.rgb, 2.2), 1.0);
 }

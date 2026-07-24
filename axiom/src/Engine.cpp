@@ -206,14 +206,6 @@ axm::AppState axm::engine::Init() {
         return { };
     }
 
-    DepthStencilDesc depthStencilDesc = { };
-    depthStencilDesc.format           = Format::D32Float;
-    depthStencilDesc.depthTestEnable  = true;
-    depthStencilDesc.depthWriteEnable = true;
-    depthStencilDesc.depthFunc        = ComparisonFunc::LessEqual;
-
-    ComPtr<ITexture> depthTexture     = textures::CreateDepthTexture(device, 1280, 720);
-
 
     auto sampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
 
@@ -225,25 +217,35 @@ axm::AppState axm::engine::Init() {
         return AppState::BAD();
     }
 
+    DepthStencilDesc depthStencilDesc = { };
+    depthStencilDesc.format           = Format::D32Float;
+    depthStencilDesc.depthTestEnable  = true;
+    depthStencilDesc.depthWriteEnable = true;
+    depthStencilDesc.depthFunc        = ComparisonFunc::LessEqual;
 
-    GPU gpu = { .m_Device               = device,
-                .m_Surface              = surface,
-                .m_Queue                = graphicsQueue,
-                .m_SwapchainColourImage = nullptr,
-                .m_SwapchainDepthImage  = depthTexture,
-                .m_DebugCallback        = std::move(debugCallback),
-                .m_MipShader            = mips,
-                .m_MipPipeline          = mipsPipeline,
-                .m_LinearClampSampler   = sampler };
+    auto depthTexture                 = textures::CreateDepthTexture(device, width, height);
 
+    GPU  gpu                          = {
+                                  .m_Device               = device,
+                                  .m_Surface              = surface,
+                                  .m_Queue                = graphicsQueue,
+                                  .m_SwapchainColourImage = nullptr,
+                                  .m_SwapchainDepthImage  = depthTexture,
+                                  .m_DebugCallback        = std::move(debugCallback),
+                                  .m_MipShader            = mips,
+                                  .m_MipPipeline          = mipsPipeline,
+                                  .m_LinearClampSampler   = sampler,
+                                  .m_DepthStencilDesc     = depthStencilDesc,
+    };
+
+    Window w = { .m_Window = window, .m_Width = static_cast<u32>(width), .m_Height = static_cast<u32>(height) };
 
     return {
-        .m_OK               = true,
-        .m_Running          = true,
-        .m_AssetManager     = AssetManager(),
-        .m_DepthStencilDesc = depthStencilDesc,
-        .m_Window           = window,
-        .m_GPU              = std::move(gpu),
+        .m_OK           = true,
+        .m_Running      = true,
+        .m_AssetManager = AssetManager(),
+        .m_Window       = w,
+        .m_GPU          = std::move(gpu),
     };
 }
 
@@ -256,7 +258,7 @@ void axm::engine::Quit(const AppState& e) {
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_DestroyWindow(e.m_Window);
+    SDL_DestroyWindow(e.m_Window.m_Window);
     SDL_Quit();
 }
 void axm::engine::PreFrame(AppState& e) {
@@ -270,6 +272,9 @@ void axm::engine::PreFrame(AppState& e) {
         switch (event.type) {
             case SDL_EVENT_QUIT:
                 e.m_Running = false;
+                break;
+            case SDL_EVENT_WINDOW_RESIZED:
+                OnWindowResized(e, event);
                 break;
             default:
                 // AXM_LOG("Unhandled event");
@@ -301,14 +306,15 @@ void axm::engine::PostFrame(AppState& e) {
 
     AXM_FLUSH_LOG();
 }
+void axm::engine::OnWindowResized(AppState& e, SDL_Event& ev) {
+    int w, h;
+    SDL_GetWindowSize(e.m_Window.m_Window, &w, &h);
+    e.m_Window.m_Width  = static_cast<u32>(w);
+    e.m_Window.m_Height = static_cast<u32>(h);
+}
 
 axm::AppState axm::AppState::BAD() {
     PROFILE_SCOPE()
 
-    return { .m_OK               = false,
-             .m_Running          = false,
-             .m_AssetManager     = AssetManager(),
-             .m_DepthStencilDesc = { },
-             .m_Window           = nullptr,
-             .m_GPU              = GPU() };
+    return { .m_OK = false, .m_Running = false, .m_AssetManager = AssetManager(), .m_Window = nullptr, .m_GPU = GPU() };
 }

@@ -18,5 +18,7 @@ namespace axm {
         Shader                             m_MipShader;
         rhi::ComPtr<rhi::IComputePipeline> m_MipPipeline;
         rhi::ComPtr<rhi::ISampler>         m_LinearClampSampler;
+
+        rhi::DepthStencilDesc              m_DepthStencilDesc;
     };
 }

@@ -63,7 +63,7 @@ int main() {
     Array formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
 
     auto  pipeline = pipeline::CreateRasterPipeline(
-            init.m_GPU.m_Device, formats, init.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
+            init.m_GPU.m_Device, formats, init.m_GPU.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
 
     g_Sampler = textures::CreateSampler(
             init.m_GPU.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::Wrap);
@@ -74,7 +74,7 @@ int main() {
     AXM_LOG("Init took {} ms", msInitTime);
     AXM_LOG("Starting Axiom Main Loop");
 
-    auto viewport  = viewports::GetFullscreenViewport(init.m_Window);
+    auto viewport  = viewports::GetFullscreenViewport(init.m_Window.m_Window);
 
     auto drawables = DynArray<Drawable> { };
 

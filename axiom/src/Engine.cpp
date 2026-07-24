@@ -206,34 +206,35 @@ axm::AppState axm::engine::Init() {
         return { };
     }
 
-    ITexture*        depthTexture     = Utils::CreateDepthTexture(device, 1280, 720);
-
     DepthStencilDesc depthStencilDesc = { };
     depthStencilDesc.format           = Format::D32Float;
     depthStencilDesc.depthTestEnable  = true;
     depthStencilDesc.depthWriteEnable = true;
     depthStencilDesc.depthFunc        = ComparisonFunc::LessEqual;
 
-    Array<String, 1> entries          = { "computeMain" };
-    auto             mips             = Shader(device, "resources/shaders/mips", entries);
-    auto             mipsPipeline     = pipeline::CreateComputePipeline(device, mips);
+    ComPtr<ITexture> depthTexture     = textures::CreateDepthTexture(device, 1280, 720);
+
+
+    auto sampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
+
+    Array<String, 1> entries      = { "computeMain" };
+    auto             mips         = Shader(device, "resources/shaders/mips", entries);
+    auto             mipsPipeline = pipeline::CreateComputePipeline(device, mips);
     if (!mipsPipeline) {
         AXM_LOG_ERROR("Failed to create compute pipeline for generating mips.");
         return AppState::BAD();
     }
 
-    auto sampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
 
-
-    GPU  gpu     = { .m_Device               = device,
-                     .m_Surface              = surface,
-                     .m_Queue                = graphicsQueue,
-                     .m_SwapchainColourImage = nullptr,
-                     .m_SwapchainDepthImage  = depthTexture,
-                     .m_DebugCallback        = std::move(debugCallback),
-                     .m_MipShader            = mips,
-                     .m_MipPipeline          = mipsPipeline,
-                     .m_LinearClampSampler   = sampler };
+    GPU gpu = { .m_Device               = device,
+                .m_Surface              = surface,
+                .m_Queue                = graphicsQueue,
+                .m_SwapchainColourImage = nullptr,
+                .m_SwapchainDepthImage  = depthTexture,
+                .m_DebugCallback        = std::move(debugCallback),
+                .m_MipShader            = mips,
+                .m_MipPipeline          = mipsPipeline,
+                .m_LinearClampSampler   = sampler };
 
 
     return {

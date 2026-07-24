@@ -49,6 +49,10 @@ namespace axm {
         Texture
         CreateTexture2D(GPU& device, const void* data, rhi::Format format, u32 w, u32 h, const char* label = "UNKNOWN");
 
+        rhi::ComPtr<rhi::ITexture>
+             CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format = rhi::Format::D32Float);
+
+
         void GenerateMips(GPU& device, Texture& texture);
 
     } // namespace textures

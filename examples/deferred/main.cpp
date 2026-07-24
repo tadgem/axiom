@@ -108,7 +108,7 @@ int main() {
         auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
         auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
                 init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
-        auto shader = ShaderDataInterface(renderPassEncoder, pipeline);
+        auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
         for (auto& drawable: drawables) {
 
             if (drawable.m_Texture == nullptr) {

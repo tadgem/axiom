@@ -11,7 +11,7 @@ namespace axm {
         rhi::ICommandQueue*                m_Queue                = nullptr;
 
         rhi::ITexture*                     m_SwapchainColourImage = nullptr;
-        rhi::ITexture*                     m_SwapchainDepthImage  = nullptr;
+        rhi::ComPtr<rhi::ITexture>         m_SwapchainDepthImage  = nullptr;
 
         Unique<rhi::IDebugCallback>        m_DebugCallback;
 

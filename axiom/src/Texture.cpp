@@ -12,20 +12,20 @@ axm::Texture
 axm::textures::CreateTexture2D(GPU& gpu, const void* data, rhi::Format format, u32 w, u32 h, const char* label) {
     PROFILE_SCOPE()
 
-    uint32_t mips                          = 1;
-    mips                                   = static_cast<uint32_t>(std::floor(std::log2(std::max(w, h)))) + 1;
+    uint32_t mips                            = 1;
+    mips                                     = static_cast<uint32_t>(std::floor(std::log2(std::max(w, h)))) + 1;
 
-    rhi::TextureDesc textureDesc           = { };
-    textureDesc.type                       = rhi::TextureType::Texture2D;
-    textureDesc.size.width                 = w;
-    textureDesc.size.height                = h;
-    textureDesc.size.depth                 = 1;
-    textureDesc.arrayLength                = 1;
-    textureDesc.mipCount                   = mips;
-    textureDesc.format                     = format;
-    textureDesc.usage                      = rhi::TextureUsage::ShaderResource | rhi::TextureUsage::UnorderedAccess;
-    textureDesc.defaultState               = rhi::ResourceState::ShaderResource;
-    textureDesc.label                      = label;
+    rhi::TextureDesc textureDesc             = { };
+    textureDesc.type                         = rhi::TextureType::Texture2D;
+    textureDesc.size.width                   = w;
+    textureDesc.size.height                  = h;
+    textureDesc.size.depth                   = 1;
+    textureDesc.arrayLength                  = 1;
+    textureDesc.mipCount                     = mips;
+    textureDesc.format                       = format;
+    textureDesc.usage                        = rhi::TextureUsage::ShaderResource | rhi::TextureUsage::UnorderedAccess;
+    textureDesc.defaultState                 = rhi::ResourceState::ShaderResource;
+    textureDesc.label                        = label;
 
     DynArray<rhi::SubresourceData> initDatas = { };
 
@@ -123,16 +123,16 @@ void axm::textures::GenerateMips(GPU& gpu, Texture& texture) {
             return;
         }
 
-        rhi::ShaderCursor cursor(computePass->bindPipeline(gpu.m_MipPipeline));
+        ShaderDataInterface cursor(computePass->bindPipeline(gpu.m_MipPipeline), gpu.m_MipPipeline->getDesc().label);
 
         MipParams params = { .srcTexelSize = { 1.0f / static_cast<f32>(srcWidth), 1.0f / static_cast<f32>(srcHeight) },
                              .dstSize      = { dstWidth, dstHeight },
                              .srcMipLevel  = 0 };
 
-        cursor["params"].setData(&params, sizeof(params));
-        cursor["srcTexture"].setBinding(srcView);
-        cursor["srcSampler"].setBinding(gpu.m_LinearClampSampler);
-        cursor["dstTexture"].setBinding(dstView);
+        cursor.SetData("params", params);
+        cursor.SetBinding("srcTexture", srcView);
+        cursor.SetBinding("srcSampler", gpu.m_LinearClampSampler);
+        cursor.SetBinding("dstTexture", dstView);
 
         u32 groupsX = (dstWidth + 7) / 8;
         u32 groupsY = (dstHeight + 7) / 8;
@@ -145,11 +145,11 @@ void axm::textures::GenerateMips(GPU& gpu, Texture& texture) {
     gpu.m_Queue->submit(commandBuffer);
 }
 
-axm::Texture        axm::Texture::BAD() {
+axm::Texture axm::Texture::BAD() {
     PROFILE_SCOPE()
     return { .m_GPUTexture = nullptr, .m_TextureView = nullptr };
 }
-void                axm::CPUTextureData::Release() const {
+void axm::CPUTextureData::Release() const {
     PROFILE_SCOPE()
     stbi_image_free(m_Data);
 }
@@ -199,4 +199,24 @@ rhi::ComPtr<rhi::ISampler> axm::textures::CreateSampler(rhi::IDevice*           
     }
 
     return sampler;
+}
+
+
+rhi::ComPtr<rhi::ITexture> axm::textures::CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format) {
+    using namespace rhi;
+    PROFILE_SCOPE()
+    TextureDesc depthDesc  = { };
+    depthDesc.type         = TextureType::Texture2D;
+    depthDesc.size.width   = w;
+    depthDesc.size.height  = h;
+    depthDesc.size.depth   = 1;
+    depthDesc.arrayLength  = 1;
+    depthDesc.mipCount     = 1;
+    depthDesc.format       = Format::D32Float;
+    depthDesc.usage        = TextureUsage::DepthStencil;
+    depthDesc.defaultState = ResourceState::DepthWrite;
+    depthDesc.label        = "Depth Texture";
+    ComPtr<ITexture> tex;
+    device->createTexture(depthDesc, nullptr, tex.writeRef());
+    return tex;
 }

@@ -22,11 +22,11 @@ namespace axm {
     };
 
     namespace engine {
-        AxiomEngine Init();
-        void        Quit(const AxiomEngine& e);
-        void        PreFrame(AxiomEngine& e);
-        void        PostFrame(AxiomEngine& e);
-        void        OnWindowResized(AxiomEngine& e, SDL_Event& ev);
+        AxiomEngine     Init();
+        void            Quit(const AxiomEngine& e);
+        NO_DISCARD bool PreFrame(AxiomEngine& e);
+        void            PostFrame(AxiomEngine& e);
+        void            OnWindowResized(AxiomEngine& e, SDL_Event& ev);
 
     } // namespace engine
 

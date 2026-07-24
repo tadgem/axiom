@@ -170,7 +170,7 @@ TestResult AssetManager_ModelAssetLoads(AxiomEngine* e) {
     return TestResult::Pass();
 }
 
-AXM_BEGIN_TESTS("Core Tests")
+AXM_BEGIN_TESTS("Asset Tests")
 
 AXM_ADD_TEST(AssetManager_CanProvideFactory)
 AXM_ADD_TEST(AssetManager_CanLoadAsset)

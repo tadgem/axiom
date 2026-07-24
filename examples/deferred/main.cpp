@@ -74,8 +74,6 @@ int main() {
     AXM_LOG("Init took {} ms", msInitTime);
     AXM_LOG("Starting Axiom Main Loop");
 
-    auto viewport  = viewports::GetFullscreenViewport(init.m_Window.m_Window);
-
     auto drawables = DynArray<Drawable> { };
 
     init.m_AssetManager.LoadAsset("resources/models/sponza/Sponza.gltf", AssetType::Model, [&drawables](Asset* asset) {
@@ -88,25 +86,28 @@ int main() {
     });
 
     while (init.m_Running) {
-        engine::PreFrame(init);
-        g_MVP                  = GetMVP(g_Transform, g_Cam);
+        if (engine::PreFrame(init)) {
+            auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
+            g_Cam.m_ViewportDimensions = viewport.m_Size;
+            g_MVP                      = GetMVP(g_Transform, g_Cam);
 
-        auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
-        auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
-                init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
-        auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
-        for (auto& drawable: drawables) {
+            auto commandEncoder        = init.m_GPU.m_Queue->createCommandEncoder();
+            auto renderPassEncoder     = render_pass::BeginSwapChainRenderPass(
+                    init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
+            auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
+            for (auto& drawable: drawables) {
 
-            if (drawable.m_Texture == nullptr) {
-                if (const auto asset = init.m_AssetManager.GetAsset(drawable.m_TextureAsset)) {
-                    drawable.m_Texture = &dynamic_cast<TextureAsset*>(asset)->m_Data;
+                if (drawable.m_Texture == nullptr) {
+                    if (const auto asset = init.m_AssetManager.GetAsset(drawable.m_TextureAsset)) {
+                        drawable.m_Texture = &dynamic_cast<TextureAsset*>(asset)->m_Data;
+                    }
                 }
+                DrawDrawable(init.m_GPU, renderPassEncoder, shader, drawable, viewport);
             }
-            DrawDrawable(init.m_GPU, renderPassEncoder, shader, drawable, viewport);
-        }
 
-        renderPassEncoder->end();
-        init.m_GPU.m_Queue->submit(commandEncoder->finish());
+            renderPassEncoder->end();
+            init.m_GPU.m_Queue->submit(commandEncoder->finish());
+        }
 
         profiler::ProfilerImGuiWindow(init);
 

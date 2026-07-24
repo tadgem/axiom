@@ -17,6 +17,7 @@ add_library(axiom
         include/Render/ImGuiUtils.hpp
         src/ImGuiUtils.cpp
         include/Core/Window.hpp
+        ../tests/EngineTests.cpp
 )
 
 # TODO: Cannot activate atm due to werrors in slang-rhi

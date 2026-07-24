@@ -57,5 +57,6 @@ add_subdirectory(axiom)
 # issue with required DLLs not being copied to correct directory
 
 add_axiom_test(axiom-tests-assets tests/AssetTests.cpp)
+add_axiom_test(axiom-tests-engine tests/EngineTests.cpp)
 
 add_axiom_example(axiom-example-deferred examples/deferred/main.cpp)

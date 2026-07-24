@@ -108,7 +108,7 @@ axm::AxiomEngine axm::engine::Init() {
         return AxiomEngine::BAD();
     }
 
-    SDL_Window* window = SDL_CreateWindow("AXIOM", 1280, 720, /*SDL_WINDOW_RESIZABLE*/ 0);
+    SDL_Window* window = SDL_CreateWindow("AXIOM", 1280, 720, SDL_WINDOW_RESIZABLE);
     if (!window) {
         AXM_LOG("Failed to initialize AXIOM : SDL Window Creation failed.");
         SDL_Quit();
@@ -261,7 +261,7 @@ void axm::engine::Quit(const AxiomEngine& e) {
     SDL_DestroyWindow(e.m_Window.m_Window);
     SDL_Quit();
 }
-void axm::engine::PreFrame(AxiomEngine& e) {
+bool axm::engine::PreFrame(AxiomEngine& e) {
     PROFILE_SCOPE()
     e.m_AssetManager.Update();
     e.m_FrameTimer.Reset();
@@ -286,31 +286,62 @@ void axm::engine::PreFrame(AxiomEngine& e) {
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
-    e.m_GPU.m_Surface->acquireNextImage(&e.m_GPU.m_SwapchainColourImage);
+    if (e.m_GPU.m_Surface->getConfig()) {
+        e.m_GPU.m_Surface->acquireNextImage(&e.m_GPU.m_SwapchainColourImage);
+        return true;
+    }
+
+    e.m_GPU.m_SwapchainColourImage = nullptr;
+    return false;
 }
 
 void axm::engine::PostFrame(AxiomEngine& e) {
     PROFILE_SCOPE()
 
     ImGui::Render();
-    auto commandEncoder = e.m_GPU.m_Queue->createCommandEncoder();
-    auto passEncoder
-            = render_pass::BeginSwapChainRenderPass(e, commandEncoder, rhi::LoadOp::Load, rhi::LoadOp::DontCare, false);
 
-    ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
+    if (e.m_GPU.m_SwapchainColourImage != nullptr) {
+        auto commandEncoder = e.m_GPU.m_Queue->createCommandEncoder();
+        auto passEncoder    = render_pass::BeginSwapChainRenderPass(
+                e, commandEncoder, rhi::LoadOp::Load, rhi::LoadOp::DontCare, false);
 
-    passEncoder->end();
-    e.m_GPU.m_Queue->submit(commandEncoder->finish());
-    e.m_GPU.m_Surface->present();
+        ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
+
+        passEncoder->end();
+        e.m_GPU.m_Queue->submit(commandEncoder->finish());
+        e.m_GPU.m_Surface->present();
+    }
+
     e.m_DeltaTime = e.m_FrameTimer.ElapsedMillisecondsF();
 
     AXM_FLUSH_LOG();
 }
 void axm::engine::OnWindowResized(AxiomEngine& e, SDL_Event& ev) {
-    int w, h;
-    SDL_GetWindowSize(e.m_Window.m_Window, &w, &h);
-    e.m_Window.m_Width  = static_cast<u32>(w);
-    e.m_Window.m_Height = static_cast<u32>(h);
+    int w = 0, h = 0;
+    SDL_GetWindowSizeInPixels(e.m_Window.m_Window, &w, &h);
+
+    if (e.m_GPU.m_Queue) {
+        e.m_GPU.m_Queue->waitOnHost();
+    }
+
+    if (w > 0 && h > 0) {
+        e.m_Window.m_Width               = static_cast<u32>(w);
+        e.m_Window.m_Height              = static_cast<u32>(h);
+
+        rhi::SurfaceConfig surfaceConfig = { };
+        surfaceConfig.width              = static_cast<uint32_t>(w);
+        surfaceConfig.height             = static_cast<uint32_t>(h);
+        surfaceConfig.format             = rhi::Format::Undefined;
+        surfaceConfig.vsync              = true;
+
+        if (SLANG_FAILED(e.m_GPU.m_Surface->configure(surfaceConfig))) {
+            AXM_LOG_ERROR("Failed to reconfigure surface on resize");
+        }
+
+        e.m_GPU.m_SwapchainDepthImage = textures::CreateDepthTexture(e.m_GPU.m_Device, w, h);
+    } else {
+        e.m_GPU.m_Surface->unconfigure();
+    }
 }
 
 axm::AxiomEngine axm::AxiomEngine::BAD() {

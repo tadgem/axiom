@@ -17,20 +17,6 @@ namespace axm {
             return { };
         }
 
-        // remove working directory from path (if it is part of the provided path)
-        // const String wd(Filesystem::current_path().string());
-        // String       tmp_path = String(path.string());
-        // if (tmp_path.find(wd) != String::npos) {
-        //     tmp_path.erase(tmp_path.find(wd), wd.length());
-        //
-        //     for (int i = 0; i < 2; i++) {
-        //         if (tmp_path[0] != '\\' && tmp_path[0] != '/') {
-        //             break;
-        //         }
-        //         tmp_path.erase(0, 1);
-        //     }
-        // }
-
         AssetHandle   handle(path, assetType);
         AssetLoadInfo loadInfo { .m_Path             = String(path.string()),
                                  .m_AssetType        = assetType,

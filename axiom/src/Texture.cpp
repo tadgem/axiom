@@ -4,8 +4,6 @@
 #include "Render/Pipeline.hpp"
 #include "Render/Shader.hpp"
 
-
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 axm::Texture

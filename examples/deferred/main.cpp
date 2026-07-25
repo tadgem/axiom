@@ -5,7 +5,6 @@
 #include "Render/ImGuiUtils.hpp"
 #include "axiom.hpp"
 
-
 AXM_OVERRIDE_GLOBAL_NEW(false)
 
 using namespace axm;
@@ -57,7 +56,7 @@ int main() {
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
     posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
 
-    Shader cube
+    auto cube
             = Shader(init.m_GPU.m_Device, "resources/shaders/cube", Array<String, 2> { "vertexMain", "fragmentMain" });
 
     Array formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
@@ -91,16 +90,16 @@ int main() {
             g_Cam.m_ViewportDimensions = viewport.m_Size;
             g_MVP                      = GetMVP(g_Transform, g_Cam);
 
-            im3d::NewFrame(g_Cam, init.m_DeltaTime, viewport.m_Size);
+            SlangIm3D::NewFrame(g_Cam, init.m_DeltaTime, viewport.m_Size);
 
             // Im3d Debug Primitives with Pushed Color and Size
-            im3d::PushColor(Im3d::Color_Green);
-            im3d::PushSize(4.0f);
+            Im3d::PushColor(Im3d::Color_Green);
+            Im3d::PushSize(4.0f);
             Im3d::DrawSphere(Im3d::Vec3(0.0f, 2.0f, 0.0f), 4.5f, 16);
-            im3d::PopSize();
-            im3d::PopColor();
+            Im3d::PopSize();
+            Im3d::PopColor();
 
-            im3d::TransformGizmo("SponzaGizmo", g_Transform);
+            SlangIm3D::TransformGizmo("SponzaGizmo", g_Transform);
 
             auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
             auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
@@ -116,7 +115,7 @@ int main() {
                 DrawDrawable(init.m_GPU, renderPassEncoder, shader, drawable, viewport);
             }
 
-            im3d::Render(commandEncoder, renderPassEncoder, viewport.m_Size, &g_Cam);
+            SlangIm3D::Render(commandEncoder, renderPassEncoder, viewport.m_Size, g_Cam);
 
             renderPassEncoder->end();
             init.m_GPU.m_Queue->submit(commandEncoder->finish());

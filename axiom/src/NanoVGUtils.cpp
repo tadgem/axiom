@@ -3,15 +3,13 @@
 
 namespace axm::nanovg {
 
-    NVGcontext* CreateContext(rhi::IDevice* device, int flags) {
-        return nvgCreateSlangRHI(device, flags);
-    }
+    using NVGTextureHandle = i32;
 
-    void DestroyContext(NVGcontext* ctx) {
-        nvgDeleteSlangRHI(ctx);
-    }
+    NVGcontext* CreateContext(rhi::IDevice* device, i32 flags) { return nvgCreateSlangRHI(device, flags); }
 
-    bool CreatePipeline(NVGcontext* ctx, rhi::Format colorFormat, rhi::Format depthFormat) {
+    void        DestroyContext(NVGcontext* ctx) { nvgDeleteSlangRHI(ctx); }
+
+    bool        CreatePipeline(NVGcontext* ctx, rhi::Format colorFormat, rhi::Format depthFormat) {
         return nvgSlangRHICreatePipeline(ctx, colorFormat, depthFormat);
     }
 
@@ -19,20 +17,18 @@ namespace axm::nanovg {
         nvgSlangRHIUpdateTextures(ctx, commandEncoder);
     }
 
-    void Render(NVGcontext*             ctx,
+    void Render(NVGcontext*              ctx,
                 rhi::ICommandEncoder*    commandEncoder,
                 rhi::IRenderPassEncoder* renderPassEncoder,
-                float                    width,
-                float                    height) {
+                f32                      width,
+                f32                      height) {
         nvgSlangRHIRender(ctx, commandEncoder, renderPassEncoder, width, height);
     }
 
-    int CreateImageFromTextureView(NVGcontext* ctx, rhi::ITextureView* textureView) {
+    NVGTextureHandle CreateImageFromTextureView(NVGcontext* ctx, rhi::ITextureView* textureView) {
         return nvgSlangRHICreateImage(ctx, textureView);
     }
 
-    void DeleteImage(NVGcontext* ctx, int image) {
-        nvgSlangRHIDeleteImage(ctx, image);
-    }
+    void DeleteImage(NVGcontext* ctx, NVGTextureHandle image) { nvgSlangRHIDeleteImage(ctx, image); }
 
 } // namespace axm::nanovg

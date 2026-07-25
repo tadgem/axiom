@@ -91,8 +91,19 @@ int main() {
             g_Cam.m_ViewportDimensions = viewport.m_Size;
             g_MVP                      = GetMVP(g_Transform, g_Cam);
 
-            auto commandEncoder        = init.m_GPU.m_Queue->createCommandEncoder();
-            auto renderPassEncoder     = render_pass::BeginSwapChainRenderPass(
+            im3d::NewFrame(g_Cam, init.m_DeltaTime, viewport.m_Size);
+
+            // Im3d Debug Primitives with Pushed Color and Size
+            im3d::PushColor(Im3d::Color_Green);
+            im3d::PushSize(4.0f);
+            Im3d::DrawSphere(Im3d::Vec3(0.0f, 2.0f, 0.0f), 4.5f, 16);
+            im3d::PopSize();
+            im3d::PopColor();
+
+            im3d::TransformGizmo("SponzaGizmo", g_Transform);
+
+            auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
+            auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
                     init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
             auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
             for (auto& drawable: drawables) {
@@ -104,6 +115,8 @@ int main() {
                 }
                 DrawDrawable(init.m_GPU, renderPassEncoder, shader, drawable, viewport);
             }
+
+            im3d::Render(commandEncoder, renderPassEncoder, viewport.m_Size, &g_Cam);
 
             renderPassEncoder->end();
             init.m_GPU.m_Queue->submit(commandEncoder->finish());

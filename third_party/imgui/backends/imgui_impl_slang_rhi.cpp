@@ -128,8 +128,8 @@ bool ImGui_ImplSlangRHI_Init(rhi::IDevice* device, rhi::Format renderTargetForma
     colorTarget.color.srcFactor = rhi::BlendFactor::SrcAlpha;
     colorTarget.color.dstFactor = rhi::BlendFactor::InvSrcAlpha;
     colorTarget.color.op = rhi::BlendOp::Add;
-    colorTarget.alpha.srcFactor = rhi::BlendFactor::One;
-    colorTarget.alpha.dstFactor = rhi::BlendFactor::InvSrcAlpha;
+    colorTarget.alpha.srcFactor = rhi::BlendFactor::Zero;
+    colorTarget.alpha.dstFactor = rhi::BlendFactor::One;
     colorTarget.alpha.op = rhi::BlendOp::Add;
 
     rhi::DepthStencilDesc depthStencilDesc = {};

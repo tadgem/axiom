@@ -21,8 +21,11 @@
 #include "Render/Vertex.hpp"
 #include "Render/Viewport.hpp"
 
+#include "Render/Im3dUtils.hpp"
+
 // Third party includes
 // TODO: (Do we want these in the public header?)
 #include "assimp/Importer.hpp"
 #include "flecs.h"
+#include "im3d.h"
 #include "imgui.h"

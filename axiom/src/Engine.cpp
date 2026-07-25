@@ -16,6 +16,7 @@
 #include "SDL3/SDL_main.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_slang_rhi.h"
+#include "im3d_impl_slang_rhi.h"
 #include "imgui.h"
 #if SLANG_WINDOWS_FAMILY
 #include "windows.h"
@@ -198,6 +199,13 @@ axm::AxiomEngine axm::engine::Init() {
         SDL_Quit();
         return { };
     }
+    if (!Im3d_ImplSlangRHI_Init(device, surface->getInfo().preferredFormat, Format::D32Float)) {
+        AXM_LOG("Failed to initialize Im3d Slang RHI backend");
+        ImGui_ImplSlangRHI_Shutdown();
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return { };
+    }
 
     // Get command queue
     ICommandQueue* graphicsQueue;
@@ -254,6 +262,7 @@ void axm::engine::Quit(const AxiomEngine& e) {
 
     e.m_GPU.m_Queue->waitOnHost();
 
+    Im3d_ImplSlangRHI_Shutdown();
     ImGui_ImplSlangRHI_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();

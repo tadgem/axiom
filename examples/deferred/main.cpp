@@ -119,7 +119,7 @@ int main() {
                                                  nvgRGBA(25, 30, 44, 255),
                                                  nvgRGBA(10, 12, 18, 255));
             nvgBeginPath(nvg);
-            nvgRect(nvg, 0, 0, width, height);
+            nvgRect(nvg, 0, 0, width / 2.0f, height / 2.0f);
             nvgFillPaint(nvg, bgPaint);
             nvgFill(nvg);
             nvgEndFrame(nvg);

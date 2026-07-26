@@ -192,19 +192,20 @@ float4 fragmentMain(VertexOutput input) : SV_Target
     }
     else if (uShaderType == 1) // Texture
     {
-        float2 pt = float2(
-            uPaintMat.x * input.pos2d.x + uPaintMat.z * input.pos2d.y + uPaintOffset.x,
-            uPaintMat.y * input.pos2d.x + uPaintMat.w * input.pos2d.y + uPaintOffset.y
-        );
-        float2 texCoord = pt / uExtent;
-        float4 texColor = uTexture.Sample(uSampler, texCoord);
-
         if (uTexType == 2) // Alpha texture (fonts)
         {
-            color = float4(1.0f, 1.0f, 1.0f, texColor.r) * uInnerCol;
+            float2 texCoord = input.uv;
+            float4 texColor = uTexture.Sample(uSampler, texCoord);
+            color = float4(uInnerCol.rgb, uInnerCol.a * texColor.r);
         }
         else // RGBA texture
         {
+            float2 pt = float2(
+                uPaintMat.x * input.pos2d.x + uPaintMat.z * input.pos2d.y + uPaintOffset.x,
+                uPaintMat.y * input.pos2d.x + uPaintMat.w * input.pos2d.y + uPaintOffset.y
+            );
+            float2 texCoord = pt / uExtent;
+            float4 texColor = uTexture.Sample(uSampler, texCoord);
             color = texColor * uInnerCol;
         }
     }
@@ -214,7 +215,7 @@ float4 fragmentMain(VertexOutput input) : SV_Target
     }
 
     // Stroke / Edge anti-alias fringe
-    float strokeAlpha = clamp(input.uv.y, 0.0f, 1.0f);
+    float strokeAlpha = (uTexType == 2) ? 1.0f : clamp(input.uv.y, 0.0f, 1.0f);
     color.a *= strokeAlpha * scissor_alpha;
 
     return color;
@@ -370,18 +371,25 @@ float4 fragmentMain(VertexOutput input) : SV_Target
     int slangRHINVG_renderUpdateTexture(void* uptr, int image, int x, int y, int w, int h, const unsigned char* data) {
         SlangRHINVGcontext* slangCtx = (SlangRHINVGcontext*) uptr;
         SlangRHINVGtexture* tex      = findTexture(slangCtx, image);
-        if (!tex || !tex->texture || !data)
+        if (!tex || !tex->texture || !data || tex->width <= 0)
             return 0;
 
-        size_t        bpp      = (tex->type == NVG_TEXTURE_ALPHA) ? 1 : 4;
-        size_t        dataSize = (size_t) w * (size_t) h * bpp;
+        size_t bpp      = (tex->type == NVG_TEXTURE_ALPHA) ? 1 : 4;
+        size_t dataSize = (size_t) w * (size_t) h * bpp;
 
         TextureUpdate update;
         update.x = x;
         update.y = y;
         update.w = w;
         update.h = h;
-        update.data.assign(data, data + dataSize);
+        update.data.resize(dataSize);
+
+        size_t pitch = (size_t) tex->width * bpp;
+        for (int r = 0; r < h; ++r) {
+            const unsigned char* srcRow = data + ((size_t) (y + r) * pitch + (size_t) x * bpp);
+            unsigned char*       dstRow = update.data.data() + (size_t) r * (size_t) w * bpp;
+            std::memcpy(dstRow, srcRow, (size_t) w * bpp);
+        }
 
         tex->pendingUpdates.push_back(std::move(update));
         return 1;

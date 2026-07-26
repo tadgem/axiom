@@ -150,7 +150,7 @@ axm::AxiomEngine axm::engine::Init() {
         return { };
     }
 
-    int width = 800, height = 600;
+    i32 width = 800, height = 600;
     SDL_GetWindowSizeInPixels(window, &width, &height);
 
     ISurface* surface;
@@ -237,9 +237,13 @@ axm::AxiomEngine axm::engine::Init() {
     auto depthTexture                 = textures::CreateDepthTexture(device, width, height);
 
     // Fullscreen NanoVG Ctx
-    NVGcontext* ctx             = nanovg::CreateContext(device, NVG_ANTIALIAS | NVG_STENCIL_STROKES);
-    bool        pipelineCreated = nanovg::CreatePipeline(ctx, surfaceConfig.format, depthStencilDesc.format);
+    NVGcontext* ctx      = nanovg::CreateContext(device, NVG_ANTIALIAS | NVG_STENCIL_STROKES);
+    bool pipelineCreated = nanovg::CreatePipeline(ctx, surface->getInfo().preferredFormat, rhi::Format::Undefined);
     AXM_ASSERT(pipelineCreated, "Failed to create NanoVG Pipeline");
+
+    // create default font in fullscreen context.
+    i32 fontSans = nvgCreateFontMem(ctx, "sans", (unsigned char*) archivo_regular_ttf, sizeof(archivo_regular_ttf), 0);
+    AXM_ASSERT(fontSans != -1, "Failed to load default font into NanoVG");
 
     GPU gpu = {
         .m_Device               = device,
@@ -343,7 +347,7 @@ void axm::engine::PostFrame(AxiomEngine& e) {
     AXM_FLUSH_LOG();
 }
 void axm::engine::OnWindowResized(AxiomEngine& e, SDL_Event& ev) {
-    int w = 0, h = 0;
+    i32 w = 0, h = 0;
     SDL_GetWindowSizeInPixels(e.m_Window.m_Window, &w, &h);
 
     if (e.m_GPU.m_Queue) {

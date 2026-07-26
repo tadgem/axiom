@@ -10,6 +10,7 @@
 #include <slang-rhi.h>
 #include <slang.h>
 #include "Core/Profile.hpp"
+#include "Render/NanoVGUtils.hpp"
 #include "Render/RenderPass.hpp"
 #include "Render/Texture.hpp"
 #include "SDL3/SDL.h"
@@ -18,6 +19,7 @@
 #include "backends/imgui_impl_slang_rhi.h"
 #include "im3d_impl_slang_rhi.h"
 #include "imgui.h"
+#include "nanovg.h"
 #if SLANG_WINDOWS_FAMILY
 #include "windows.h"
 #endif
@@ -148,7 +150,7 @@ axm::AxiomEngine axm::engine::Init() {
         return { };
     }
 
-    int width = 800, height = 600;
+    i32 width = 800, height = 600;
     SDL_GetWindowSizeInPixels(window, &width, &height);
 
     ISurface* surface;
@@ -207,6 +209,7 @@ axm::AxiomEngine axm::engine::Init() {
         return { };
     }
 
+
     // Get command queue
     ICommandQueue* graphicsQueue;
     if (SLANG_FAILED(device->getQueue(QueueType::Graphics, &graphicsQueue))) {
@@ -233,17 +236,27 @@ axm::AxiomEngine axm::engine::Init() {
 
     auto depthTexture                 = textures::CreateDepthTexture(device, width, height);
 
-    GPU  gpu                          = {
-                                  .m_Device               = device,
-                                  .m_Surface              = surface,
-                                  .m_Queue                = graphicsQueue,
-                                  .m_SwapchainColourImage = nullptr,
-                                  .m_SwapchainDepthImage  = depthTexture,
-                                  .m_DebugCallback        = std::move(debugCallback),
-                                  .m_MipShader            = mips,
-                                  .m_MipPipeline          = mipsPipeline,
-                                  .m_LinearClampSampler   = sampler,
-                                  .m_DepthStencilDesc     = depthStencilDesc,
+    // Fullscreen NanoVG Ctx
+    NVGcontext* ctx      = nanovg::CreateContext(device, NVG_ANTIALIAS | NVG_STENCIL_STROKES);
+    bool pipelineCreated = nanovg::CreatePipeline(ctx, surface->getInfo().preferredFormat, rhi::Format::Undefined);
+    AXM_ASSERT(pipelineCreated, "Failed to create NanoVG Pipeline");
+
+    // create default font in fullscreen context.
+    i32 fontSans = nvgCreateFontMem(ctx, "sans", (unsigned char*) archivo_regular_ttf, sizeof(archivo_regular_ttf), 0);
+    AXM_ASSERT(fontSans != -1, "Failed to load default font into NanoVG");
+
+    GPU gpu = {
+        .m_Device               = device,
+        .m_Surface              = surface,
+        .m_Queue                = graphicsQueue,
+        .m_SwapchainColourImage = nullptr,
+        .m_SwapchainDepthImage  = depthTexture,
+        .m_DebugCallback        = std::move(debugCallback),
+        .m_MipShader            = mips,
+        .m_MipPipeline          = mipsPipeline,
+        .m_LinearClampSampler   = sampler,
+        .m_DepthStencilDesc     = depthStencilDesc,
+        .m_FullScreenVG         = ctx,
     };
 
     Window w = { .m_Window = window, .m_Width = static_cast<u32>(width), .m_Height = static_cast<u32>(height) };
@@ -311,8 +324,16 @@ void axm::engine::PostFrame(AxiomEngine& e) {
 
     if (e.m_GPU.m_SwapchainColourImage != nullptr) {
         auto commandEncoder = e.m_GPU.m_Queue->createCommandEncoder();
-        auto passEncoder    = render_pass::BeginSwapChainRenderPass(
+        nanovg::UpdateTextures(e.m_GPU.m_FullScreenVG, commandEncoder);
+
+        auto passEncoder = render_pass::BeginSwapChainRenderPass(
                 e, commandEncoder, rhi::LoadOp::Load, rhi::LoadOp::DontCare, false);
+
+        nanovg::Render(e.m_GPU.m_FullScreenVG,
+                       commandEncoder,
+                       passEncoder,
+                       static_cast<f32>(e.m_Window.m_Width),
+                       static_cast<f32>(e.m_Window.m_Height));
 
         ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
 
@@ -326,7 +347,7 @@ void axm::engine::PostFrame(AxiomEngine& e) {
     AXM_FLUSH_LOG();
 }
 void axm::engine::OnWindowResized(AxiomEngine& e, SDL_Event& ev) {
-    int w = 0, h = 0;
+    i32 w = 0, h = 0;
     SDL_GetWindowSizeInPixels(e.m_Window.m_Window, &w, &h);
 
     if (e.m_GPU.m_Queue) {

@@ -22,6 +22,7 @@
 #include "Render/Viewport.hpp"
 
 #include "Render/Im3dUtils.hpp"
+#include "Render/NanoVGUtils.hpp"
 
 // Third party includes
 // TODO: (Do we want these in the public header?)
@@ -29,3 +30,4 @@
 #include "flecs.h"
 #include "im3d.h"
 #include "imgui.h"
+#include "nanovg.h"

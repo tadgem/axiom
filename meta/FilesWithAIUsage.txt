@@ -1,0 +1,14 @@
+axiom/include/Render/NanoVGUtils.hpp
+axiom/include/Render/Im3dUtils.hpp
+axiom/include/Render/ImGuiUtils.hpp
+
+axiom/src/NanoVGUtils.cpp
+axiom/src/Im3dUtils.cpp
+axiom/src/ImGuiUtils.cpp
+
+third_party/im3d/backends/im3d_impl_slang_rhi.cpp
+third_party/im3d/backends/im3d_impl_slang_rhi.h
+third_party/imgui/backends/imgui_impl_slang_rhi.cpp
+third_party/imgui/backends/imgui_impl_slang_rhi.h
+third_party/nanovg/backends/nanovg_impl_slang_rhi.cpp
+third_party/nanovg/backends/nanovg_impl_slang_rhi.h

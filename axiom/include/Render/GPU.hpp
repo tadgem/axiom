@@ -3,6 +3,8 @@
 #include <slang-rhi.h>
 #include "Render/Shader.hpp"
 
+struct NVGcontext;
+
 namespace axm {
     struct GPU
     {
@@ -20,5 +22,7 @@ namespace axm {
         rhi::ComPtr<rhi::ISampler>         m_LinearClampSampler;
 
         rhi::DepthStencilDesc              m_DepthStencilDesc;
+
+        NVGcontext*                        m_FullScreenVG;
     };
 }

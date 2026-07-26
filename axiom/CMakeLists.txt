@@ -10,6 +10,8 @@ add_library(axiom
         ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
         ${THIRD_PARTY_DIRS}/im3d/im3d.cpp
         ${THIRD_PARTY_DIRS}/im3d/backends/im3d_impl_slang_rhi.cpp
+        ${THIRD_PARTY_DIRS}/nanovg/nanovg.c
+        ${THIRD_PARTY_DIRS}/nanovg/backends/nanovg_impl_slang_rhi.cpp
         ${AXM_SRCS}
 
 )
@@ -34,5 +36,7 @@ target_include_directories(axiom PUBLIC
         ${MIMALLOC_INCLUDE_DIRS}
         ${SINGLE_HEADER_INCLUDE_DIRS}
         ${THIRD_PARTY_DIRS}/im3d
+        ${THIRD_PARTY_DIRS}/nanovg
         ${THIRD_PARTY_DIRS}/im3d/backends
+        ${THIRD_PARTY_DIRS}/nanovg/backends
 )

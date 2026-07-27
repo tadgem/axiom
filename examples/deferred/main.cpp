@@ -9,12 +9,11 @@ AXM_OVERRIDE_GLOBAL_NEW(false)
 
 using namespace axm;
 
-static aml::Mat44                 g_MVP;
-static Transform                  g_Transform;
-static Camera                     g_Cam;
-static rhi::ComPtr<rhi::ISampler> g_Sampler;
+static aml::Mat44 g_MVP;
+static Transform  g_Transform;
+static Camera     g_Cam;
 
-static aml::Mat44                 GetMVP(const Transform& trans, const Camera& cam) {
+static aml::Mat44 GetMVP(const Transform& trans, const Camera& cam) {
     return cam.GetViewProjectionMatrix() * trans.GetModelMatrix();
 }
 
@@ -36,7 +35,7 @@ namespace {
         if (drawable.m_Texture) {
             shader.SetBinding("diffuse", drawable.m_Texture->m_TextureView);
         }
-        shader.SetBinding("diffuseSampler", g_Sampler);
+        shader.SetBinding("diffuseSampler", gpu.m_LinearWrapSampler);
 
         meshes ::DrawMesh(viewport, drawable.m_Mesh, encoder);
     }
@@ -63,9 +62,6 @@ int main() {
 
     auto  pipeline = pipeline::CreateRasterPipeline(
             init.m_GPU.m_Device, formats, init.m_GPU.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
-
-    g_Sampler = textures::CreateSampler(
-            init.m_GPU.m_Device, rhi::TextureFilteringMode::Linear, rhi::TextureAddressingMode::Wrap);
 
 
     f64 msInitTime = initTimer.ElapsedMillisecondsF();

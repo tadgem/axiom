@@ -13,6 +13,7 @@ add_library(axiom STATIC
         ${THIRD_PARTY_DIRS}/nanovg/nanovg.c
         ${THIRD_PARTY_DIRS}/nanovg/backends/nanovg_impl_slang_rhi.cpp
         ${AXM_SRCS}
+        include/Core/Input.hpp
 
 )
 

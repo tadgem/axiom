@@ -218,7 +218,9 @@ axm::AxiomEngine axm::engine::Init() {
     }
 
 
-    auto sampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
+    auto linearClampSampler
+            = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
+    auto linearWrapSampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::Wrap);
 
     Array<String, 1> entries      = { "computeMain" };
     auto             mips         = Shader(device, "resources/shaders/mips", entries);
@@ -254,7 +256,8 @@ axm::AxiomEngine axm::engine::Init() {
         .m_DebugCallback        = std::move(debugCallback),
         .m_MipShader            = mips,
         .m_MipPipeline          = mipsPipeline,
-        .m_LinearClampSampler   = sampler,
+        .m_LinearClampSampler   = linearClampSampler,
+        .m_LinearWrapSampler    = linearWrapSampler,
         .m_DepthStencilDesc     = depthStencilDesc,
         .m_FullScreenVG         = ctx,
     };

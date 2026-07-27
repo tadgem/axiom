@@ -1,6 +1,6 @@
 file(GLOB_RECURSE AXM_SRCS src/*.cpp)
 
-add_library(axiom
+add_library(axiom STATIC
         ${IMGUI_INCLUDE_DIRS}/imgui.cpp
         ${IMGUI_INCLUDE_DIRS}/imgui_demo.cpp
         ${IMGUI_INCLUDE_DIRS}/imgui_draw.cpp

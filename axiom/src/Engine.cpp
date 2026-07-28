@@ -290,26 +290,28 @@ bool axm::AxiomEngine::PreFrame() {
     PROFILE_SCOPE()
     m_AssetManager.Update();
     m_FrameTimer.Reset();
-    m_Input.ClearInputs();
+    {
+        NAMED_SCOPE(FrameInputHandling)
+        m_Input.ClearInputs();
 
-    SDL_Event event;
+        SDL_Event event;
 
-    while (SDL_PollEvent(&event)) {
-        m_Input.HandleFrameInputEvent(event);
-        ImGui_ImplSDL3_ProcessEvent(&event);
-        switch (event.type) {
-            case SDL_EVENT_QUIT:
-                m_Running = false;
-                break;
-            case SDL_EVENT_WINDOW_RESIZED:
-                OnWindowResized(event);
-                break;
-            default:
-                // AXM_LOG("Unhandled event");
-                break;
+        while (SDL_PollEvent(&event)) {
+            m_Input.HandleFrameInputEvent(event);
+            ImGui_ImplSDL3_ProcessEvent(&event);
+            switch (event.type) {
+                case SDL_EVENT_QUIT:
+                    m_Running = false;
+                    break;
+                case SDL_EVENT_WINDOW_RESIZED:
+                    OnWindowResized(event);
+                    break;
+                default:
+                    // AXM_LOG("Unhandled event");
+                    break;
+            }
         }
     }
-
     ImGui_ImplSlangRHI_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();

@@ -198,6 +198,8 @@ namespace axm {
 
         NO_DISCARD aml::Float2 GetMousePosition() const;
         NO_DISCARD aml::Float2 GetMousePositionLastFrame() const;
+        NO_DISCARD aml::Float2 GetMouseVelocity(const aml::Float2& windowDim) const;
+
 
         NO_DISCARD f32         GetGamepadAxis(u8 index, const GamepadAxis& axis) const;
 

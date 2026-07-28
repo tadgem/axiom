@@ -1,5 +1,8 @@
 #include "Core/Input.hpp"
+#include "Core/Profile.hpp"
+
 bool axm::Input::IsKeyDown(const Keycode& keycode) const {
+    PROFILE_SCOPE()
     auto pressed = std::ranges::find(p_PressedKeyboardButtons.begin(), p_PressedKeyboardButtons.end(), keycode);
     auto justPressed
             = std::ranges::find(p_JustPressedKeyboardButtons.begin(), p_JustPressedKeyboardButtons.end(), keycode);
@@ -7,11 +10,13 @@ bool axm::Input::IsKeyDown(const Keycode& keycode) const {
     return pressed != p_PressedKeyboardButtons.end() || justPressed != p_JustPressedKeyboardButtons.end();
 }
 bool axm::Input::IsKeyJustPressed(const Keycode& keycode) const {
+    PROFILE_SCOPE()
     return std::ranges::find(p_JustPressedKeyboardButtons.begin(), p_JustPressedKeyboardButtons.end(), keycode)
            != p_JustPressedKeyboardButtons.end();
 }
 
 bool axm::Input::IsGamepadButtonDown(u8 index, const GamepadButton& keycode) const {
+    PROFILE_SCOPE()
     AXM_ASSERT(index < kNumGamepads, "Gamepad index out of range");
     const auto pressed = std::ranges::find(
             p_GamepadsState[index].m_PressedButtons.begin(), p_GamepadsState[index].m_PressedButtons.end(), keycode);
@@ -24,6 +29,7 @@ bool axm::Input::IsGamepadButtonDown(u8 index, const GamepadButton& keycode) con
 }
 
 bool axm::Input::IsGamepadButtonJustPressed(u8 index, const GamepadButton& button) const {
+    PROFILE_SCOPE()
     AXM_ASSERT(index < kNumGamepads, "Gamepad index out of range");
     auto justPressed = std::ranges::find(p_GamepadsState[index].m_JustPressedButtons.begin(),
                                          p_GamepadsState[index].m_JustPressedButtons.end(),
@@ -32,6 +38,7 @@ bool axm::Input::IsGamepadButtonJustPressed(u8 index, const GamepadButton& butto
 }
 
 bool axm::Input::IsMouseButtonDown(const MouseButton& button) const {
+    PROFILE_SCOPE()
     auto pressed     = std::ranges::find(p_PressedMouseButtons.begin(), p_PressedMouseButtons.end(), button);
     auto justPressed = std::ranges::find(p_JustPressedMouseButtons.begin(), p_JustPressedMouseButtons.end(), button);
 
@@ -42,15 +49,28 @@ bool axm::Input::IsMouseButtonJustPressed(const MouseButton& button) const {
            != p_JustPressedMouseButtons.end();
 }
 
-axm::aml::Float2 axm::Input::GetMousePosition() const { return p_MouseState.m_Pos; }
-axm::aml::Float2 axm::Input::GetMousePositionLastFrame() const { return p_MouseState.m_LastPos; }
-f32              axm::Input::GetGamepadAxis(u8 index, const GamepadAxis& axis) const {
+axm::aml::Float2 axm::Input::GetMousePosition() const {
+    PROFILE_SCOPE()
+    return p_MouseState.m_Pos;
+}
+axm::aml::Float2 axm::Input::GetMousePositionLastFrame() const {
+    PROFILE_SCOPE()
+    return p_MouseState.m_LastPos;
+}
+JPH::Float2 axm::Input::GetMouseVelocity(const aml::Float2& windowDim) const {
+    const auto now  = GetMousePosition();
+    const auto last = GetMousePositionLastFrame();
+    return { (now.x - last.x) / windowDim.x, (now.y - last.y) / windowDim.y };
+}
+f32 axm::Input::GetGamepadAxis(u8 index, const GamepadAxis& axis) const {
+    PROFILE_SCOPE()
     AXM_ASSERT(index < kNumGamepads, "Gamepad index out of range");
     return p_GamepadsState[index].m_AxisState.m_AxisValues[static_cast<i32>(axis)];
 }
 
 
 void axm::Input::ClearInputs() {
+    PROFILE_SCOPE()
     p_JustPressedKeyboardButtons.clear();
 
     for (auto i = 0; i < kNumGamepads; i++) {
@@ -63,7 +83,7 @@ void axm::Input::ClearInputs() {
 }
 
 void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
-
+    PROFILE_SCOPE()
     if (e.type == SDL_EVENT_KEY_DOWN) {
         const auto k = static_cast<Keycode>(e.key.key);
 
@@ -139,6 +159,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 }
 u8 axm::Input::GetGamepadIndex(const SDL_JoystickID& id) {
+    PROFILE_SCOPE()
     for (u8 i = 0; i < kNumGamepads; i++) {
         if (p_GamepadsState[i].m_ID == id) {
             return i;

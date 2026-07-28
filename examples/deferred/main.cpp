@@ -80,15 +80,18 @@ int main() {
         }
     });
 
+    FlyCamController controller(init.m_Input);
+
     while (init.m_Running) {
         if (init.PreFrame()) {
             auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
             g_Cam.m_ViewportDimensions = viewport.m_Size;
-            g_MVP                      = GetMVP(g_Transform, g_Cam);
+            controller.Update(g_Cam);
+            g_MVP                  = GetMVP(g_Transform, g_Cam);
 
 
-            auto commandEncoder        = init.m_GPU.m_Queue->createCommandEncoder();
-            auto renderPassEncoder     = render_pass::BeginSwapChainRenderPass(
+            auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
+            auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
                     init.m_GPU, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
             auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
             for (auto& drawable: drawables) {

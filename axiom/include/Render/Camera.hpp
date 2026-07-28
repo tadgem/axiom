@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Input.hpp"
 #include "Core/Maths.hpp"
 #include "Render/Transform.hpp"
 
@@ -15,5 +16,17 @@ namespace axm {
         ProjectionType m_ProjectionType = ProjectionType::Perspective;
 
         NO_DISCARD aml::Mat44 GetViewProjectionMatrix() const;
+    };
+
+    class FlyCamController
+    {
+    public:
+        const Input& m_Input;
+
+        f32          m_MovementSpeed = 3.0f;
+        f32          m_RotationSpeed = 60.0f;
+
+        FlyCamController(const Input& input);
+        void Update(Camera& cam);
     };
 }

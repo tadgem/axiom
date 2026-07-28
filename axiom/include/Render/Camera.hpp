@@ -23,10 +23,10 @@ namespace axm {
     public:
         const Input& m_Input;
 
-        f32          m_MovementSpeed = 3.0f;
-        f32          m_RotationSpeed = 60.0f;
+        f32          m_MovementSpeed = 5.0f;
+        f32          m_RotationSpeed = 120.0f;
 
         FlyCamController(const Input& input);
-        void Update(Camera& cam);
+        void Update(Camera& cam) const;
     };
 }

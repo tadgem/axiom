@@ -4,7 +4,7 @@
 
 namespace axm {
     namespace render_pass {
-        rhi::IRenderPassEncoder* BeginSwapChainRenderPass(AxiomEngine&             app,
+        rhi::IRenderPassEncoder* BeginSwapChainRenderPass(GPU&                  gpu,
                                                           rhi::ICommandEncoder* cmd,
                                                           rhi::LoadOp           colourLoadOp    = rhi::LoadOp::Clear,
                                                           rhi::LoadOp           depthLoadOp     = rhi::LoadOp::Clear,

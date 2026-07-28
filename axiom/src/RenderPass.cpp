@@ -1,7 +1,7 @@
 #include "../include/Render/RenderPass.hpp"
 
 #include "Core/Profile.hpp"
-rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AxiomEngine&          app,
+rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(GPU&                  gpu,
                                                                     rhi::ICommandEncoder* cmd,
                                                                     rhi::LoadOp           colourLoadOp,
                                                                     rhi::LoadOp           depthLoadOp,
@@ -11,7 +11,7 @@ rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AxiomEngine&
 
     using namespace rhi;
     RenderPassColorAttachment colorAttachment        = { };
-    colorAttachment.view                             = app.m_GPU.m_SwapchainColourImage->getDefaultView();
+    colorAttachment.view                             = gpu.m_SwapchainColourImage->getDefaultView();
     colorAttachment.loadOp                           = colourLoadOp;
     colorAttachment.storeOp                          = StoreOp::Store;
     colorAttachment.clearValue[0]                    = clearColour.mF32[0];
@@ -21,7 +21,7 @@ rhi::IRenderPassEncoder* axm::render_pass::BeginSwapChainRenderPass(AxiomEngine&
 
     RenderPassDepthStencilAttachment depthAttachment = { };
     if (enableDepthTest) {
-        depthAttachment.view            = app.m_GPU.m_SwapchainDepthImage->getDefaultView();
+        depthAttachment.view            = gpu.m_SwapchainDepthImage->getDefaultView();
         depthAttachment.depthLoadOp     = depthLoadOp;
         depthAttachment.depthStoreOp    = StoreOp::Store;
         depthAttachment.depthClearValue = 1.0f;

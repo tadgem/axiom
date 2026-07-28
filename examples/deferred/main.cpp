@@ -44,7 +44,7 @@ namespace {
 int main() {
     const Timer initTimer = { };
 
-    AxiomEngine init      = engine::Init();
+    AxiomEngine init      = AxiomEngine::Init();
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
     init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
@@ -81,7 +81,7 @@ int main() {
     });
 
     while (init.m_Running) {
-        if (engine::PreFrame(init)) {
+        if (init.PreFrame()) {
             auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
             g_Cam.m_ViewportDimensions = viewport.m_Size;
             g_MVP                      = GetMVP(g_Transform, g_Cam);
@@ -89,7 +89,7 @@ int main() {
 
             auto commandEncoder        = init.m_GPU.m_Queue->createCommandEncoder();
             auto renderPassEncoder     = render_pass::BeginSwapChainRenderPass(
-                    init, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
+                    init.m_GPU, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
             auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
             for (auto& drawable: drawables) {
 
@@ -145,8 +145,8 @@ int main() {
         }
         ImGui::End();
 
-        engine::PostFrame(init);
+        init.PostFrame();
     }
 
-    engine::Quit(init);
+    init.Quit();
 }

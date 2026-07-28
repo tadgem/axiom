@@ -1,6 +1,6 @@
 #pragma once
 #include "Assets/AssetManager.hpp"
-#include "Core/STL.hpp"
+#include "Core/Input.hpp"
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
 #include "Render/GPU.hpp"
@@ -17,17 +17,15 @@ namespace axm {
         AssetManager       m_AssetManager;
         Window             m_Window;
         GPU                m_GPU;
+        Input              m_Input;
 
         static AxiomEngine BAD();
+        static AxiomEngine Init();
+
+        void               Quit();
+        NO_DISCARD bool    PreFrame();
+        void               PostFrame();
+        void               OnWindowResized(SDL_Event& ev);
     };
-
-    namespace engine {
-        AxiomEngine     Init();
-        void            Quit(const AxiomEngine& e);
-        NO_DISCARD bool PreFrame(AxiomEngine& e);
-        void            PostFrame(AxiomEngine& e);
-        void            OnWindowResized(AxiomEngine& e, SDL_Event& ev);
-
-    } // namespace engine
 
 } // namespace axm

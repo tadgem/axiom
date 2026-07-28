@@ -4,6 +4,8 @@
 #include "SDL3/SDL.h"
 namespace axm {
 
+    static constexpr u8 kNumGamepads = 4;
+
     enum class Keycode {
         UNKNOWN       = SDLK_UNKNOWN,
         RETURN        = SDLK_RETURN,
@@ -129,14 +131,11 @@ namespace axm {
     };
 
     enum class MouseButton {
-        Right,
-        Left,
-        Middle,
-        Extra1,
-        Extra2,
-        Extra3,
-        Extra4,
-        Extra5,
+        Left   = SDL_BUTTON_LEFT,
+        Middle = SDL_BUTTON_MIDDLE,
+        Right  = SDL_BUTTON_RIGHT,
+        Extra1 = SDL_BUTTON_X1,
+        Extra2 = SDL_BUTTON_X2,
     };
 
     struct MouseState
@@ -146,60 +145,77 @@ namespace axm {
     };
 
     enum class GamepadButton {
-        FaceNorth,
-        FaceSouth,
-        FaceEast,
-        FaceWest,
-        DpadNorth,
-        DpadSouth,
-        DpadEast,
-        DpadWest,
-        RightBumper,
-        LeftBumper,
-        Start,
-        Back,
-        Home,
+        FaceNorth   = SDL_GAMEPAD_BUTTON_NORTH,
+        FaceSouth   = SDL_GAMEPAD_BUTTON_SOUTH,
+        FaceEast    = SDL_GAMEPAD_BUTTON_EAST,
+        FaceWest    = SDL_GAMEPAD_BUTTON_WEST,
+        DpadUp      = SDL_GAMEPAD_BUTTON_DPAD_UP,
+        DpadDown    = SDL_GAMEPAD_BUTTON_DPAD_DOWN,
+        DpadLeft    = SDL_GAMEPAD_BUTTON_DPAD_LEFT,
+        DpadRight   = SDL_GAMEPAD_BUTTON_DPAD_RIGHT,
+        RightBumper = SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+        LeftBumper  = SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
+        Start       = SDL_GAMEPAD_BUTTON_START,
+        Back        = SDL_GAMEPAD_BUTTON_BACK,
+        Home        = SDL_GAMEPAD_BUTTON_GUIDE,
     };
 
-    enum class GamepadAxis : i32 {
-        LeftStick    = 0,
-        RightStick   = 1,
-        RightTrigger = 2,
-        LeftTrigger  = 3,
+    enum class GamepadAxis {
+        LeftStickX   = SDL_GAMEPAD_AXIS_LEFTX,
+        LeftStickY   = SDL_GAMEPAD_AXIS_LEFTY,
+        RightStickX  = SDL_GAMEPAD_AXIS_RIGHTX,
+        RightStickY  = SDL_GAMEPAD_AXIS_RIGHTY,
+        LeftTrigger  = SDL_GAMEPAD_AXIS_LEFT_TRIGGER,
+        RightTrigger = SDL_GAMEPAD_AXIS_RIGHT_TRIGGER,
     };
 
     struct GamepadAxisState
     {
-        Array<f32, 4> m_AxisValues = { };
+        Array<f32, 6> m_AxisValues = { };
+    };
+
+    struct GamepadState
+    {
+        static constexpr SDL_JoystickID kUnknown = 0;
+
+        SDL_JoystickID                  m_ID;
+        GamepadAxisState                m_AxisState;
+        DynArray<GamepadButton>         m_PressedButtons;
+        DynArray<GamepadButton>         m_JustPressedButtons;
     };
 
     class Input
     {
     public:
-        bool        IsKeyDown(const Keycode& keycode);
-        bool        IsKeyJustPressed(const Keycode& keycode);
+        NO_DISCARD bool IsKeyDown(const Keycode& keycode) const;
+        NO_DISCARD bool IsKeyJustPressed(const Keycode& keycode) const;
 
-        bool        IsGamepadButtonDown(const GamepadButton& button);
-        bool        IsGamepadButtonJustPressed(const GamepadButton& button);
+        NO_DISCARD bool IsGamepadButtonDown(u8 index, const GamepadButton& button) const;
+        NO_DISCARD bool IsGamepadButtonJustPressed(u8 index, const GamepadButton& button) const;
 
-        bool        IsMouseButtonDown(const MouseButton& button);
-        bool        IsMouseButtonJustPressed(const MouseButton& button);
+        NO_DISCARD bool IsMouseButtonDown(const MouseButton& button) const;
+        NO_DISCARD bool IsMouseButtonJustPressed(const MouseButton& button) const;
 
-        aml::Float2 GetMousePosition();
-        aml::Float2 GetMousePositionLastFrame();
+        NO_DISCARD aml::Float2 GetMousePosition() const;
+        NO_DISCARD aml::Float2 GetMousePositionLastFrame() const;
+
+        NO_DISCARD f32         GetGamepadAxis(u8 index, const GamepadAxis& axis) const;
 
     private:
-        DynArray<Keycode>          p_PressedKeyboardButtons;
-        DynArray<Keycode>          p_JustPressedKeyboardButtons;
+        friend class AxiomEngine;
 
-        DynArray<GamepadButton>    p_PressedGamepadButtons;
-        DynArray<GamepadButton>    p_JustPressedGamepadButtons;
+        void                              ClearInputs();
+        void                              HandleFrameInputEvent(SDL_Event& e);
+        u8                                GetGamepadIndex(const SDL_JoystickID& id);
 
-        DynArray<MouseButton>      p_PressedMouseButtons;
-        DynArray<MouseButton>      p_JustPressedMouseButtons;
+        DynArray<Keycode>                 p_PressedKeyboardButtons;
+        DynArray<Keycode>                 p_JustPressedKeyboardButtons;
 
-        MouseState                 p_MouseState;
+        DynArray<MouseButton>             p_PressedMouseButtons;
+        DynArray<MouseButton>             p_JustPressedMouseButtons;
 
-        Array<GamepadAxisState, 4> p_GamepadsState;
+        MouseState                        p_MouseState;
+
+        Array<GamepadState, kNumGamepads> p_GamepadsState;
     };
 }

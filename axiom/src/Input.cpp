@@ -65,7 +65,7 @@ JPH::Float2 axm::Input::GetMouseVelocity(const aml::Float2& windowDim) const {
 f32 axm::Input::GetGamepadAxis(u8 index, const GamepadAxis& axis) const {
     PROFILE_SCOPE()
     AXM_ASSERT(index < kNumGamepads, "Gamepad index out of range");
-    return p_GamepadsState[index].m_AxisState.m_AxisValues[static_cast<i32>(axis)];
+    return p_GamepadsState[index].m_AxisState.m_AxisValues[CAST(axis, i32)];
 }
 
 
@@ -85,7 +85,7 @@ void axm::Input::ClearInputs() {
 void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     PROFILE_SCOPE()
     if (e.type == SDL_EVENT_KEY_DOWN) {
-        const auto k = static_cast<Keycode>(e.key.key);
+        const auto k = CAST(e.key.key, Keycode);
 
         if (std::ranges::find(p_PressedKeyboardButtons.begin(), p_PressedKeyboardButtons.end(), k)
             == p_PressedKeyboardButtons.end()) {
@@ -95,7 +95,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 
     if (e.type == SDL_EVENT_KEY_UP) {
-        const auto k  = static_cast<Keycode>(e.key.key);
+        const auto k  = CAST(e.key.key, Keycode);
         const auto it = std::ranges::find(p_PressedKeyboardButtons.begin(), p_PressedKeyboardButtons.end(), k);
 
         if (it != p_PressedKeyboardButtons.end()) {
@@ -104,7 +104,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 
     if (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-        const auto mb = static_cast<MouseButton>(e.button.button);
+        const auto mb = CAST(e.button.button, MouseButton);
 
         if (std::ranges::find(p_PressedMouseButtons.begin(), p_PressedMouseButtons.end(), mb)
             == p_PressedMouseButtons.end()) {
@@ -114,7 +114,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 
     if (e.type == SDL_EVENT_MOUSE_BUTTON_UP) {
-        const auto mb = static_cast<MouseButton>(e.button.button);
+        const auto mb = CAST(e.button.button, MouseButton);
         const auto it = std::ranges::find(p_PressedMouseButtons.begin(), p_PressedMouseButtons.end(), mb);
 
         if (it != p_PressedMouseButtons.end()) {
@@ -123,7 +123,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 
     if (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
-        const auto gb        = static_cast<GamepadButton>(e.button.button);
+        const auto gb        = CAST(e.button.button, GamepadButton);
         const auto index     = GetGamepadIndex(e.gbutton.which);
 
         const auto pressedIt = std::ranges::find(
@@ -136,7 +136,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 
     if (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP) {
-        const auto gb        = static_cast<GamepadButton>(e.button.button);
+        const auto gb        = CAST(e.button.button, GamepadButton);
         const auto index     = GetGamepadIndex(e.gbutton.which);
 
         const auto pressedIt = std::ranges::find(
@@ -152,10 +152,10 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
     }
 
     if (e.type == SDL_EVENT_GAMEPAD_AXIS_MOTION) {
-        const auto axis                                               = static_cast<GamepadAxis>(e.gaxis.axis);
+        const auto axis                                               = CAST(e.gaxis.axis, GamepadAxis);
         const auto index                                              = GetGamepadIndex(e.gaxis.which);
 
-        p_GamepadsState[index].m_AxisState.m_AxisValues[e.gaxis.axis] = static_cast<float>(e.gaxis.value);
+        p_GamepadsState[index].m_AxisState.m_AxisValues[e.gaxis.axis] = CAST(e.gaxis.value, float);
     }
 }
 u8 axm::Input::GetGamepadIndex(const SDL_JoystickID& id) {

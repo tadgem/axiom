@@ -6,8 +6,11 @@ namespace axm {
     class Window
     {
     public:
-        SDL_Window* m_Window;
+        SDL_Window*     m_Window;
 
-        u32         m_Width, m_Height;
+        u32             m_Width, m_Height;
+
+        NO_DISCARD bool GrabCursor() const;
+        NO_DISCARD bool ReleaseCursor() const;
     };
 }

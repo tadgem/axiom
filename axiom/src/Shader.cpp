@@ -13,7 +13,7 @@ slang::IModule* axm::shaders::GetModule(IDevice* device, const char* name) {
     slang::IModule*      shaderModule = device->getSlangSession()->loadModule(name, diagnostics.writeRef());
 
     if (diagnostics) {
-        AXM_LOG("Shader Compilation Messages: {}", static_cast<const char*>(diagnostics->getBufferPointer()));
+        AXM_LOG("Shader Compilation Messages: {}", CAST(diagnostics->getBufferPointer(), const char*));
     }
 
     if (!shaderModule) {
@@ -35,7 +35,7 @@ void axm::shaders::CreateShaderProgram(IDevice*                device,
     if (SLANG_FAILED(device->createShaderProgram(desc, program.writeRef(), diagnostics.writeRef()))) {
         AXM_LOG("Failed to create shader program : {}", name);
         if (diagnostics) {
-            AXM_LOG("{}", static_cast<const char*>(diagnostics->getBufferPointer()));
+            AXM_LOG("{}", CAST(diagnostics->getBufferPointer(), const char*));
         }
     }
 }

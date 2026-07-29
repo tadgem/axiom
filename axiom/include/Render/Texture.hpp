@@ -27,13 +27,18 @@ namespace axm {
         rhi::ITexture*     m_GPUTexture;
         rhi::ITextureView* m_TextureView;
 
+        rhi::Format        m_Format;
+
+        u32                m_Width, m_Height;
+
+
         static Texture     BAD();
     };
 
     struct CPUTextureData
     {
         void* m_Data;
-        int   m_Width, m_Height, m_NumChannels;
+        u32   m_Width, m_Height, m_NumChannels;
 
         void  Release() const;
     };

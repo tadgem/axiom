@@ -132,7 +132,7 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
             deviceDesc.enableValidation              = true;
 
             Array<Feature, 2> requiredFeatures       = { Feature::Surface, Feature::Rasterization };
-            deviceDesc.requiredFeatureCount          = static_cast<uint32_t>(requiredFeatures.size());
+            deviceDesc.requiredFeatureCount          = CAST(requiredFeatures.size(), uint32_t);
             deviceDesc.requiredFeatures              = requiredFeatures.data();
             deviceDesc.slang.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
 
@@ -262,7 +262,7 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
         .m_FullScreenVG         = ctx,
     };
 
-    Window w = { .m_Window = window, .m_Width = static_cast<u32>(width), .m_Height = static_cast<u32>(height) };
+    Window w = { .m_Window = window, .m_Width = CAST(width, u32), .m_Height = CAST(height, u32) };
 
     return {
         .m_OK           = true,
@@ -340,8 +340,8 @@ void axm::AxiomEngine::PostFrame() {
         nanovg::Render(m_GPU.m_FullScreenVG,
                        commandEncoder,
                        passEncoder,
-                       static_cast<f32>(m_Window.m_Width),
-                       static_cast<f32>(m_Window.m_Height));
+                       CAST(m_Window.m_Width, f32),
+                       CAST(m_Window.m_Height, f32));
 
         ImGui_ImplSlangRHI_RenderDrawData(ImGui::GetDrawData(), commandEncoder, passEncoder);
 
@@ -363,12 +363,12 @@ void axm::AxiomEngine::OnWindowResized(SDL_Event& ev) {
     }
 
     if (w > 0 && h > 0) {
-        m_Window.m_Width                 = static_cast<u32>(w);
-        m_Window.m_Height                = static_cast<u32>(h);
+        m_Window.m_Width                 = CAST(w, u32);
+        m_Window.m_Height                = CAST(h, u32);
 
         rhi::SurfaceConfig surfaceConfig = { };
-        surfaceConfig.width              = static_cast<uint32_t>(w);
-        surfaceConfig.height             = static_cast<uint32_t>(h);
+        surfaceConfig.width              = CAST(w, uint32_t);
+        surfaceConfig.height             = CAST(h, uint32_t);
         surfaceConfig.format             = rhi::Format::Undefined;
         surfaceConfig.vsync              = true;
 

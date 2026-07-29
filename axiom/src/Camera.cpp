@@ -10,12 +10,21 @@ JPH::Mat44 axm::Camera::GetViewProjectionMatrix() const {
 
     return proj * view;
 }
-axm::FlyCamController::FlyCamController(const Input& input) : m_Input(input) { }
+axm::FlyCamController::FlyCamController(const Input& input, const Window& window) : m_Input(input), m_Window(window) { }
 
-void axm::FlyCamController::Update(Camera& cam, f32 deltaTime) const {
+void axm::FlyCamController::Update(Camera& cam, f32 deltaTime) {
 
     if (!m_Input.IsMouseButtonDown(MouseButton::Right)) {
+        if (!p_ShowCursor) {
+            auto _       = m_Window.ReleaseCursor();
+            p_ShowCursor = true;
+        }
         return;
+    }
+
+    if (p_ShowCursor) {
+        auto _       = m_Window.GrabCursor();
+        p_ShowCursor = false;
     }
 
     const auto mouseVelocity = m_Input.GetMouseVelocity(cam.m_ViewportDimensions);

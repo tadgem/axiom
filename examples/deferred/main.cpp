@@ -81,7 +81,7 @@ int main() {
         }
     });
 
-    FlyCamController controller(init.m_Input);
+    FlyCamController controller(init.m_Input, init.m_Window);
 
     while (init.m_Running) {
         if (init.PreFrame()) {

@@ -13,7 +13,7 @@ namespace axm {
         }
 
         if (!p_AssetFactories.contains(assetType)) {
-            AXM_LOG_ERROR("AssetManager : No factory provided for asset load with type {}", static_cast<u8>(assetType));
+            AXM_LOG_ERROR("AssetManager : No factory provided for asset load with type {}", CAST(assetType, u8));
             return { };
         }
 
@@ -43,7 +43,7 @@ namespace axm {
         // make sure we have a provided function to unload the asset
         if (!p_AssetFactories.contains(handle.m_AssetType)) {
             // TODO: Get enum str value
-            AXM_LOG_ERROR("No provided AssetFactory for AssetType {}", static_cast<u8>(handle.m_AssetType));
+            AXM_LOG_ERROR("No provided AssetFactory for AssetType {}", CAST(handle.m_AssetType, u8));
             return;
         }
 
@@ -144,7 +144,7 @@ namespace axm {
     void AssetManager::HandlePendingLoads(u16& remainingTasks) {
         PROFILE_SCOPE()
 
-        auto bound = std::min(static_cast<size_t>(remainingTasks), p_QueuedLoads.size());
+        auto bound = std::min(CAST(remainingTasks, size_t), p_QueuedLoads.size());
 
         for (auto i = 0; i < bound; i++) {
             // get first load info
@@ -167,7 +167,7 @@ namespace axm {
 
     void AssetManager::HandleAsyncTasks(u16& remainingTasks) {
         PROFILE_SCOPE()
-        auto bound = std::min(static_cast<size_t>(remainingTasks), p_InFlightLoads.size());
+        auto bound = std::min(CAST(remainingTasks, size_t), p_InFlightLoads.size());
 
         for (auto i = 0; i < bound; i++) {
             if (IsFutureReady(p_InFlightLoads.front().m_Task)) {
@@ -207,7 +207,7 @@ namespace axm {
 
     void AssetManager::HandleTransients(u16& remainingTasks) {
         PROFILE_SCOPE()
-        auto bound = std::min(static_cast<size_t>(remainingTasks), p_InFlightTransients.size());
+        auto bound = std::min(CAST(remainingTasks, size_t), p_InFlightTransients.size());
         for (auto i = 0; i < bound; i++) {
             // Process one step of the first of the in flight transients
             const auto type      = p_InFlightTransients.front().m_Transient->m_AssetType;
@@ -227,7 +227,7 @@ namespace axm {
 
     void AssetManager::HandleUnloads(u16& remainingTasks) {
         PROFILE_SCOPE()
-        auto bound = std::min(static_cast<size_t>(remainingTasks), p_QueuedUnloads.size());
+        auto bound = std::min(CAST(remainingTasks, size_t), p_QueuedUnloads.size());
 
         for (auto i = 0; i < bound; i++) {
             const auto  type   = p_QueuedUnloads.front().m_AssetType;

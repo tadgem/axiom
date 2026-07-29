@@ -11,7 +11,7 @@ axm::textures::CreateTexture2D(GPU& gpu, const void* data, rhi::Format format, u
     PROFILE_SCOPE()
 
     uint32_t mips                            = 1;
-    mips                                     = static_cast<uint32_t>(std::floor(std::log2(std::max(w, h)))) + 1;
+    mips                                     = CAST(std::floor(std::log2(std::max(w, h))), uint32_t) + 1;
 
     rhi::TextureDesc textureDesc             = { };
     textureDesc.type                         = rhi::TextureType::Texture2D;
@@ -50,6 +50,10 @@ axm::textures::CreateTexture2D(GPU& gpu, const void* data, rhi::Format format, u
         GenerateMips(gpu, tex);
     }
 
+    tex.m_Width  = w;
+    tex.m_Height = h;
+    tex.m_Format = format;
+
     return tex;
 }
 axm::Texture axm::textures::CreateRenderTexture2D(GPU&               gpu,
@@ -64,7 +68,7 @@ axm::Texture axm::textures::CreateRenderTexture2D(GPU&               gpu,
 
     uint32_t mips = 1;
     if (generateMips) {
-        mips = static_cast<uint32_t>(std::floor(std::log2(std::max(w, h)))) + 1;
+        mips = CAST(std::floor(std::log2(std::max(w, h))), uint32_t) + 1;
     }
     rhi::TextureDesc textureDesc = { };
     textureDesc.type             = rhi::TextureType::Texture2D;
@@ -94,6 +98,10 @@ axm::Texture axm::textures::CreateRenderTexture2D(GPU&               gpu,
     if (generateMips) {
         GenerateMips(gpu, tex);
     }
+
+    tex.m_Width  = w;
+    tex.m_Height = h;
+    tex.m_Format = format;
 
     return tex;
 }
@@ -168,9 +176,9 @@ void axm::textures::GenerateMips(GPU& gpu, Texture& texture) {
 
         ShaderDataInterface cursor(computePass->bindPipeline(gpu.m_MipPipeline), gpu.m_MipPipeline->getDesc().label);
 
-        MipParams params = { .srcTexelSize = { 1.0f / static_cast<f32>(srcWidth), 1.0f / static_cast<f32>(srcHeight) },
-                             .dstSize      = { dstWidth, dstHeight },
-                             .srcMipLevel  = 0 };
+        MipParams           params = { .srcTexelSize = { 1.0f / CAST(srcWidth, f32), 1.0f / CAST(srcHeight, f32) },
+                                       .dstSize      = { dstWidth, dstHeight },
+                                       .srcMipLevel  = 0 };
 
         cursor.SetData("params", params);
         cursor.SetBinding("srcTexture", srcView);
@@ -201,14 +209,13 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size
     // stbi_set_flip_vertically_on_load(true);
     int   texWidth, texHeight, texChannels;
 
-    auto* pixels = stbi_load_from_memory(static_cast<stbi_uc const*>(data),
-                                         static_cast<int>(length),
-                                         &texWidth,
-                                         &texHeight,
-                                         &texChannels,
-                                         STBI_rgb_alpha);
+    auto* pixels = stbi_load_from_memory(
+            CAST(data, stbi_uc const*), CAST(length, int), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
-    return { .m_Data = pixels, .m_Width = texWidth, .m_Height = texHeight, .m_NumChannels = texChannels };
+    return { .m_Data        = pixels,
+             .m_Width       = CAST(texWidth, u32),
+             .m_Height      = CAST(texHeight, u32),
+             .m_NumChannels = CAST(texChannels, u32) };
 }
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::path& path) {
     PROFILE_SCOPE()
@@ -218,7 +225,10 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::
     auto* pixels = stbi_load(
             reinterpret_cast<const char*>(newPath.c_str()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
-    return { .m_Data = pixels, .m_Width = texWidth, .m_Height = texHeight, .m_NumChannels = texChannels };
+    return { .m_Data        = pixels,
+             .m_Width       = CAST(texWidth, u32),
+             .m_Height      = CAST(texHeight, u32),
+             .m_NumChannels = CAST(texChannels, u32) };
 }
 rhi::ComPtr<rhi::ISampler> axm::textures::CreateSampler(rhi::IDevice*              device,
                                                         rhi::TextureFilteringMode  filter,

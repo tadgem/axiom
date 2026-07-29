@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Input.hpp"
 #include "Core/Maths.hpp"
+#include "Core/Window.hpp"
 #include "Render/Transform.hpp"
 
 namespace axm {
@@ -21,12 +22,16 @@ namespace axm {
     class FlyCamController
     {
     public:
-        const Input& m_Input;
+        const Input&  m_Input;
+        const Window& m_Window;
 
-        f32          m_MovementSpeed = 0.5f;
-        f32          m_RotationSpeed = 120.0f;
+        f32           m_MovementSpeed = 0.5f;
+        f32           m_RotationSpeed = 120.0f;
 
-        FlyCamController(const Input& input);
-        void Update(Camera& cam, f32 deltaTime = 0.0166667f) const;
+        FlyCamController(const Input& input, const Window& window);
+        void Update(Camera& cam, f32 deltaTime = 0.0166667f);
+
+    protected:
+        bool p_ShowCursor = true;
     };
 }

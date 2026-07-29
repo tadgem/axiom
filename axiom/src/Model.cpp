@@ -137,7 +137,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
             continue;
         }
         for (unsigned int index = 0; index < mesh->mFaces[i].mNumIndices; index++) {
-            indexData.push_back(static_cast<u32>(mesh->mFaces[i].mIndices[index]));
+            indexData.push_back(CAST(mesh->mFaces[i].mIndices[index], u32));
         }
     }
 
@@ -184,7 +184,7 @@ axm::ModelAssetFactory::ProcessSceneMaterials(const String& directory, const aiS
         Model::MaterialEntry entry    = { };
 
         for (auto j = 0; j < TextureMapType::Count; j++) {
-            auto mapType            = static_cast<TextureMapType>(j);
+            auto mapType            = CAST(j, TextureMapType);
             const auto& [map, path] = GetMaterialTexture(directory, material, GetAssimpTextureType(mapType), mapType);
 
             if (map.m_Handle != AssetHandle::BAD) {

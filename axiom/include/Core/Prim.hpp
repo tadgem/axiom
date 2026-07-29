@@ -18,3 +18,5 @@ using str_hash = u64;
 
 using f32      = float;
 using f64      = double;
+
+#define CAST(_var, _type) static_cast<_type>(_var)

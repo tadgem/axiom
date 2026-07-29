@@ -5,6 +5,8 @@
 
 namespace axm {
     namespace render_pass {
+        static constexpr u8      kMaxColourTargets = 8;
+
         rhi::IRenderPassEncoder* BeginSwapChainRenderPass(GPU&                  gpu,
                                                           rhi::ICommandEncoder* cmd,
                                                           rhi::LoadOp           colourLoadOp    = rhi::LoadOp::Clear,
@@ -15,8 +17,6 @@ namespace axm {
         class Builder
         {
         public:
-            static constexpr u8                                      kMaxColourTargets = 8;
-
             Array<rhi::RenderPassColorAttachment, kMaxColourTargets> m_ColourTargets;
             rhi::RenderPassDepthStencilAttachment                    m_DepthStencil;
             u32                                                      m_NumColourTargets = 0;

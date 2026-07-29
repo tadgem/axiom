@@ -50,6 +50,7 @@ int main() {
     init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
     init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
 
+    g_Transform.m_Scale    = aml::Vec3(0.2f, 0.2f, 0.2f);
     g_MVP                  = GetMVP(g_Transform, g_Cam);
 
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
@@ -86,7 +87,7 @@ int main() {
         if (init.PreFrame()) {
             auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
             g_Cam.m_ViewportDimensions = viewport.m_Size;
-            controller.Update(g_Cam);
+            controller.Update(g_Cam, init.m_DeltaTime);
             g_MVP                  = GetMVP(g_Transform, g_Cam);
 
 
@@ -145,6 +146,7 @@ int main() {
         if (ImGui::Begin("Example (Deferred)")) {
             ImGuiEx::TransformEdit(g_Transform);
             ImGuiEx::CameraEdit(g_Cam);
+            ImGuiEx::FlyCamControllerEdit(controller);
         }
         ImGui::End();
 

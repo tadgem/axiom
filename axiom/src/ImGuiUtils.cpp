@@ -25,3 +25,14 @@ bool axm::ImGuiEx::CameraEdit(Camera& cam) {
 
     return b;
 }
+bool axm::ImGuiEx::FlyCamControllerEdit(FlyCamController& controller) {
+    bool b = false;
+    if (ImGui::TreeNode("FlyCam Controller")) {
+        b |= ImGui::DragFloat("Movement Speed", &controller.m_MovementSpeed);
+        b |= ImGui::DragFloat("Rotation Speed", &controller.m_RotationSpeed);
+
+        ImGui::TreePop();
+    }
+
+    return b;
+}

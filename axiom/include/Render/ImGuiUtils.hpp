@@ -7,4 +7,6 @@ namespace axm::ImGuiEx {
 
     bool CameraEdit(Camera& cam);
 
+    bool FlyCamControllerEdit(FlyCamController& controller);
+
 }

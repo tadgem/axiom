@@ -58,9 +58,8 @@ axm::aml::Float2 axm::Input::GetMousePositionLastFrame() const {
     return p_MouseState.m_LastPos;
 }
 JPH::Float2 axm::Input::GetMouseVelocity(const aml::Float2& windowDim) const {
-    const auto now  = GetMousePosition();
-    const auto last = GetMousePositionLastFrame();
-    return { (now.x - last.x) / windowDim.x, (now.y - last.y) / windowDim.y };
+    const auto now = p_MouseState.m_Rel;
+    return { now.x / windowDim.x, now.y / windowDim.y };
 }
 f32 axm::Input::GetGamepadAxis(u8 index, const GamepadAxis& axis) const {
     PROFILE_SCOPE()
@@ -149,6 +148,7 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e) {
 
     if (e.type == SDL_EVENT_MOUSE_MOTION) {
         p_MouseState.m_Pos = aml::Float2(e.motion.x, e.motion.y);
+        p_MouseState.m_Rel = aml::Float2(e.motion.xrel, e.motion.yrel);
     }
 
     if (e.type == SDL_EVENT_GAMEPAD_AXIS_MOTION) {

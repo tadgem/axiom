@@ -141,6 +141,7 @@ namespace axm {
     struct MouseState
     {
         aml::Float2 m_Pos     = { 0.0f, 0.0f };
+        aml::Float2 m_Rel     = { 0.0f, 0.0f };
         aml::Float2 m_LastPos = { 0.0f, 0.0f };
     };
 

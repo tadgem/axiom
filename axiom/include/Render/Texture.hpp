@@ -49,6 +49,15 @@ namespace axm {
         Texture
         CreateTexture2D(GPU& device, const void* data, rhi::Format format, u32 w, u32 h, const char* label = "UNKNOWN");
 
+        Texture CreateRenderTexture2D(GPU&               gpu,
+                                      rhi::Format        format,
+                                      u32                w,
+                                      u32                h,
+                                      rhi::TextureUsage  usage,
+                                      rhi::ResourceState defaultState,
+                                      bool               generateMips = false,
+                                      const char*        label        = "UNKNOWN_RENDER_ATTACHMENT");
+
         rhi::ComPtr<rhi::ITexture>
              CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format = rhi::Format::D32Float);
 

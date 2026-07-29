@@ -52,6 +52,51 @@ axm::textures::CreateTexture2D(GPU& gpu, const void* data, rhi::Format format, u
 
     return tex;
 }
+axm::Texture axm::textures::CreateRenderTexture2D(GPU&               gpu,
+                                                  rhi::Format        format,
+                                                  u32                w,
+                                                  u32                h,
+                                                  rhi::TextureUsage  usage,
+                                                  rhi::ResourceState defaultState,
+                                                  bool               generateMips,
+                                                  const char*        label) {
+    PROFILE_SCOPE()
+
+    uint32_t mips = 1;
+    if (generateMips) {
+        mips = static_cast<uint32_t>(std::floor(std::log2(std::max(w, h)))) + 1;
+    }
+    rhi::TextureDesc textureDesc = { };
+    textureDesc.type             = rhi::TextureType::Texture2D;
+    textureDesc.size.width       = w;
+    textureDesc.size.height      = h;
+    textureDesc.size.depth       = 1;
+    textureDesc.arrayLength      = 1;
+    textureDesc.mipCount         = mips;
+    textureDesc.format           = format;
+    textureDesc.usage            = usage;
+    textureDesc.defaultState     = defaultState;
+    textureDesc.label            = label;
+
+    Texture tex                  = { };
+
+    if (SLANG_FAILED(gpu.m_Device->createTexture(textureDesc, nullptr, &tex.m_GPUTexture))) {
+        AXM_LOG("Failed to create texture.");
+        return Texture::BAD();
+    }
+
+    tex.m_TextureView = tex.m_GPUTexture->getDefaultView();
+    if (!tex.m_TextureView) {
+        AXM_LOG("Failed to acquire texture view");
+        return Texture::BAD();
+    }
+
+    if (generateMips) {
+        GenerateMips(gpu, tex);
+    }
+
+    return tex;
+}
 
 void axm::textures::GenerateMips(GPU& gpu, Texture& texture) {
     PROFILE_SCOPE()

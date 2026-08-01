@@ -56,36 +56,16 @@ int main() {
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
     posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
 
-    auto gbuffer = Shader(
-            init.m_GPU.m_Device, "resources/shaders/gbuffer", Array<String, 2> { "vertexMain", "fragmentMain" });
+    auto cube
+            = Shader(init.m_GPU.m_Device, "resources/shaders/cube", Array<String, 2> { "vertexMain", "fragmentMain" });
+
+    Array formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
+
+    auto  pipeline = pipeline::CreateRasterPipeline(
+            init.m_GPU.m_Device, formats, init.m_GPU.m_DepthStencilDesc, cube, posNormalUvLayout.m_DeviceInputLayout);
 
 
-    Framebuffer fb(init.m_GPU);
-
-    fb.AddColourAttachment(rhi::Format::RGB10A2Unorm,
-                           rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
-                           rhi::ResourceState::RenderTarget,
-                           "Diffuse Buffer");
-    fb.AddColourAttachment(rhi::Format::RG16Float,
-                           rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
-                           rhi::ResourceState::RenderTarget,
-                           "Normal Buffer");
-    fb.AddColourAttachment(rhi::Format::RG16Float,
-                           rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
-                           rhi::ResourceState::RenderTarget,
-                           "UV Buffer");
-    fb.AddDepthAttachment(
-            rhi::Format::D32FloatS8Uint, rhi::TextureUsage::DepthStencil, rhi::ResourceState::DepthWrite, "Depth");
-
-    auto       formats    = fb.GetFormatList();
-    const auto pipeline   = pipeline::CreateRasterPipeline(init.m_GPU.m_Device,
-                                                         formats,
-                                                         init.m_GPU.m_DepthStencilDesc,
-                                                         gbuffer,
-                                                         posNormalUvLayout.m_DeviceInputLayout);
-
-
-    f64        msInitTime = initTimer.ElapsedMillisecondsF();
+    f64 msInitTime = initTimer.ElapsedMillisecondsF();
 
     AXM_LOG("Init took {} ms", msInitTime);
     AXM_LOG("Starting Axiom Main Loop");
@@ -112,7 +92,8 @@ int main() {
 
 
             auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
-            auto renderPassEncoder = fb.BeginRenderPass(commandEncoder);
+            auto renderPassEncoder = render_pass::BeginSwapChainRenderPass(
+                    init.m_GPU, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Clear, true);
             auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
             for (auto& drawable: drawables) {
 

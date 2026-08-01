@@ -247,11 +247,16 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
     i32 fontSans = nvgCreateFontMem(ctx, "sans", (unsigned char*) archivo_regular_ttf, sizeof(archivo_regular_ttf), 0);
     AXM_ASSERT(fontSans != -1, "Failed to load default font into NanoVG");
 
+    rhi::ITexture* swapChainTexture = nullptr;
+    if (surface->getConfig()) {
+        surface->acquireNextImage(&swapChainTexture);
+    }
+
     GPU gpu = {
         .m_Device               = device,
         .m_Surface              = surface,
         .m_Queue                = graphicsQueue,
-        .m_SwapchainColourImage = nullptr,
+        .m_SwapchainColourImage = swapChainTexture,
         .m_SwapchainDepthImage  = depthTexture,
         .m_DebugCallback        = std::move(debugCallback),
         .m_MipShader            = mips,
@@ -273,7 +278,7 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
     };
 }
 
-void axm::AxiomEngine::Quit() {
+void axm::AxiomEngine::Quit() const {
     PROFILE_SCOPE()
 
     m_GPU.m_Queue->waitOnHost();
@@ -286,6 +291,7 @@ void axm::AxiomEngine::Quit() {
     SDL_DestroyWindow(m_Window.m_Window);
     SDL_Quit();
 }
+
 bool axm::AxiomEngine::PreFrame() {
     PROFILE_SCOPE()
     m_AssetManager.Update();

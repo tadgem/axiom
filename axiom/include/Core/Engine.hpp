@@ -22,7 +22,7 @@ namespace axm {
         static AxiomEngine BAD();
         static AxiomEngine Init();
 
-        void               Quit();
+        void               Quit() const;
         NO_DISCARD bool    PreFrame();
         void               PostFrame();
         void               OnWindowResized(SDL_Event& ev);

@@ -19,39 +19,10 @@ namespace axm {
     {
     public:
         Shader() = default;
+
+        explicit Shader(rhi::IDevice* device, const String& name, const String& computeEntry);
+        explicit Shader(rhi::IDevice* device, const String& name, const String& vertEntry, const String& fragEntry);
         explicit Shader(rhi::IDevice* device, const String& name, const Span<String>& entries);
-
-        template <size_t N>
-        explicit Shader(rhi::IDevice* device, const String& name, const Array<String, N>& entries) {
-            using namespace rhi;
-            PROFILE_SCOPE()
-
-            slang::IModule* shaderModule = shaders::GetModule(device, name.c_str());
-
-            if (!shaderModule) {
-                AXM_LOG("Failed to compile shader : {}", name);
-                return;
-            }
-
-            DynArray<slang::IComponentType*> entryPoints = { };
-
-            for (const auto& entry: entries) {
-                slang::IEntryPoint* ep = { };
-                shaderModule->findEntryPointByName(entry.c_str(), &ep);
-
-                if (ep) {
-                    entryPoints.push_back(ep);
-                }
-            }
-
-            ShaderProgramDesc programDesc    = { };
-            programDesc.linkingStyle         = LinkingStyle::SingleProgram;
-            programDesc.slangEntryPoints     = entryPoints.data();
-            programDesc.slangEntryPointCount = entryPoints.size();
-            programDesc.slangGlobalScope     = shaderModule;
-
-            shaders::CreateShaderProgram(device, programDesc, m_Program, name);
-        }
 
         String                           m_Name;
         rhi::ComPtr<rhi::IShaderProgram> m_Program;

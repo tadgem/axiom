@@ -56,8 +56,7 @@ int main() {
     auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
     posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
 
-    auto gbuffer = Shader(
-            init.m_GPU.m_Device, "resources/shaders/gbuffer", Array<String, 2> { "vertexMain", "fragmentMain" });
+    auto        gbuffer = Shader(init.m_GPU.m_Device, "resources/shaders/gbuffer", "vertexMain", "fragmentMain");
 
 
     Framebuffer fb(init.m_GPU);
@@ -143,6 +142,8 @@ int main() {
             nvgFill(nvg);
             nvgEndFrame(nvg);
 
+            renderPassEncoder->end();
+            auto swapChainPass = render_pass::BeginSwapChainRenderPass(init.m_GPU, commandEncoder);
 
             SlangIm3D::NewFrame(g_Cam, init.m_DeltaTime, viewport.m_Size);
 
@@ -154,9 +155,14 @@ int main() {
             Im3d::PopColor();
 
             SlangIm3D::TransformGizmo("SponzaGizmo", g_Transform);
-
-            SlangIm3D::Render(commandEncoder, renderPassEncoder, viewport.m_Size, g_Cam);
-            renderPassEncoder->end();
+            SlangIm3D::Render(commandEncoder,
+                              swapChainPass,
+                              viewport.m_Size,
+                              g_Cam,
+                              init.m_GPU.m_SwapchainColourImage->getDesc().format,
+                              init.m_GPU.m_SwapchainDepthImage->getDesc().format,
+                              1.0f);
+            swapChainPass->end();
             init.m_GPU.m_Queue->submit(commandEncoder->finish());
         }
 

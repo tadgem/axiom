@@ -222,13 +222,15 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
             = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::ClampToEdge);
     auto linearWrapSampler = textures::CreateSampler(device, TextureFilteringMode::Linear, TextureAddressingMode::Wrap);
 
-    Array<String, 1> entries      = { "computeMain" };
-    auto             mips         = Shader(device, "resources/shaders/mips", entries);
-    auto             mipsPipeline = pipeline::CreateComputePipeline(device, mips);
+
+    auto mips              = Shader(device, "resources/shaders/mips", "computeMain");
+    auto mipsPipeline      = pipeline::CreateComputePipeline(device, mips);
     if (!mipsPipeline) {
         AXM_LOG_ERROR("Failed to create compute pipeline for generating mips.");
         return AxiomEngine::BAD();
     }
+
+    auto             blit             = Shader(device, "resources/shaders/blit", "vertMain", "fragMain");
 
     DepthStencilDesc depthStencilDesc = { };
     depthStencilDesc.format           = Format::D32Float;

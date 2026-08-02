@@ -40,10 +40,10 @@ SamplerState    diffuseSampler;
 FragmentOutput fragmentMain(VertexOutput input) : SV_Target
 {
     FragmentOutput output;
+    float3 normalized = normalize(input.normal);
     output.colour = diffuse.Sample(diffuseSampler, input.uv);
-    output.normal = float2(input.normal.x, input.normal.y);
+    output.normal = float2(normalized.x, normalized.y);
     output.uv = input.uv;
-    //float4 col = float4( input.uv, 0.0, 1.0 );
 
     return output;
 }

@@ -1,8 +1,10 @@
 #include "AxiomTestFramework.hpp"
 #include "Render/Camera.hpp"
 #include "Render/NanoVGUtils.hpp"
+#include "Render/Textures.hpp"
 
 using namespace axm;
+
 
 namespace {
     TestResult Engine_CanResizeSwapchain(AxiomEngine* e) {
@@ -113,6 +115,18 @@ namespace {
 
         return TestResult::Pass();
     }
+
+    TestResult Textures_CopyDepthTexture(AxiomEngine* e) {
+        auto srcDepth = textures::CreateDepthTexture(e->m_GPU.m_Device, 512, 512);
+        auto dstDepth = textures::CreateDepthTexture(e->m_GPU.m_Device, 512, 512);
+
+        AXM_TEST_ASSERT(srcDepth != nullptr, "Failed to create source depth texture");
+        AXM_TEST_ASSERT(dstDepth != nullptr, "Failed to create destination depth texture");
+
+        textures::CopyDepthTexture(e->m_GPU, srcDepth, dstDepth);
+
+        return TestResult::Pass();
+    }
 }
 
 AXM_BEGIN_TESTS("Engine Tests")
@@ -121,5 +135,7 @@ AXM_ADD_TEST(Engine_CanResizeSwapchain)
 AXM_ADD_TEST(Engine_NanoVgIntegrationDoesntBreak)
 AXM_ADD_TEST(Transform_DirectionVectors)
 AXM_ADD_TEST(Camera_ViewMatrix)
+AXM_ADD_TEST(Textures_CopyDepthTexture)
 
 AXM_END_TESTS()
+

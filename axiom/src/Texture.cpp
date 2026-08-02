@@ -265,11 +265,23 @@ rhi::ComPtr<rhi::ITexture> axm::textures::CreateDepthTexture(rhi::IDevice* devic
     depthDesc.size.depth   = 1;
     depthDesc.arrayLength  = 1;
     depthDesc.mipCount     = 1;
-    depthDesc.format       = Format::D32Float;
-    depthDesc.usage        = TextureUsage::DepthStencil;
+    depthDesc.format       = format;
+    depthDesc.usage        = TextureUsage::DepthStencil | TextureUsage::CopySource | TextureUsage::CopyDestination;
     depthDesc.defaultState = ResourceState::DepthWrite;
     depthDesc.label        = "Depth Texture";
     ComPtr<ITexture> tex;
     device->createTexture(depthDesc, nullptr, tex.writeRef());
     return tex;
+}
+
+
+void axm::textures::CopyDepthTexture(rhi::ICommandEncoder* commandEncoder, rhi::ITexture* src, rhi::ITexture* dst) {
+    PROFILE_SCOPE()
+    if (!commandEncoder || !src || !dst) {
+        AXM_LOG_ERROR("Cannot copy depth texture with null command encoder or textures.");
+        return;
+    }
+
+    rhi::SubresourceRange subresource = { };
+    commandEncoder->copyTexture(dst, subresource, { }, src, subresource, { }, rhi::Extent3D::kWholeTexture);
 }

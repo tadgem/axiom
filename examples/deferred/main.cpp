@@ -1,4 +1,3 @@
-#include <array>
 #include "Assets/Model.hpp"
 #include "Assets/TextureAsset.hpp"
 #include "Core/Profile.hpp"
@@ -25,7 +24,7 @@ namespace {
         Mesh        m_Mesh;
     };
 
-    void DrawDrawable(GPU&                       gpu,
+    void DrawDrawable(const GPU&                 gpu,
                       rhi::IRenderPassEncoder*   encoder,
                       const ShaderDataInterface& shader,
                       const Drawable&            drawable,
@@ -73,8 +72,11 @@ int main() {
                            rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
                            rhi::ResourceState::RenderTarget,
                            "UV Buffer");
-    fb.AddDepthAttachment(
-            rhi::Format::D32FloatS8Uint, rhi::TextureUsage::DepthStencil, rhi::ResourceState::DepthWrite, "Depth");
+    fb.AddDepthAttachment(rhi::Format::D32Float,
+                          rhi::TextureUsage::DepthStencil | rhi::TextureUsage::CopySource,
+                          rhi::ResourceState::DepthWrite,
+                          "Depth");
+
 
     auto       formats    = fb.GetFormatList();
     const auto pipeline   = pipeline::CreateRasterPipeline(init.m_GPU.m_Device,
@@ -106,7 +108,7 @@ int main() {
         if (init.PreFrame()) {
             auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
             g_Cam.m_ViewportDimensions = viewport.m_Size;
-            controller.Update(g_Cam, init.m_DeltaTime);
+            controller.Update(g_Cam, CAST(init.m_DeltaTime, f32));
             g_MVP                  = GetMVP(g_Transform, g_Cam);
 
 
@@ -143,9 +145,13 @@ int main() {
             nvgEndFrame(nvg);
 
             renderPassEncoder->end();
-            auto swapChainPass = render_pass::BeginSwapChainRenderPass(init.m_GPU, commandEncoder);
+            textures::CopyDepthTexture(commandEncoder,
+                                       fb.m_DepthStencilAttachment.m_Texture.m_GPUTexture,
+                                       init.m_GPU.m_SwapchainDepthImage);
+            auto swapChainPass = render_pass::BeginSwapChainRenderPass(
+                    init.m_GPU, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Load);
 
-            SlangIm3D::NewFrame(g_Cam, init.m_DeltaTime, viewport.m_Size);
+            SlangIm3D::NewFrame(g_Cam, CAST(init.m_DeltaTime, f32), viewport.m_Size);
 
             // Im3d Debug Primitives with Pushed Color and Size
             Im3d::PushColor(Im3d::Color_Green);

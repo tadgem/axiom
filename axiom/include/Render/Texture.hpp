@@ -66,6 +66,7 @@ namespace axm {
         rhi::ComPtr<rhi::ITexture>
              CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format = rhi::Format::D32Float);
 
+        void CopyDepthTexture(rhi::ICommandEncoder* commandEncoder, rhi::ITexture* src, rhi::ITexture* dst);
 
         void GenerateMips(GPU& device, Texture& texture);
 

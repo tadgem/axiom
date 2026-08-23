@@ -33,3 +33,5 @@
 *.bkp
 /.idea
 /.idea
+.vs/
+out/

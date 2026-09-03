@@ -19,6 +19,7 @@ axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path&
 
     transient->m_NumSteps = 1;
     result.m_Next         = dynamic_cast<AssetTransient*>(transient);
+
     return result;
 }
 void axm::TextureAssetFactory::UnloadAsset(Asset* asset) const { }
@@ -31,5 +32,6 @@ void axm::TextureAssetFactory::ProcessAssetTransient(AssetTransient* data) const
                                             rhi::Format::RGBA8Unorm,
                                             transient->m_TransientData.m_Width,
                                             transient->m_TransientData.m_Height);
+    transient->m_TransientData.Release();
     transient->m_CurrentStep++;
 }

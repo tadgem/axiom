@@ -46,6 +46,7 @@ add_subdirectory(third_party/assimp)
 
 # Jolt
 set(JPH_BUILD_SHARED_LIBS OFF CACHE BOOL "Disable Jolt shared libs" FORCE)
+set(OVERRIDE_CXX_FLAGS OFF CACHE BOOL "Disable Jolt overriding CXX flags" FORCE)
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "Disable Jolt static MSVC runtime library" FORCE)
 add_subdirectory(submodules/jolt/Build)
 

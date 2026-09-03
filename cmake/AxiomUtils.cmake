@@ -35,7 +35,7 @@ function(add_axiom_game name src res_dir)
             TARGET ${name} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${res_dir}
-            ${CMAKE_CURRENT_BINARY_DIR}/resources
+            ${CMAKE_BINARY_DIR}/resources
             COMMENT "Copying resources to target output directory"
     )
 endfunction()

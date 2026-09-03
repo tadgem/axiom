@@ -50,6 +50,7 @@ namespace axm {
         NO_DISCARD virtual AssetLoadResult LoadAsset(const Filesystem::path& path) const = 0;
         virtual void                       UnloadAsset(Asset* asset) const               = 0;
         virtual void                       ProcessAssetTransient(AssetTransient* data) const { };
+        virtual void                       OnTransientComplete(AssetTransient* data) const { };
 
         virtual ~AssetFactory() = default;
     };

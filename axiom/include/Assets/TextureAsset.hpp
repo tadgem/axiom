@@ -17,5 +17,7 @@ namespace axm {
         NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
         void                       UnloadAsset(Asset* asset) const override;
         void                       ProcessAssetTransient(AssetTransient* data) const override;
+        void                       OnTransientComplete(AssetTransient* data) const override;
+
     };
 }

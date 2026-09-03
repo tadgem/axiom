@@ -216,6 +216,7 @@ namespace axm {
 
             // if transient stage is finished, move to loaded state and delete transient
             if (transient->m_CurrentStep == transient->m_NumSteps) {
+                p_AssetFactories[type]->OnTransientComplete(transient);
                 TransitionAssetToLoaded(transient->m_AssetDataPtr, p_InFlightTransients.front().m_LoadCallback);
                 p_InFlightTransients.erase(p_InFlightTransients.begin());
                 // do an extra step in case we have a callback

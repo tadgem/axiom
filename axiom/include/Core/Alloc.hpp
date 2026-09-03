@@ -53,6 +53,9 @@ namespace axm {
     class mimalloc_default_delete
     {
     public:
-        void operator()(T* p) const { mi_free((void*) p); }
+        void operator()(T* p) const { 
+            p->~T();
+            mi_free((void*) p); 
+        }
     };
 } // namespace axm

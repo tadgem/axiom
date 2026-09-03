@@ -151,6 +151,14 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
     model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });
 }
 
+
+void axm::ModelAssetFactory::OnTransientComplete(AssetTransient* data) const {
+    PROFILE_SCOPE()
+    auto*       transient = dynamic_cast<ModelAssetTransient*>(data);
+    
+    transient->m_TransientData.m_Importer.FreeScene();
+}
+
 static axm::Pair<axm::Model::MaterialEntry::Map, axm::String>
 GetMaterialTexture(const axm::String&         directory,
                    const aiMaterial*          material,

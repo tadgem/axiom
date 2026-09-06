@@ -4,3 +4,4 @@ stb_image 2.30
 mimalloc 3.3.2
 nlohmann_json 3.12.0
 assimp 6.0.5
+imguizmo 1.10

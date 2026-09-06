@@ -1,26 +1,19 @@
 file(GLOB_RECURSE AXM_SRCS src/*.cpp)
 
+file(GLOB_RECURSE IMGUI_SRCS ${IMGUI_INCLUDE_DIRS}/*.cpp)
+file(GLOB_RECURSE IMGUI_BACKEND_SRCS ${IMGUI_INCLUDE_DIRS}/backends/*.cpp)
+file(GLOB_RECURSE IMGUIZMO_SRCS ${IMGUIZMO_INCLUDE_DIRS}/*.cpp)
+
 add_library(axiom STATIC
-        ${IMGUI_INCLUDE_DIRS}/imgui.cpp
-        ${IMGUI_INCLUDE_DIRS}/imgui_demo.cpp
-        ${IMGUI_INCLUDE_DIRS}/imgui_draw.cpp
-        ${IMGUI_INCLUDE_DIRS}/imgui_tables.cpp
-        ${IMGUI_INCLUDE_DIRS}/imgui_widgets.cpp
-        ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_sdl3.cpp
-        ${IMGUI_INCLUDE_DIRS}/backends/imgui_impl_slang_rhi.cpp
-        ${THIRD_PARTY_DIRS}/im3d/im3d.cpp
-        ${THIRD_PARTY_DIRS}/im3d/backends/im3d_impl_slang_rhi.cpp
-        ${THIRD_PARTY_DIRS}/nanovg/nanovg.c
-        ${THIRD_PARTY_DIRS}/nanovg/backends/nanovg_impl_slang_rhi.cpp
-        ${AXM_SRCS}
-        include/Render/Framebuffer.hpp
-        src/Framebuffer.cpp
-        src/Window.cpp
-
+    ${IMGUI_SRCS}
+    ${IMGUI_BACKEND_SRCS}
+    ${IMGUIZMO_SRCS}
+    ${THIRD_PARTY_DIRS}/im3d/im3d.cpp
+    ${THIRD_PARTY_DIRS}/im3d/backends/im3d_impl_slang_rhi.cpp
+    ${THIRD_PARTY_DIRS}/nanovg/nanovg.c
+    ${THIRD_PARTY_DIRS}/nanovg/backends/nanovg_impl_slang_rhi.cpp
+    ${AXM_SRCS}
 )
-
-# TODO: Cannot activate atm due to werrors in slang-rhi
-# set_warnings_as_errors(axiom)
 
 target_link_libraries(axiom PUBLIC
         SDL3-static
@@ -32,14 +25,15 @@ target_link_libraries(axiom PUBLIC
 )
 
 target_include_directories(axiom PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${IMGUI_INCLUDE_DIRS}
-        ${SLANG_INCLUDE_DIRS}
-        ${SDL_INCLUDE_DIRS}
-        ${MIMALLOC_INCLUDE_DIRS}
-        ${SINGLE_HEADER_INCLUDE_DIRS}
-        ${THIRD_PARTY_DIRS}/im3d
-        ${THIRD_PARTY_DIRS}/nanovg
-        ${THIRD_PARTY_DIRS}/im3d/backends
-        ${THIRD_PARTY_DIRS}/nanovg/backends
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${IMGUI_INCLUDE_DIRS}
+    ${IMGUIZMO_INCLUDE_DIRS}
+    ${SLANG_INCLUDE_DIRS}
+    ${SDL_INCLUDE_DIRS}
+    ${MIMALLOC_INCLUDE_DIRS}
+    ${SINGLE_HEADER_INCLUDE_DIRS}
+    ${THIRD_PARTY_DIRS}/im3d
+    ${THIRD_PARTY_DIRS}/nanovg
+    ${THIRD_PARTY_DIRS}/im3d/backends
+    ${THIRD_PARTY_DIRS}/nanovg/backends
 )

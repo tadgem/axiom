@@ -34,3 +34,4 @@
 #include "im3d.h"
 #include "imgui.h"
 #include "nanovg.h"
+#include "ImGuizmo.h"

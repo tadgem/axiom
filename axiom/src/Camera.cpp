@@ -1,14 +1,20 @@
 #include "Render/Camera.hpp"
 #include "Core/Utils.hpp"
+using namespace axm;
 
-JPH::Mat44 axm::Camera::GetViewProjectionMatrix() const {
-    static const aml::Vec3 IDENTITY_SCALE = { 1.0f, 1.0f, 1.0f };
-    const auto             view           = Utils::CreateViewMatrix(m_Transform.m_Position, m_Transform.m_Euler);
+aml::Mat44 axm::Camera::GetViewProjectionMatrix() const {
+    return GetProjectionMatrix() * GetViewMatrix();
+}
+
+aml::Mat44 axm::Camera::GetProjectionMatrix() const {
     const auto             aspect         = m_ViewportDimensions.x / m_ViewportDimensions.y;
     // TODO: Add support for other projection types
-    const auto proj = aml::Mat44::sPerspective(aml::DegreesToRadians(m_FOV), aspect, m_NearPlane, m_FarPlane);
+    return aml::Mat44::sPerspective(aml::DegreesToRadians(m_FOV), aspect, m_NearPlane, m_FarPlane);
+}
 
-    return proj * view;
+aml::Mat44 axm::Camera::GetViewMatrix() const {
+    static const aml::Vec3 IDENTITY_SCALE = { 1.0f, 1.0f, 1.0f };
+    return Utils::CreateViewMatrix(m_Transform.m_Position, m_Transform.m_Euler);
 }
 axm::FlyCamController::FlyCamController(const Input& input, const Window& window) : m_Input(input), m_Window(window) { }
 

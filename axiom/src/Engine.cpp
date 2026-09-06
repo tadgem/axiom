@@ -19,6 +19,7 @@
 #include "backends/imgui_impl_slang_rhi.h"
 #include "im3d_impl_slang_rhi.h"
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "nanovg.h"
 #if SLANG_WINDOWS_FAMILY
 #include "windows.h"
@@ -323,6 +324,7 @@ bool axm::AxiomEngine::PreFrame() {
     ImGui_ImplSlangRHI_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 
     if (m_GPU.m_Surface->getConfig()) {
         m_GPU.m_Surface->acquireNextImage(&m_GPU.m_SwapchainColourImage);

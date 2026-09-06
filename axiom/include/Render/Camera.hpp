@@ -16,6 +16,8 @@ namespace axm {
         f32            m_FOV = 60.0f, m_NearPlane = 0.03f, m_FarPlane = 1000.0f;
         ProjectionType m_ProjectionType = ProjectionType::Perspective;
 
+        NO_DISCARD aml::Mat44 GetViewMatrix() const;
+        NO_DISCARD aml::Mat44 GetProjectionMatrix() const;
         NO_DISCARD aml::Mat44 GetViewProjectionMatrix() const;
     };
 

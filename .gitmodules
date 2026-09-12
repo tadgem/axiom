@@ -13,3 +13,6 @@
 [submodule "submodules/spirv-reflect"]
 	path = submodules/spirv-reflect
 	url = https://github.com/KhronosGroup/SPIRV-Reflect.git
+[submodule "submodules/slang"]
+	path = submodules/slang
+	url = https://github.com/shader-slang/slang.git

@@ -26,18 +26,31 @@ set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/sdl/include CACHE INTERNAL "")
 add_subdirectory(third_party/sdl)
 
-# Slang RHI
-# slang-rhi backends not used by the engine.
-set(SLANG_RHI_ENABLE_WGPU OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_OPTIX OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_AGILITY_SDK OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_NVAPI OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(SLANG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/submodules/slang-rhi/include)
-add_subdirectory(submodules/slang-rhi)
+# Disable Slang internal tests, examples, and tools you don't need
+set(SLANG_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+set(SLANG_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SLANG_ENABLE_GFX OFF CACHE BOOL "" FORCE)
+set(SLANG_ENABLE_SLANGC ON CACHE BOOL "" FORCE)
+add_subdirectory(submodules/slang)
+
+# # Slang RHI
+# # slang-rhi backends not used by the engine.
+# set(SLANG_RHI_ENABLE_WGPU OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_ENABLE_OPTIX OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_ENABLE_AGILITY_SDK OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_ENABLE_NVAPI OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+# set(SLANG_RHI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+# set(SLANG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/submodules/slang-rhi/include)
+# add_subdirectory(submodules/slang-rhi)
+
+# Volk
+add_subdirectory(submodules/volk)
+
+#SPIRV-Reflect
+add_subdirectory(submodules/spirv-reflect)
 
 # ImGui
 add_subdirectory(third_party/imgui)

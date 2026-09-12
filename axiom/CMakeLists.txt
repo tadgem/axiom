@@ -17,11 +17,12 @@ add_library(axiom STATIC
 
 target_link_libraries(axiom PUBLIC
         SDL3-static
-        slang-rhi
         assimp
         flecs_static
         mimalloc-static
         Jolt
+        volk
+        spirv-reflect-static
 )
 
 target_include_directories(axiom PUBLIC

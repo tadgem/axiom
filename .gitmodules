@@ -7,3 +7,9 @@
 [submodule "submodules/jolt"]
 	path = submodules/jolt
 	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "submodules/volk"]
+	path = submodules/volk
+	url = https://github.com/zeux/volk.git
+[submodule "submodules/spirv-reflect"]
+	path = submodules/spirv-reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect.git

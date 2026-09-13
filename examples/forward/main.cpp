@@ -57,7 +57,7 @@ int main() {
     posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
 
     auto cube
-            = Shader(init.m_GPU.m_Device, "resources/shaders/cube", Array<String, 2> { "vertexMain", "fragmentMain" });
+            = Shader(init.m_GPU.m_Device, "resources/shaders/cube", "vertexMain", "fragmentMain" );
 
     Array formats  = { init.m_GPU.m_Surface->getInfo().preferredFormat };
 

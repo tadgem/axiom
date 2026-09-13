@@ -14,8 +14,8 @@ set(MI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(MI_BUILD_STATIC ON CACHE BOOL "" FORCE)
 set(MI_BUILD_OBJECT OFF CACHE BOOL "" FORCE)
 set(MI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(MIMALLOC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mimalloc/include)
-add_subdirectory(third_party/mimalloc)
+#set(MIMALLOC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mimalloc/include)
+#add_subdirectory(third_party/mimalloc)
 
 # SDL3
 set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -31,6 +31,9 @@ set(SLANG_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(SLANG_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(SLANG_ENABLE_GFX OFF CACHE BOOL "" FORCE)
 set(SLANG_ENABLE_SLANGC ON CACHE BOOL "" FORCE)
+set(SLANG_BUILD_MIMALLOC OFF CACHE BOOL "" FORCE)
+set(SLANG_MIMALLOC_AVAILABLE ON CACHE BOOL "" FORCE)
+set(MIMALLOC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mimalloc CACHE INTERNAL "")
 add_subdirectory(submodules/slang)
 
 # # Slang RHI
@@ -74,6 +77,7 @@ add_subdirectory(submodules/jolt/Build)
 
 # Third Party Single Headers
 set(THIRD_PARTY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+set(SUBMODULE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/submodules)
 set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_headers)
 
 # AXIOM

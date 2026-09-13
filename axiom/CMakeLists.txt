@@ -9,9 +9,9 @@ add_library(axiom STATIC
     ${IMGUI_BACKEND_SRCS}
     ${IMGUIZMO_SRCS}
     ${THIRD_PARTY_DIRS}/im3d/im3d.cpp
-    ${THIRD_PARTY_DIRS}/im3d/backends/im3d_impl_slang_rhi.cpp
-    ${THIRD_PARTY_DIRS}/nanovg/nanovg.c
-    ${THIRD_PARTY_DIRS}/nanovg/backends/nanovg_impl_slang_rhi.cpp
+    ${THIRD_PARTY_DIRS}/im3d/backends/im3d_vk.cpp
+    ${SUBMODULE_DIRS}/nanovg-vk/src/nanovg.c
+    ${SUBMODULE_DIRS}/nanovg-vk/src/nanovg_vk.c
     ${AXM_SRCS}
 )
 
@@ -36,5 +36,5 @@ target_include_directories(axiom PUBLIC
     ${THIRD_PARTY_DIRS}/im3d
     ${THIRD_PARTY_DIRS}/nanovg
     ${THIRD_PARTY_DIRS}/im3d/backends
-    ${THIRD_PARTY_DIRS}/nanovg/backends
+    ${SUBMODULE_DIRS}/nanovg-vk/src
 )

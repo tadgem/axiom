@@ -16,3 +16,6 @@
 [submodule "submodules/slang"]
 	path = submodules/slang
 	url = https://github.com/shader-slang/slang.git
+[submodule "submodules/nanovg-vk"]
+	path = submodules/nanovg-vk
+	url = https://github.com/SubiyaCryolite/nanovg_vulkan.git

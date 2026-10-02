@@ -99,6 +99,9 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
 
 void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const { PROFILE_SCOPE() }
 
+thread_local axm::DynArray<f32> g_VertexDataCommitBuffer;
+thread_local axm::DynArray<u32> g_IndexDataCommitBuffer;
+
 void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
     PROFILE_SCOPE()
     auto*       transient = dynamic_cast<ModelAssetTransient*>(data);
@@ -109,43 +112,43 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         AXM_LOG_ERROR("Mesh {} does not have any normals", model->m_Path.generic_string());
     }
 
-    DynArray<f32> vertexData = { };
+    g_VertexDataCommitBuffer.clear();
     for (auto i = 0; i < mesh->mNumVertices; i++) {
         // positions
-        vertexData.push_back(mesh->mVertices[i].x);
-        vertexData.push_back(mesh->mVertices[i].y);
-        vertexData.push_back(mesh->mVertices[i].z);
+        g_VertexDataCommitBuffer.push_back(mesh->mVertices[i].x);
+        g_VertexDataCommitBuffer.push_back(mesh->mVertices[i].y);
+        g_VertexDataCommitBuffer.push_back(mesh->mVertices[i].z);
 
         // normals
         if (mesh->HasNormals()) {
-            vertexData.push_back(mesh->mNormals[i].x);
-            vertexData.push_back(mesh->mNormals[i].y);
-            vertexData.push_back(mesh->mNormals[i].z);
+            g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].x);
+            g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].y);
+            g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].z);
         }
 
         // todo: support additional tex coords
         if (mesh->HasTextureCoords(0)) {
-            vertexData.push_back(mesh->mTextureCoords[0][i].x);
-            vertexData.push_back(mesh->mTextureCoords[0][i].y);
+            g_VertexDataCommitBuffer.push_back(mesh->mTextureCoords[0][i].x);
+            g_VertexDataCommitBuffer.push_back(mesh->mTextureCoords[0][i].y);
         }
     }
 
-    DynArray<u32> indexData = { };
+    g_IndexDataCommitBuffer.clear();
     for (auto i = 0; i < mesh->mNumFaces; i++) {
         if (mesh->mFaces[i].mNumIndices != 3) {
             AXM_LOG_ERROR("Mesh {} has non triangular face.", model->m_Path.generic_string());
             continue;
         }
         for (unsigned int index = 0; index < mesh->mFaces[i].mNumIndices; index++) {
-            indexData.push_back(CAST(mesh->mFaces[i].mIndices[index], u32));
+            g_IndexDataCommitBuffer.push_back(CAST(mesh->mFaces[i].mIndices[index], u32));
         }
     }
 
     auto gpuMesh = meshes::CreateMeshFromData(m_GPU.m_Device,
-                                              vertexData.data(),
-                                              vertexData.size() * sizeof(f32),
-                                              indexData.data(),
-                                              indexData.size(),
+                                              g_VertexDataCommitBuffer.data(),
+                                              g_VertexDataCommitBuffer.size() * sizeof(f32),
+                                              g_IndexDataCommitBuffer.data(),
+                                              g_IndexDataCommitBuffer.size(),
                                               vertex::PosNormalUV::GetInputLayout(),
                                               mesh->mName.C_Str());
     model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });

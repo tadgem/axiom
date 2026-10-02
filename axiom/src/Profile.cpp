@@ -76,6 +76,30 @@ struct CompareItemsFromMap
     }
 };
 
+void ImGuiMemoryStats()
+{
+    size_t  elapsed, 
+            user_elapsed, 
+            system_elapsed, 
+            current_rss, 
+            peak_rss, 
+            current_committed_bytes, 
+            peak_committed_bytes, 
+            page_faults;
+
+    mi_process_info(
+        &elapsed, 
+        &user_elapsed, 
+        &system_elapsed, 
+        &current_rss, 
+        &peak_rss, 
+        &current_committed_bytes, 
+        &peak_committed_bytes, 
+        &page_faults
+    );
+
+    ImGui::Text("Committed : %llu mb, Peak : %llu mb", current_committed_bytes / MEGABYTES(1), peak_committed_bytes / MEGABYTES(1));
+}
 
 void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
 
@@ -96,6 +120,8 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
 
     ImGui::Begin("Axiom Profiler Stats");
     ImGui::Text("Frame Time : %.2f, FPS : %.2f", e.m_DeltaTime, 1000.0 / e.m_DeltaTime);
+    ImGuiMemoryStats();
+    
     if (ImGui::BeginTable("Axiom Profiler Stats", 5, flags)) {
 
         ImGui::TableSetupColumn("Label");

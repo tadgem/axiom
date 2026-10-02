@@ -22,6 +22,7 @@ namespace axm {
         struct ProfilerItem
         {
             f64 m_MeanDuration;
+            f64 m_ThisFrameDuration;
             f64 m_MinDuration = DBL_MAX;
             f64 m_MaxDuration;
         };

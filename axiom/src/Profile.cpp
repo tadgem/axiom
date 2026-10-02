@@ -16,6 +16,7 @@ axm::profiler::ScopedTimer::~ScopedTimer() {
         g_ProfilerItems[m_Label] = ProfilerItem { };
     }
 
+    g_ProfilerItems[m_Label].m_ThisFrameDuration = duration;
     g_ProfilerItems[m_Label].m_MeanDuration += duration;
     g_ProfilerItems[m_Label].m_MeanDuration /= 2;
 
@@ -49,13 +50,16 @@ struct CompareItemsFromMap
 
             f64                              delta = 0;
             switch (spec->ColumnIndex) {
-                case 1: // Mean Duration
+                case 1: // Current Duration
+                    delta = (a.m_ThisFrameDuration - b.m_ThisFrameDuration);
+                    break;
+                case 2: // Mean Duration
                     delta = (a.m_MeanDuration - b.m_MeanDuration);
                     break;
-                case 2: // Min Duration
+                case 3: // Min Duration
                     delta = a.m_MinDuration - b.m_MinDuration;
                     break;
-                case 3: // Max Duration
+                case 4: // Max Duration
                     delta = b.m_MaxDuration > a.m_MaxDuration ? 1.0f : -1.0f;
                     break;
             }
@@ -92,9 +96,10 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
 
     ImGui::Begin("Axiom Profiler Stats");
     ImGui::Text("Frame Time : %.2f, FPS : %.2f", e.m_DeltaTime, 1000.0 / e.m_DeltaTime);
-    if (ImGui::BeginTable("Axiom Profiler Stats", 4, flags)) {
+    if (ImGui::BeginTable("Axiom Profiler Stats", 5, flags)) {
 
         ImGui::TableSetupColumn("Label");
+        ImGui::TableSetupColumn("Duration (ms)");
         ImGui::TableSetupColumn("Mean Duration (ms)");
         ImGui::TableSetupColumn("Min Duration (ms)");
         ImGui::TableSetupColumn("Max Duration (ms)");
@@ -111,9 +116,11 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
         ImGui::TableHeadersRow();
         for (const auto& label: g_ProfilerItemLabelsSorted) {
 
-            const auto& stats = g_ProfilerItems[label];
+            auto& stats = g_ProfilerItems[label];
             ImGui::TableNextColumn();
             ImGui::TextUnformatted(label);
+            ImGui::TableNextColumn();
+            ImGui::Text("%.4f ms", stats.m_ThisFrameDuration / 1000000.0);
             ImGui::TableNextColumn();
             ImGui::Text("%.4f ms", stats.m_MeanDuration / 1000000.0);
             ImGui::TableNextColumn();
@@ -121,6 +128,7 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
             ImGui::TableNextColumn();
             ImGui::Text("%.4f ms", stats.m_MaxDuration / 1000000.0);
             ImGui::TableNextRow();
+            stats.m_ThisFrameDuration = 0.0f;
         }
         ImGui::EndTable();
     }

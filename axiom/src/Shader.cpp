@@ -55,6 +55,8 @@ axm::Shader::Shader(IDevice* device, const String& name, const Span<String>& ent
     using namespace rhi;
     PROFILE_SCOPE()
 
+    m_Name                       = std::move(name);
+
     slang::IModule* shaderModule = shaders::GetModule(device, name.c_str());
 
     if (!shaderModule) {

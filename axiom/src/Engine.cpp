@@ -231,8 +231,6 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
         return AxiomEngine::BAD();
     }
 
-    auto             blit             = Shader(device, "resources/shaders/blit", "vertMain", "fragMain");
-
     DepthStencilDesc depthStencilDesc = { };
     depthStencilDesc.format           = Format::D32Float;
     depthStencilDesc.depthTestEnable  = true;

@@ -32,6 +32,7 @@ axm::profiler::ScopedTimer::~ScopedTimer() {
 }
 
 static axm::DynArray<const char*> g_ProfilerItemLabelsSorted;
+static bool                       g_ProfilerSortDirty = false;
 
 // Helper struct to allow profiler items to be sorted:
 struct CompareItemsFromMap
@@ -103,6 +104,7 @@ void ImGuiMemoryStats()
 
 void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
 
+
     constexpr ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter
                                       | ImGuiTableFlags_BordersV | ImGuiTableFlags_Reorderable
                                       | ImGuiTableFlags_Sortable;
@@ -112,16 +114,18 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
         for (const auto& pair: g_ProfilerItems) {
             g_ProfilerItemLabelsSorted.push_back(pair.first);
         }
-        // Force a resort since the keys vector was rebuilt
-        if (ImGuiTableSortSpecs* sort_specs = ImGui::TableGetSortSpecs()) {
-            sort_specs->SpecsDirty = true;
-        }
+        // Rebuilt keys are unsorted; the table sort specs are handled once the
+        // table is active below.
+        g_ProfilerSortDirty = true;
     }
 
+
     ImGui::Begin("Axiom Profiler Stats");
+
     ImGui::Text("Frame Time : %.2f, FPS : %.2f", e.m_DeltaTime, 1000.0 / e.m_DeltaTime);
     ImGuiMemoryStats();
     
+
     if (ImGui::BeginTable("Axiom Profiler Stats", 5, flags)) {
 
         ImGui::TableSetupColumn("Label");
@@ -131,11 +135,12 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
         ImGui::TableSetupColumn("Max Duration (ms)");
 
         if (ImGuiTableSortSpecs* sort_specs = ImGui::TableGetSortSpecs()) {
-            if (sort_specs->SpecsDirty) {
+            if (sort_specs->SpecsDirty || g_ProfilerSortDirty) {
                 std::sort(g_ProfilerItemLabelsSorted.begin(),
                           g_ProfilerItemLabelsSorted.end(),
                           CompareItemsFromMap(g_ProfilerItems, sort_specs));
                 sort_specs->SpecsDirty = false; // Mark dirty flag as resolved
+                g_ProfilerSortDirty    = false;
             }
         }
 
@@ -159,4 +164,5 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e) {
         ImGui::EndTable();
     }
     ImGui::End();
+
 }

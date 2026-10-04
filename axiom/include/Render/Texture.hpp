@@ -1,11 +1,10 @@
 #pragma once
 
+#include "Core/Prim.hpp"
 #include "Core/STL.hpp"
-#include "Render/GPU.hpp"
+#include "vku/vku.h"
 
 namespace axm {
-
-    class Shader;
 
     enum TextureMapType {
         Unknown = -1,
@@ -24,21 +23,22 @@ namespace axm {
 
     struct Texture
     {
-        rhi::ITexture*     m_GPUTexture;
-        rhi::ITextureView* m_TextureView;
+        vku::Texture m_Texture;
+        bool         m_Valid = false;
 
-        rhi::Format        m_Format;
+        NO_DISCARD VkImageView View() const { return m_Texture.m_ImageView; }
+        NO_DISCARD VkSampler   Sampler() const { return m_Texture.m_Sampler; }
+        NO_DISCARD VkFormat    Format() const { return m_Texture.m_Format; }
 
-        u32                m_Width, m_Height;
+        void                   Free(vku::VkState& vk) { m_Texture.Free(vk); }
 
-
-        static Texture     BAD();
+        static Texture         BAD();
     };
 
     struct CPUTextureData
     {
-        void* m_Data;
-        u32   m_Width, m_Height, m_NumChannels;
+        void* m_Data = nullptr;
+        u32   m_Width = 0, m_Height = 0, m_NumChannels = 0;
 
         void  Release() const;
     };
@@ -48,27 +48,12 @@ namespace axm {
         CPUTextureData LoadCPUTextureDataFromMemory(void* data, size_t length);
         CPUTextureData LoadCPUTextureDataFromFile(const Filesystem::path& path);
 
-        rhi::ComPtr<rhi::ISampler>
-        CreateSampler(rhi::IDevice* device, rhi::TextureFilteringMode filter, rhi::TextureAddressingMode addressMode);
-
-        Texture
-        CreateTexture2D(GPU& device, const void* data, rhi::Format format, u32 w, u32 h, const char* label = "UNKNOWN");
-
-        Texture CreateRenderTexture2D(GPU&               gpu,
-                                      rhi::Format        format,
-                                      u32                w,
-                                      u32                h,
-                                      rhi::TextureUsage  usage,
-                                      rhi::ResourceState defaultState,
-                                      bool               generateMips = false,
-                                      const char*        label        = "UNKNOWN_RENDER_ATTACHMENT");
-
-        rhi::ComPtr<rhi::ITexture>
-             CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format = rhi::Format::D32Float);
-
-        void CopyDepthTexture(rhi::ICommandEncoder* commandEncoder, rhi::ITexture* src, rhi::ITexture* dst);
-
-        void GenerateMips(GPU& device, Texture& texture);
+        Texture        CreateTexture2D(vku::VkState&     vk,
+                                       const void*       data,
+                                       VkFormat          format,
+                                       u32               w,
+                                       u32               h,
+                                       const char*       label = "UNKNOWN");
 
     } // namespace textures
 

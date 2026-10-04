@@ -1,23 +1,14 @@
 file(GLOB_RECURSE AXM_SRCS src/*.cpp)
 
-file(GLOB_RECURSE IMGUI_SRCS ${IMGUI_INCLUDE_DIRS}/*.cpp)
-file(GLOB_RECURSE IMGUI_BACKEND_SRCS ${IMGUI_INCLUDE_DIRS}/backends/*.cpp)
-file(GLOB_RECURSE IMGUIZMO_SRCS ${IMGUIZMO_INCLUDE_DIRS}/*.cpp)
-
 add_library(axiom STATIC
-    ${IMGUI_SRCS}
-    ${IMGUI_BACKEND_SRCS}
-    ${IMGUIZMO_SRCS}
-    ${THIRD_PARTY_DIRS}/im3d/im3d.cpp
-    ${THIRD_PARTY_DIRS}/im3d/backends/im3d_impl_slang_rhi.cpp
-    ${THIRD_PARTY_DIRS}/nanovg/nanovg.c
-    ${THIRD_PARTY_DIRS}/nanovg/backends/nanovg_impl_slang_rhi.cpp
+    ${THIRD_PARTY_DIRS}/imguizmo/ImGuizmo.cpp
     ${AXM_SRCS}
 )
 
 target_link_libraries(axiom PUBLIC
+        vku
+        vku-sdl
         SDL3-static
-        slang-rhi
         assimp
         flecs_static
         mimalloc-static
@@ -26,14 +17,10 @@ target_link_libraries(axiom PUBLIC
 
 target_include_directories(axiom PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${IMGUI_INCLUDE_DIRS}
     ${IMGUIZMO_INCLUDE_DIRS}
-    ${SLANG_INCLUDE_DIRS}
-    ${SDL_INCLUDE_DIRS}
+    ${SDL_INCLUDES}
+    ${ASSIMP_INCLUDES}
+    ${GLM_INCLUDES}
     ${MIMALLOC_INCLUDE_DIRS}
     ${SINGLE_HEADER_INCLUDE_DIRS}
-    ${THIRD_PARTY_DIRS}/im3d
-    ${THIRD_PARTY_DIRS}/nanovg
-    ${THIRD_PARTY_DIRS}/im3d/backends
-    ${THIRD_PARTY_DIRS}/nanovg/backends
 )

@@ -1,59 +1,30 @@
-#include "../include/Render/Pipeline.hpp"
-#include <vector>
-#include "../include/Core/Debug.hpp"
-#include "Core/Profile.hpp"
+#include "Render/Pipeline.hpp"
+#include "Core/Debug.hpp"
 
-rhi::ComPtr<rhi::IRenderPipeline> axm::pipeline::CreateRasterPipeline(rhi::IDevice*                device,
-                                                                      const Span<rhi::Format>&     colourFormats,
-                                                                      const rhi::DepthStencilDesc& depthTarget,
-                                                                      const Shader&                shader,
-                                                                      rhi::IInputLayout*           inputLayout) {
-    PROFILE_SCOPE()
-
-    AXM_LOG("CreateRasterPipeline for shader '{}'", shader.m_Name);
-    AXM_LOG("  depthTarget.depthTestEnable: {}", depthTarget.depthTestEnable);
-    AXM_LOG("  depthTarget.depthWriteEnable: {}", depthTarget.depthWriteEnable);
-    AXM_LOG("  depthTarget.depthFunc: {}", (int) depthTarget.depthFunc);
-    AXM_LOG("  depthTarget.format: {}", (int) depthTarget.format);
-
-
-    DynArray<rhi::ColorTargetDesc> colorTargets;
-    colorTargets.resize(colourFormats.size());
-
-    for (auto i = 0; i < colourFormats.size(); i++) {
-        colorTargets[i].format = colourFormats[i];
+vku::VkPipelineData axm::pipeline::CreateRasterPipeline(vku::VkState&           vk,
+                                                        Shader&                 shader,
+                                                        vku::VertexDescription& vertDesc,
+                                                        vku::RasterizationState& raster,
+                                                        VkRenderPass            renderPass,
+                                                        VkExtent2D              extent,
+                                                        u32                     colourCount) {
+    if (!shader.Valid()) {
+        AXM_LOG_ERROR("Cannot create raster pipeline from an invalid shader");
+        return {};
     }
 
-    rhi::RenderPipelineDesc pipelineDesc = { };
-    pipelineDesc.program                 = shader.m_Program;
-    pipelineDesc.inputLayout             = inputLayout;
-    pipelineDesc.targets                 = colorTargets.data();
-    pipelineDesc.targetCount             = colorTargets.size();
-    pipelineDesc.depthStencil            = depthTarget;
-    pipelineDesc.label                   = shader.m_Name.c_str();
-    rhi::ComPtr<rhi::IRenderPipeline> pipeline;
-
-    if (SLANG_FAILED(device->createRenderPipeline(pipelineDesc, pipeline.writeRef()))) {
-        AXM_LOG("Failed to create render pipeline with shader : {}", shader.m_Name);
-        return { };
-    }
-
-    return pipeline;
+    return vku::pipelines::CreateRasterPipeline(
+            vk, shader.m_Program, vertDesc, raster, renderPass, extent, colourCount);
 }
 
-rhi::ComPtr<rhi::IComputePipeline> axm::pipeline::CreateComputePipeline(rhi::IDevice* device, const Shader& shader) {
-    PROFILE_SCOPE()
-
-    rhi::ComputePipelineDesc pipelineDesc = { };
-    pipelineDesc.program                  = shader.m_Program;
-    pipelineDesc.label                    = shader.m_Name.c_str();
-
-    rhi::ComPtr<rhi::IComputePipeline> pipeline;
-
-    if (SLANG_FAILED(device->createComputePipeline(pipelineDesc, pipeline.writeRef()))) {
-        AXM_LOG("Failed to create compute pipeline with shader : {}", shader.m_Name);
-        return { };
+vku::VkPipelineData axm::pipeline::CreateComputePipeline(vku::VkState& vk, Shader& shader) {
+    if (!shader.Valid() || shader.m_Program.m_Stages.empty()) {
+        AXM_LOG_ERROR("Cannot create compute pipeline from an invalid shader");
+        return {};
     }
 
-    return pipeline;
+    return vku::pipelines::CreateComputePipeline(
+            vk,
+            shader.m_Program.m_Stages[0].m_StageBinary,
+            shader.m_Program.m_DescriptorSetLayout);
 }

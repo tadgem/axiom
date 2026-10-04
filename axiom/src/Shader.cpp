@@ -1,87 +1,41 @@
 #include "Render/Shader.hpp"
 #include "Core/Debug.hpp"
-#include "Core/Profile.hpp"
-#include "Core/STL.hpp"
 
-using namespace rhi;
-
-slang::IModule* axm::shaders::GetModule(IDevice* device, const char* name) {
-    PROFILE_SCOPE()
-
-    ComPtr<slang::IBlob> diagnostics  = { };
-
-    slang::IModule*      shaderModule = device->getSlangSession()->loadModule(name, diagnostics.writeRef());
-
-    if (diagnostics) {
-        AXM_LOG("Shader Compilation Messages: {}", CAST(diagnostics->getBufferPointer(), const char*));
-    }
-
-    if (!shaderModule) {
-        AXM_LOG("Failed to compile shader : {}", name);
-        return nullptr;
-    }
-
-    return shaderModule;
-}
-
-void axm::shaders::CreateShaderProgram(IDevice*                device,
-                                       ShaderProgramDesc       desc,
-                                       ComPtr<IShaderProgram>& program,
-                                       const axm::String&      name) {
-    PROFILE_SCOPE()
-
-    ComPtr<slang::IBlob> diagnostics = { };
-
-    if (SLANG_FAILED(device->createShaderProgram(desc, program.writeRef(), diagnostics.writeRef()))) {
-        AXM_LOG("Failed to create shader program : {}", name);
-        if (diagnostics) {
-            AXM_LOG("{}", CAST(diagnostics->getBufferPointer(), const char*));
-        }
+axm::Shader::Shader(vku::VkState& vk, const String& vertPath, const String& fragPath) :
+    m_VertexPath(vertPath), m_FragmentPath(fragPath), m_IsCompute(false) {
+    m_Program = vku::ShaderProgram::CreateGraphicsFromSourcePath(
+            vk, m_VertexPath.c_str(), m_FragmentPath.c_str());
+    m_Valid = !m_Program.m_Stages.empty();
+    if (!m_Valid) {
+        AXM_LOG_ERROR("Failed to compile graphics shader '{}' / '{}'", m_VertexPath, m_FragmentPath);
     }
 }
 
-
-axm::Shader::Shader(IDevice* device, const String& name, const String& computeEntry) {
-    Array entries = { computeEntry };
-    *this         = Shader(device, name, entries);
+axm::Shader::Shader(vku::VkState& vk, const String& computePath) :
+    m_ComputePath(computePath), m_IsCompute(true) {
+    m_Program = vku::ShaderProgram::CreateComputeFromSourcePath(vk, m_ComputePath.c_str());
+    m_Valid   = !m_Program.m_Stages.empty();
+    if (!m_Valid) {
+        AXM_LOG_ERROR("Failed to compile compute shader '{}'", m_ComputePath);
+    }
 }
 
-axm::Shader::Shader(IDevice* device, const String& name, const String& vertEntry, const String& fragEntry) {
-    Array entries = { vertEntry, fragEntry };
-    *this         = Shader(device, name, entries);
-}
-
-axm::Shader::Shader(IDevice* device, const String& name, const Span<String>& entries) {
-    using namespace rhi;
-    PROFILE_SCOPE()
-
-    m_Name                       = std::move(name);
-
-    slang::IModule* shaderModule = shaders::GetModule(device, name.c_str());
-
-    if (!shaderModule) {
-        AXM_LOG("Failed to compile shader : {}", name);
-        return;
+bool axm::Shader::Reload(vku::VkState& vk) {
+    vku::ShaderProgram rebuilt;
+    if (m_IsCompute) {
+        rebuilt = vku::ShaderProgram::CreateComputeFromSourcePath(vk, m_ComputePath.c_str());
+    } else {
+        rebuilt = vku::ShaderProgram::CreateGraphicsFromSourcePath(
+                vk, m_VertexPath.c_str(), m_FragmentPath.c_str());
     }
 
-    DynArray<slang::IComponentType*> entryPoints = { };
-
-    for (const auto& entry: entries) {
-        slang::IEntryPoint* ep = { };
-        shaderModule->findEntryPointByName(entry.c_str(), &ep);
-
-        if (ep) {
-            entryPoints.push_back(ep);
-        }
+    if (rebuilt.m_Stages.empty()) {
+        AXM_LOG_ERROR("Shader reload failed, keeping previous program");
+        return false;
     }
 
-    ShaderProgramDesc programDesc    = { };
-    programDesc.linkingStyle         = LinkingStyle::SingleProgram;
-    programDesc.slangEntryPoints     = entryPoints.data();
-    programDesc.slangEntryPointCount = entryPoints.size();
-    programDesc.slangGlobalScope     = shaderModule;
-
-    shaders::CreateShaderProgram(device, programDesc, m_Program, name);
+    m_Program.Free(vk);
+    m_Program = rebuilt;
+    m_Valid   = true;
+    return true;
 }
-axm::ShaderDataInterface::ShaderDataInterface(IShaderObject* obj, const String& pipelineName) :
-    m_SlangCursor(ShaderCursor(obj)), m_PipelineName(pipelineName) { }

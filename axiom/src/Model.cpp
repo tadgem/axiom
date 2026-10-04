@@ -1,6 +1,5 @@
 #include "Assets/Model.hpp"
 #include "Core/Profile.hpp"
-#include "Render/Buffer.hpp"
 #include "assimp/cimport.h"
 #include "assimp/mesh.h"
 #include "assimp/postprocess.h"
@@ -144,12 +143,11 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         }
     }
 
-    auto gpuMesh = meshes::CreateMeshFromData(m_GPU.m_Device,
+    auto gpuMesh = meshes::CreateMeshFromData(m_GPU.State(),
                                               g_VertexDataCommitBuffer.data(),
                                               g_VertexDataCommitBuffer.size() * sizeof(f32),
                                               g_IndexDataCommitBuffer.data(),
                                               g_IndexDataCommitBuffer.size(),
-                                              vertex::PosNormalUV::GetInputLayout(),
                                               mesh->mName.C_Str());
     model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });
 }

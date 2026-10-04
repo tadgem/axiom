@@ -1,29 +1,25 @@
 #pragma once
 
-#include <slang-rhi.h>
-#include "Render/Shader.hpp"
+#include "vku/vku.h"
 
 struct NVGcontext;
 
 namespace axm {
+    // Thin convenience view over the vku::VkState owned by the engine. The
+    // vku state is the single source of truth for device, queues and swapchain.
     struct GPU
     {
-        rhi::IDevice*                      m_Device               = nullptr;
-        rhi::ISurface*                     m_Surface              = nullptr;
-        rhi::ICommandQueue*                m_Queue                = nullptr;
+        vku::VkState* m_VK = nullptr;
 
-        rhi::ITexture*                     m_SwapchainColourImage = nullptr;
-        rhi::ComPtr<rhi::ITexture>         m_SwapchainDepthImage  = nullptr;
+        VkSampler     m_LinearClampSampler = VK_NULL_HANDLE;
+        VkSampler     m_LinearWrapSampler  = VK_NULL_HANDLE;
 
-        Unique<rhi::IDebugCallback>        m_DebugCallback;
-
-        Shader                             m_MipShader;
-        rhi::ComPtr<rhi::IComputePipeline> m_MipPipeline;
-        rhi::ComPtr<rhi::ISampler>         m_LinearClampSampler;
-        rhi::ComPtr<rhi::ISampler>         m_LinearWrapSampler;
-
-        rhi::DepthStencilDesc              m_DepthStencilDesc;
-
-        NVGcontext*                        m_FullScreenVG;
+        NO_DISCARD vku::VkState&       State() const { return *m_VK; }
+        // NanoVG context is recreated on swapchain recreation, so always
+        // resolve it from the live vku state.
+        NO_DISCARD NVGcontext*         NanoVG() const { return m_VK->m_NanoVG; }
+        NO_DISCARD VkDevice            Device() const { return m_VK->m_LogicalDevice; }
+        NO_DISCARD VkExtent2D          SwapchainExtent() const { return m_VK->m_SwapChainImageExtent; }
+        NO_DISCARD VkFormat            SwapchainFormat() const { return m_VK->m_SwapChainImageFormat; }
     };
 }

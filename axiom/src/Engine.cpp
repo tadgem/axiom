@@ -85,6 +85,7 @@ axm::AxiomEngine::~AxiomEngine() {
 
 void axm::AxiomEngine::Quit() {
     PROFILE_SCOPE()
+    m_AssetManager.UnloadAllAssets();
     if (m_VK) {
         vku::init::Quit(*m_VK);
         m_VK.reset();

@@ -86,6 +86,40 @@ namespace {
         AXM_TEST_ASSERT(shader.Valid(), "Expected cube shader to compile from GLSL source");
         return TestResult::Pass();
     }
+
+    // Vulkan expects Y-down NDC and a depth range of [0, 1]. The camera must
+    // therefore flip Y and remap z from the OpenGL [-1, 1] convention.
+    TestResult Camera_VulkanProjectionConventions(AxiomEngine* e) {
+        (void)e;
+        Camera cam;
+        cam.m_FOV = 90.0f;
+        cam.m_NearPlane = 0.1f;
+        cam.m_FarPlane = 100.0f;
+        cam.m_ViewportDimensions = aml::Float2(1.0f, 1.0f);
+
+        const aml::Mat44 proj = cam.GetProjectionMatrix();
+
+        // A point on the near plane (camera looking down -Z) has clip depth 0,
+        // and a point on the far plane has clip depth 1 (after perspective
+        // divide, w == -z_view for a right-handed projection).
+        const float nearZ = -cam.m_NearPlane;
+        const float farZ = -cam.m_FarPlane;
+
+        aml::Vec4 nearClip = proj * aml::Vec4(0.0f, 0.0f, nearZ, 1.0f);
+        aml::Vec4 farClip = proj * aml::Vec4(0.0f, 0.0f, farZ, 1.0f);
+        const float nearDepth = nearClip.GetZ() / nearClip.GetW();
+        const float farDepth = farClip.GetZ() / farClip.GetW();
+
+        AXM_TEST_ASSERT(std::abs(nearDepth - 0.0f) < 0.001f, "Near plane should map to depth 0");
+        AXM_TEST_ASSERT(std::abs(farDepth - 1.0f) < 0.001f, "Far plane should map to depth 1");
+
+        // A point above the view centre must map to negative Y in Vulkan's
+        // Y-down clip space (i.e. the projection flips Y).
+        aml::Vec4 upClip = proj * aml::Vec4(0.0f, 1.0f, nearZ, 1.0f);
+        AXM_TEST_ASSERT(upClip.GetY() / upClip.GetW() < 0.0f, "Projection should flip Y for Vulkan");
+
+        return TestResult::Pass();
+    }
 }
 
 AXM_BEGIN_TESTS("Engine Tests")
@@ -95,6 +129,7 @@ AXM_ADD_TEST(Engine_CanResizeWindow)
 AXM_ADD_TEST(Engine_NanoVgContextWorks)
 AXM_ADD_TEST(Transform_DirectionVectors)
 AXM_ADD_TEST(Camera_ViewMatrix)
+AXM_ADD_TEST(Camera_VulkanProjectionConventions)
 AXM_ADD_TEST(Shaders_CompileFromSource)
 
 AXM_END_TESTS()

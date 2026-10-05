@@ -22,22 +22,8 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
 
     AxiomEngine engine;
 
-    // Register the embedded Archivo font before vku builds and uploads the
-    // ImGui font atlas, otherwise the atlas is already locked and the font is
-    // silently ignored.
-    auto configureImGui = []() {
-        static ImFontConfig config{};
-        config.FontDataOwnedByAtlas = false;
-        ImFont* font = ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)&archivo_regular_ttf[0],
-                                                                  CAST(sizeof(archivo_regular_ttf), int),
-                                                                  14.0f,
-                                                                  &config);
-        if (font != nullptr) {
-            ImGui::GetIO().FontDefault = font;
-        }
-    };
-
-    vku::VkState vk = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true, configureImGui);
+    
+    vku::VkState vk = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
     engine.m_VK     = MakeUnique<vku::VkState>(std::move(vk));
 
     engine.m_GPU.m_VK           = engine.m_VK.get();

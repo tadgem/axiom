@@ -6,10 +6,27 @@ aml::Mat44 axm::Camera::GetViewProjectionMatrix() const {
     return GetProjectionMatrix() * GetViewMatrix();
 }
 
-aml::Mat44 axm::Camera::GetProjectionMatrix() const {
-    const auto             aspect         = m_ViewportDimensions.x / m_ViewportDimensions.y;
-    // TODO: Add support for other projection types
+aml::Mat44 axm::Camera::GetViewProjectionMatrixGL() const {
+    return GetProjectionMatrixGL() * GetViewMatrix();
+}
+
+aml::Mat44 axm::Camera::GetProjectionMatrixGL() const {
+    const auto aspect = m_ViewportDimensions.x / m_ViewportDimensions.y;
+    // Raw Y-up / OpenGL-convention projection for editor tools.
     return aml::Mat44::sPerspective(aml::DegreesToRadians(m_FOV), aspect, m_NearPlane, m_FarPlane);
+}
+
+aml::Mat44 axm::Camera::GetProjectionMatrix() const {
+    // Jolt's sPerspective already maps depth to Vulkan's [0, 1] range, but it
+    // is Y-up (OpenGL convention). Vulkan clip space is Y-down, so flip the Y
+    // axis. Without this the scene renders upside down.
+    aml::Mat44 proj = GetProjectionMatrixGL();
+
+    for (u32 col = 0; col < 4; ++col) {
+        proj(1, col) = -proj(1, col);
+    }
+
+    return proj;
 }
 
 aml::Mat44 axm::Camera::GetViewMatrix() const {

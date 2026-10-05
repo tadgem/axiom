@@ -19,6 +19,12 @@ namespace axm {
         NO_DISCARD aml::Mat44 GetViewMatrix() const;
         NO_DISCARD aml::Mat44 GetProjectionMatrix() const;
         NO_DISCARD aml::Mat44 GetViewProjectionMatrix() const;
+
+        // Raw Y-up / OpenGL-convention projection (no Vulkan Y-flip). Required
+        // by screen-space editor tools such as ImGuizmo and Im3d, which assume
+        // the OpenGL clip space convention.
+        NO_DISCARD aml::Mat44 GetProjectionMatrixGL() const;
+        NO_DISCARD aml::Mat44 GetViewProjectionMatrixGL() const;
     };
 
     class FlyCamController

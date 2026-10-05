@@ -1,7 +1,6 @@
-sdl3 3.4.10
-imgui 1.92.8-docking
 stb_image 2.30
 mimalloc 3.3.2
 nlohmann_json 3.12.0
-assimp 6.0.5
 imguizmo 1.10
+# sdl3, assimp, imgui, im3d and nanovg are provided by the vku submodule.
+

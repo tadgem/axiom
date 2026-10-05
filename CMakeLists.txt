@@ -8,7 +8,6 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
 
 message("-- Axiom : Configuring build --")
 
-
 # mimalloc
 set(MI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(MI_BUILD_STATIC ON CACHE BOOL "" FORCE)
@@ -17,41 +16,21 @@ set(MI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(MIMALLOC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mimalloc/include)
 add_subdirectory(third_party/mimalloc)
 
-# SDL3
-set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(SDL_TESTS OFF CACHE BOOL "" FORCE)
-set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-set(SDL_STATIC ON CACHE BOOL "" FORCE)
-set(SDL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/sdl/include CACHE INTERNAL "")
-add_subdirectory(third_party/sdl)
+# vku (Vulkan helper library) - provides SDL3, assimp, glm, volk, imgui, nanovg,
+# im3d and runtime GLSL compilation via shaderc. Slang is disabled and vku's
+# own examples are not built as part of axiom.
+set(VKU_ENABLE_SLANG OFF CACHE BOOL "" FORCE)
+set(VKU_RT_SHADER_COMPILATION ON CACHE BOOL "" FORCE)
+set(VKU_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(submodules/vku)
 
-# Slang RHI
-# slang-rhi backends not used by the engine.
-set(SLANG_RHI_ENABLE_WGPU OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_OPTIX OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_AGILITY_SDK OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_ENABLE_NVAPI OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(SLANG_RHI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(SLANG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/submodules/slang-rhi/include)
-add_subdirectory(submodules/slang-rhi)
-
-# ImGui
-add_subdirectory(third_party/imgui)
+# ImGuiZmo (the rest of the ImGui stack comes from vku).
 add_subdirectory(third_party/imguizmo)
 
 # Flecs
 set(FLECS_SHARED OFF CACHE BOOL "" FORCE)
 set(FLECS_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory(submodules/flecs)
-
-# ASSIMP
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking" FORCE)
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable ASSIMP tests (removed the dir)")
-add_subdirectory(third_party/assimp)
 
 # Jolt
 set(JPH_BUILD_SHARED_LIBS OFF CACHE BOOL "Disable Jolt shared libs" FORCE)

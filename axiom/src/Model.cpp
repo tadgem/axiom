@@ -1,6 +1,5 @@
 #include "Assets/Model.hpp"
 #include "Core/Profile.hpp"
-#include "Render/Buffer.hpp"
 #include "assimp/cimport.h"
 #include "assimp/mesh.h"
 #include "assimp/postprocess.h"
@@ -97,7 +96,19 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
     return result;
 }
 
-void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const { PROFILE_SCOPE() }
+void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const {
+    PROFILE_SCOPE()
+    auto* model = dynamic_cast<ModelAsset*>(asset);
+    if (model == nullptr) {
+        return;
+    }
+
+    AXM_LOG_INFO("ModelAssetFactory::UnloadAsset freeing {} meshes", model->m_Data.m_Meshes.size());
+    for (auto& entry: model->m_Data.m_Meshes) {
+        entry.m_Mesh.Free(m_GPU.State());
+    }
+    model->m_Data.m_Meshes.clear();
+}
 
 thread_local axm::DynArray<f32> g_VertexDataCommitBuffer;
 thread_local axm::DynArray<u32> g_IndexDataCommitBuffer;
@@ -144,12 +155,11 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         }
     }
 
-    auto gpuMesh = meshes::CreateMeshFromData(m_GPU.m_Device,
+    auto gpuMesh = meshes::CreateMeshFromData(m_GPU.State(),
                                               g_VertexDataCommitBuffer.data(),
                                               g_VertexDataCommitBuffer.size() * sizeof(f32),
                                               g_IndexDataCommitBuffer.data(),
                                               g_IndexDataCommitBuffer.size(),
-                                              vertex::PosNormalUV::GetInputLayout(),
                                               mesh->mName.C_Str());
     model->m_Data.m_Meshes.push_back({ .m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex });
 }

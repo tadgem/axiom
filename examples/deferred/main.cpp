@@ -1,6 +1,7 @@
 #include "Assets/Model.hpp"
 #include "Assets/TextureAsset.hpp"
 #include "Core/Profile.hpp"
+#include "ImGui/vku_extensions.h"
 #include "Render/ImGuiUtils.hpp"
 #include "axiom.hpp"
 
@@ -19,88 +20,101 @@ static aml::Mat44 GetMVP(const Transform& trans, const Camera& cam) {
 namespace {
     struct Drawable
     {
-        AssetHandle m_TextureAsset;
-        Texture*    m_Texture = nullptr;
-        Mesh        m_Mesh;
+        AssetHandle   m_TextureAsset;
+        Texture*      m_Texture = nullptr;
+        Mesh          m_Mesh;
+        vku::Material m_Material;
     };
-
-    void DrawDrawable(const GPU&                 gpu,
-                      rhi::IRenderPassEncoder*   encoder,
-                      const ShaderDataInterface& shader,
-                      const Drawable&            drawable,
-                      const Viewport&            viewport) {
-
-        shader.SetData("modelViewProj", g_MVP);
-        if (drawable.m_Texture) {
-            shader.SetBinding("diffuse", drawable.m_Texture->m_TextureView);
-        }
-        shader.SetBinding("diffuseSampler", gpu.m_LinearWrapSampler);
-
-        meshes ::DrawMesh(viewport, drawable.m_Mesh, encoder);
-    }
-
 }
+
 int main() {
     const Timer initTimer = { };
 
-    AxiomEngine init      = AxiomEngine::Init();
+    AxiomEngine init = AxiomEngine::Init();
     AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
+
+    vku::VkState& vk = *init.m_VK;
 
     init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
     init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
 
-    g_Transform.m_Scale    = aml::Vec3(0.2f, 0.2f, 0.2f);
-    g_MVP                  = GetMVP(g_Transform, g_Cam);
+    g_Transform.m_Scale = aml::Vec3(0.2f, 0.2f, 0.2f);
+    g_MVP               = GetMVP(g_Transform, g_Cam);
 
-    auto posNormalUvLayout = vertex::PosNormalUV::GetInputLayout();
-    posNormalUvLayout.BuildDeviceLayout(init.m_GPU.m_Device);
+    vku::VertexDescription vertDesc = vertex::PosNormalUV::GetVertexDescription(vk);
 
-    auto        gbuffer = Shader(init.m_GPU.m_Device, "resources/shaders/gbuffer", "vertexMain", "fragmentMain");
+    Shader gbufferShader(vk, "resources/shaders/gbuffer.vert", "resources/shaders/gbuffer.frag");
 
+    // G-Buffer: colour (RGB10A2), normal (RG16F), uv (RG16F) + depth.
+    vku::Framebuffer fb(*vk.m_CPUAllocator);
+    fb.AddColourAttachment(vk,
+                           vku::ResolutionScale::Full,
+                           1,
+                           VK_FORMAT_A2B10G10R10_UNORM_PACK32,
+                           VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                           VK_SAMPLE_COUNT_1_BIT);
+    fb.AddColourAttachment(vk,
+                           vku::ResolutionScale::Full,
+                           1,
+                           VK_FORMAT_R16G16_SFLOAT,
+                           VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                           VK_SAMPLE_COUNT_1_BIT);
+    fb.AddColourAttachment(vk,
+                           vku::ResolutionScale::Full,
+                           1,
+                           VK_FORMAT_R16G16_SFLOAT,
+                           VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                           VK_SAMPLE_COUNT_1_BIT);
+    fb.AddDepthAttachment(vk,
+                          vku::ResolutionScale::Full,
+                          1,
+                          VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                          VK_SAMPLE_COUNT_1_BIT);
 
-    Framebuffer fb(init.m_GPU);
+    fb.m_AttachmentLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    fb.m_ClearValues.resize(4);
+    for (u32 i = 0; i < 3; i++) {
+        fb.m_ClearValues[i].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
+    }
+    fb.m_ClearValues[3].depthStencil = { 1.0f, 0 };
+    fb.Build(vk);
 
-    fb.AddColourAttachment(rhi::Format::RGB10A2Unorm,
-                           rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
-                           rhi::ResourceState::RenderTarget,
-                           "Diffuse Buffer");
-    fb.AddColourAttachment(rhi::Format::RG16Float,
-                           rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
-                           rhi::ResourceState::RenderTarget,
-                           "Normal Buffer");
-    fb.AddColourAttachment(rhi::Format::RG16Float,
-                           rhi::TextureUsage::RenderTarget | rhi::TextureUsage::ShaderResource,
-                           rhi::ResourceState::RenderTarget,
-                           "UV Buffer");
-    fb.AddDepthAttachment(rhi::Format::D32Float,
-                          rhi::TextureUsage::DepthStencil | rhi::TextureUsage::CopySource,
-                          rhi::ResourceState::DepthWrite,
-                          "Depth");
+    vku::RasterizationState rasterState = vku::defaults::DefaultRasterState;
+    vku::VkPipelineData     pipeline    = pipeline::CreateRasterPipeline(vk,
+                                                     gbufferShader,
+                                                     vertDesc,
+                                                     rasterState,
+                                                     fb.m_RenderPassInfo.m_RenderPass,
+                                                     fb.m_Resolution,
+                                                     3);
 
-
-    auto       formats    = fb.GetFormatList();
-    const auto pipeline   = pipeline::CreateRasterPipeline(init.m_GPU.m_Device,
-                                                         formats,
-                                                         init.m_GPU.m_DepthStencilDesc,
-                                                         gbuffer,
-                                                         posNormalUvLayout.m_DeviceInputLayout);
-
-
-    f64        msInitTime = initTimer.ElapsedMillisecondsF();
-
+    const f64 msInitTime = initTimer.ElapsedMillisecondsF();
     AXM_LOG("Init took {} ms", msInitTime);
     AXM_LOG("Starting Axiom Main Loop");
 
     auto drawables = DynArray<Drawable> { };
 
-    init.m_AssetManager.LoadAsset("resources/models/sponza/Sponza.gltf", AssetType::Model, [&drawables](Asset* asset) {
-        const auto* model = dynamic_cast<ModelAsset*>(asset);
-
-        for (const auto& entry: model->m_Data.m_Meshes) {
-            const auto map = model->m_Data.m_Materials[entry.m_MaterialIndex].m_TextureMaps[TextureMapType::Diffuse];
-            drawables.push_back({ .m_TextureAsset = map.m_Handle, .m_Texture = nullptr, .m_Mesh = entry.m_Mesh });
-        }
-    });
+    init.m_AssetManager.LoadAsset(
+            "resources/models/sponza/Sponza.gltf", AssetType::Model, [&](Asset* asset) {
+                const auto* model = dynamic_cast<ModelAsset*>(asset);
+                for (const auto& entry: model->m_Data.m_Meshes) {
+                    Drawable drawable;
+                    drawable.m_Mesh = entry.m_Mesh;
+                    if (entry.m_MaterialIndex < model->m_Data.m_Materials.size()) {
+                        drawable.m_TextureAsset
+                                = model->m_Data.m_Materials[entry.m_MaterialIndex]
+                                          .m_TextureMaps[TextureMapType::Diffuse]
+                                          .m_Handle;
+                    }
+                    drawable.m_Material = vku::Material::Create(vk, gbufferShader.m_Program);
+                    drawable.m_Material.CreateBuffer(vk, 0, 0);
+                    drawables.push_back(std::move(drawable));
+                }
+            });
 
     FlyCamController controller(init.m_Input, init.m_Window);
 
@@ -109,67 +123,62 @@ int main() {
             auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
             g_Cam.m_ViewportDimensions = viewport.m_Size;
             controller.Update(g_Cam, CAST(init.m_DeltaTime, f32));
-            g_MVP                  = GetMVP(g_Transform, g_Cam);
+            g_MVP = GetMVP(g_Transform, g_Cam);
 
-
-            auto commandEncoder    = init.m_GPU.m_Queue->createCommandEncoder();
-            auto renderPassEncoder = fb.BeginRenderPass(commandEncoder);
-            auto shader = ShaderDataInterface(renderPassEncoder->bindPipeline(pipeline), pipeline->getDesc().label);
             for (auto& drawable: drawables) {
-
-                if (drawable.m_Texture == nullptr) {
+                if (drawable.m_Texture == nullptr
+                    && drawable.m_TextureAsset != AssetHandle::BAD) {
                     if (const auto asset = init.m_AssetManager.GetAsset(drawable.m_TextureAsset)) {
                         drawable.m_Texture = &dynamic_cast<TextureAsset*>(asset)->m_Data;
                     }
                 }
-                DrawDrawable(init.m_GPU, renderPassEncoder, shader, drawable, viewport);
+
+                drawable.m_Material.SetBuffer(vk.m_CurrentFrameIndex, 0, 0, g_MVP);
+                if (drawable.m_Texture) {
+                    drawable.m_Material.SetSampler(vk, "diffuse", drawable.m_Texture->m_Texture);
+                }
             }
 
-            auto nvg    = init.m_GPU.m_FullScreenVG;
-            auto width  = static_cast<f32>(init.m_Window.m_Width);
-            auto height = static_cast<f32>(init.m_Window.m_Height);
+            vku::commands::RecordGraphicsCommands(vk, [&](VkCommandBuffer& cmd, uint32_t frame) {
+                // G-Buffer pass (multiple render targets).
+                vkCmdBeginRenderPass(
+                        cmd, &fb.m_RenderPassInfo.m_RenderPassInfos[frame], VK_SUBPASS_CONTENTS_INLINE);
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.m_Pipeline);
 
+                for (auto& drawable: drawables) {
+                    vkCmdBindDescriptorSets(cmd,
+                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            pipeline.m_PipelineLayout,
+                                            0,
+                                            1,
+                                            &drawable.m_Material.m_DescriptorSets[0].m_Sets[frame],
+                                            0,
+                                            nullptr);
+                    meshes::DrawMesh(viewport, drawable.m_Mesh, cmd);
+                }
+                vkCmdEndRenderPass(cmd);
 
-            nvgBeginFrame(init.m_GPU.m_FullScreenVG, width, height, 1.0f);
-            NVGpaint bgPaint = nvgRadialGradient(nvg,
-                                                 width * 0.5f,
-                                                 height * 0.5f,
-                                                 width * 0.2f,
-                                                 width * 0.7f,
-                                                 nvgRGBA(25, 30, 44, 255),
-                                                 nvgRGBA(10, 12, 18, 255));
-            nvgBeginPath(nvg);
-            nvgRect(nvg, 0, 0, width / 2.0f, height / 2.0f);
-            nvgFillPaint(nvg, bgPaint);
-            nvgFill(nvg);
-            nvgEndFrame(nvg);
+                // Present pass with the NanoVG background.
+                vku::render_passes::BeginSwapchainRenderPass(vk, cmd);
 
-            renderPassEncoder->end();
-            textures::CopyDepthTexture(commandEncoder,
-                                       fb.m_DepthStencilAttachment.m_Texture.m_GPUTexture,
-                                       init.m_GPU.m_SwapchainDepthImage);
-            auto swapChainPass = render_pass::BeginSwapChainRenderPass(
-                    init.m_GPU, commandEncoder, rhi::LoadOp::Clear, rhi::LoadOp::Load);
+                auto        nvg    = init.m_GPU.NanoVG();
+                const f32   width  = CAST(init.m_Window.m_Width, f32);
+                const f32   height = CAST(init.m_Window.m_Height, f32);
+                NVGpaint    bgPaint = nvgRadialGradient(nvg,
+                                                     width * 0.5f,
+                                                     height * 0.5f,
+                                                     width * 0.2f,
+                                                     width * 0.7f,
+                                                     nvgRGBA(25, 30, 44, 255),
+                                                     nvgRGBA(10, 12, 18, 255));
+                nvgBeginPath(nvg);
+                nvgRect(nvg, 0, 0, width / 2.0f, height / 2.0f);
+                nvgFillPaint(nvg, bgPaint);
+                nvgFill(nvg);
+                nvgEndFrame(nvg);
 
-            SlangIm3D::NewFrame(g_Cam, CAST(init.m_DeltaTime, f32), viewport.m_Size);
-
-            // Im3d Debug Primitives with Pushed Color and Size
-            Im3d::PushColor(Im3d::Color_Green);
-            Im3d::PushSize(4.0f);
-            Im3d::DrawSphere(Im3d::Vec3(0.0f, 2.0f, 0.0f), 4.5f, 16);
-            Im3d::PopSize();
-            Im3d::PopColor();
-
-            SlangIm3D::TransformGizmo("SponzaGizmo", g_Transform);
-            SlangIm3D::Render(commandEncoder,
-                              swapChainPass,
-                              viewport.m_Size,
-                              g_Cam,
-                              init.m_GPU.m_SwapchainColourImage->getDesc().format,
-                              init.m_GPU.m_SwapchainDepthImage->getDesc().format,
-                              1.0f);
-            swapChainPass->end();
-            init.m_GPU.m_Queue->submit(commandEncoder->finish());
+                vkCmdEndRenderPass(cmd);
+            });
         }
 
         profiler::ProfilerImGuiWindow(init);
@@ -178,6 +187,13 @@ int main() {
             ImGuiEx::TransformEdit(g_Transform);
             ImGuiEx::CameraEdit(g_Cam);
             ImGuiEx::FlyCamControllerEdit(controller);
+
+            auto extent = ImGui::GetContentRegionAvail();
+            if (extent.x > 0.0f && extent.y > 0.0f) {
+                auto& image = fb.m_ColourAttachments[0]
+                                      .m_AttachmentSwapchainImages[vk.m_CurrentFrameIndex];
+                ImGuiX::Image(image, extent);
+            }
         }
         ImGui::End();
 

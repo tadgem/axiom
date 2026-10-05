@@ -1,9 +1,9 @@
-[submodule "submodules/slang-rhi"]
-	path = submodules/slang-rhi
-	url = https://github.com/shader-slang/slang-rhi.git
 [submodule "submodules/flecs"]
 	path = submodules/flecs
 	url = https://github.com/SanderMertens/flecs.git
 [submodule "submodules/jolt"]
 	path = submodules/jolt
 	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "submodules/vku"]
+	path = submodules/vku
+	url = https://github.com/tadgem/vku.git

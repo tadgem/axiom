@@ -1,18 +1,18 @@
 #pragma once
-#include "../Core/STL.hpp"
-#include "Shader.hpp"
-#include "slang-rhi.h"
+#include "Render/Shader.hpp"
+#include "Render/Vertex.hpp"
+#include "vku/vku.h"
 
-namespace axm {
-    namespace pipeline {
-        rhi::ComPtr<rhi::IRenderPipeline> CreateRasterPipeline(rhi::IDevice*                device,
-                                                               const Span<rhi::Format>&     colourFormats,
-                                                               const rhi::DepthStencilDesc& depthTarget,
-                                                               const Shader&                shader,
-                                                               rhi::IInputLayout*           inputLayout);
+namespace axm::pipeline {
 
-        rhi::ComPtr<rhi::IComputePipeline> CreateComputePipeline(rhi::IDevice*     device,
-                                                                 const Shader&     shader);
+    vku::VkPipelineData CreateRasterPipeline(vku::VkState&          vk,
+                                             Shader&                shader,
+                                             vku::VertexDescription& vertDesc,
+                                             vku::RasterizationState& raster,
+                                             VkRenderPass           renderPass,
+                                             VkExtent2D             extent,
+                                             u32                    colourCount = 1);
 
-    };
-} // namespace axm
+    vku::VkPipelineData CreateComputePipeline(vku::VkState& vk, Shader& shader);
+
+} // namespace axm::pipeline

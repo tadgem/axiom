@@ -23,15 +23,25 @@ axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path&
     return result;
 }
 
-void axm::TextureAssetFactory::UnloadAsset(Asset* asset) const { }
+void axm::TextureAssetFactory::UnloadAsset(Asset* asset) const {
+    auto* tex = dynamic_cast<TextureAsset*>(asset);
+    if (tex == nullptr) {
+        return;
+    }
+
+    if (tex->m_Data.m_Valid) {
+        tex->m_Data.Free(m_GPU.State());
+        tex->m_Data = Texture::BAD();
+    }
+}
 
 void axm::TextureAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
     auto*         transient = dynamic_cast<TextureAssetTransient*>(data);
     TextureAsset* tex       = transient->GetConcreteAsset();
 
-    tex->m_Data             = textures::CreateTexture2D(m_GPU,
+    tex->m_Data             = textures::CreateTexture2D(m_GPU.State(),
                                             transient->m_TransientData.m_Data,
-                                            rhi::Format::RGBA8Unorm,
+                                            VK_FORMAT_R8G8B8A8_UNORM,
                                             transient->m_TransientData.m_Width,
                                             transient->m_TransientData.m_Height);
     transient->m_TransientData.Release();

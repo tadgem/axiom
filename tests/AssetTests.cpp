@@ -106,7 +106,7 @@ TestResult AssetManager_CanProcessTransient(AxiomEngine* e) {
     const auto* texture = e->m_AssetManager.GetAsset<TextureAsset>("test_resources/checkerboard.jpg");
 
     AXM_TEST_ASSERT(texture, "Texture should be loaded after asset manager signals no more loading ops.")
-    AXM_TEST_ASSERT(texture->m_Data.m_GPUTexture != nullptr, "a GPU Texture should have been allocated for this load");
+    AXM_TEST_ASSERT(texture->m_Data.m_Valid, "a GPU Texture should have been allocated for this load");
 
     return TestResult::Pass();
 }

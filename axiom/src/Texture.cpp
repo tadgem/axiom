@@ -1,226 +1,96 @@
 #include "Render/Texture.hpp"
 #include "Core/Debug.hpp"
-#include "Core/Profile.hpp"
-#include "Render/Pipeline.hpp"
-#include "Render/Shader.hpp"
+
+#include <algorithm>
+#include <cmath>
 
 #include "stb_image.h"
 
-axm::Texture
-axm::textures::CreateTexture2D(GPU& gpu, const void* data, rhi::Format format, u32 w, u32 h, const char* label) {
-    PROFILE_SCOPE()
-
-    uint32_t mips                            = 1;
-    mips                                     = CAST(std::floor(std::log2(std::max(w, h))), uint32_t) + 1;
-
-    rhi::TextureDesc textureDesc             = { };
-    textureDesc.type                         = rhi::TextureType::Texture2D;
-    textureDesc.size.width                   = w;
-    textureDesc.size.height                  = h;
-    textureDesc.size.depth                   = 1;
-    textureDesc.arrayLength                  = 1;
-    textureDesc.mipCount                     = mips;
-    textureDesc.format                       = format;
-    textureDesc.usage                        = rhi::TextureUsage::ShaderResource | rhi::TextureUsage::UnorderedAccess;
-    textureDesc.defaultState                 = rhi::ResourceState::ShaderResource;
-    textureDesc.label                        = label;
-
-    DynArray<rhi::SubresourceData> initDatas = { };
-
-    initDatas.push_back({ .data = data, .rowPitch = w * 4 });
-    for (auto i = 0; i < mips; i++) {
-        auto mipWidth = w / (2 * (i + 1));
-        initDatas.push_back({ .data = data, .rowPitch = mipWidth * 4 });
-    }
-
-    Texture tex = { };
-
-    if (SLANG_FAILED(gpu.m_Device->createTexture(textureDesc, initDatas.data(), &tex.m_GPUTexture))) {
-        AXM_LOG("Failed to create texture.");
-        return Texture::BAD();
-    }
-
-    tex.m_TextureView = tex.m_GPUTexture->getDefaultView();
-    if (!tex.m_TextureView) {
-        AXM_LOG("Failed to acquire texture view");
-        return Texture::BAD();
-    }
-
-    if (mips > 1) {
-        GenerateMips(gpu, tex);
-    }
-
-    tex.m_Width  = w;
-    tex.m_Height = h;
-    tex.m_Format = format;
-
-    return tex;
-}
-axm::Texture axm::textures::CreateRenderTexture2D(GPU&               gpu,
-                                                  rhi::Format        format,
-                                                  u32                w,
-                                                  u32                h,
-                                                  rhi::TextureUsage  usage,
-                                                  rhi::ResourceState defaultState,
-                                                  bool               generateMips,
-                                                  const char*        label) {
-    PROFILE_SCOPE()
-
-    uint32_t mips = 1;
-    if (generateMips) {
-        mips = CAST(std::floor(std::log2(std::max(w, h))), uint32_t) + 1;
-    }
-    rhi::TextureDesc textureDesc = { };
-    textureDesc.type             = rhi::TextureType::Texture2D;
-    textureDesc.size.width       = w;
-    textureDesc.size.height      = h;
-    textureDesc.size.depth       = 1;
-    textureDesc.arrayLength      = 1;
-    textureDesc.mipCount         = mips;
-    textureDesc.format           = format;
-    textureDesc.usage            = usage;
-    textureDesc.defaultState     = defaultState;
-    textureDesc.label            = label;
-
-    Texture tex                  = { };
-
-    if (SLANG_FAILED(gpu.m_Device->createTexture(textureDesc, nullptr, &tex.m_GPUTexture))) {
-        AXM_LOG("Failed to create texture.");
-        return Texture::BAD();
-    }
-
-    tex.m_TextureView = tex.m_GPUTexture->getDefaultView();
-    if (!tex.m_TextureView) {
-        AXM_LOG("Failed to acquire texture view");
-        return Texture::BAD();
-    }
-
-    if (generateMips) {
-        GenerateMips(gpu, tex);
-    }
-
-    tex.m_Width  = w;
-    tex.m_Height = h;
-    tex.m_Format = format;
-
-    return tex;
-}
-
-void axm::textures::GenerateMips(GPU& gpu, Texture& texture) {
-    PROFILE_SCOPE()
-
-    if (!texture.m_GPUTexture || !gpu.m_Device) {
-        AXM_LOG_ERROR("Cannot generate mips for invalid texture or device.");
-        return;
-    }
-
-    const auto desc = texture.m_GPUTexture->getDesc();
-    if (desc.mipCount <= 1) {
-        return;
-    }
-    if (!gpu.m_MipPipeline) {
-        AXM_LOG_ERROR("Failed to create compute pipeline for generating mips.");
-        return;
-    }
-
-    auto commandEncoder = gpu.m_Queue->createCommandEncoder();
-
-    if (!commandEncoder) {
-        AXM_LOG_ERROR("Failed to create command encoder for mip generation");
-        return;
-    }
-    struct MipParams
-    {
-        f32 srcTexelSize[2];
-        u32 dstSize[2];
-        u32 srcMipLevel;
-    };
-
-    for (u32 m = 1; m < desc.mipCount; ++m) {
-        u32                  srcWidth              = std::max(1u, desc.size.width >> (m - 1));
-        u32                  srcHeight             = std::max(1u, desc.size.height >> (m - 1));
-        u32                  dstWidth              = std::max(1u, desc.size.width >> m);
-        u32                  dstHeight             = std::max(1u, desc.size.height >> m);
-
-        rhi::TextureViewDesc srcViewDesc           = { };
-        srcViewDesc.format                         = desc.format;
-        srcViewDesc.subresourceRange.layer         = 0;
-        srcViewDesc.subresourceRange.layerCount    = desc.arrayLength;
-        srcViewDesc.subresourceRange.mip           = m - 1;
-        srcViewDesc.subresourceRange.mipCount      = 1;
-
-        rhi::ComPtr<rhi::ITextureView> srcView     = texture.m_GPUTexture->createView(srcViewDesc);
-
-        rhi::TextureViewDesc           dstViewDesc = { };
-        dstViewDesc.format                         = desc.format;
-        dstViewDesc.subresourceRange.layer         = 0;
-        dstViewDesc.subresourceRange.layerCount    = desc.arrayLength;
-        dstViewDesc.subresourceRange.mip           = m;
-        dstViewDesc.subresourceRange.mipCount      = 1;
-
-        rhi::ComPtr<rhi::ITextureView> dstView     = texture.m_GPUTexture->createView(dstViewDesc);
-
-        if (!srcView || !dstView) {
-            AXM_LOG("Failed to create texture views for mip generation level {}", m);
-            commandEncoder->finish();
-            return;
-        }
-
-        auto computePass = commandEncoder->beginComputePass();
-        if (!computePass) {
-            AXM_LOG("Failed to begin compute pass for mip generation level {}", m);
-            commandEncoder->finish();
-
-            return;
-        }
-
-        ShaderDataInterface cursor(computePass->bindPipeline(gpu.m_MipPipeline), gpu.m_MipPipeline->getDesc().label);
-
-        MipParams           params = { .srcTexelSize = { 1.0f / CAST(srcWidth, f32), 1.0f / CAST(srcHeight, f32) },
-                                       .dstSize      = { dstWidth, dstHeight },
-                                       .srcMipLevel  = 0 };
-
-        cursor.SetData("params", params);
-        cursor.SetBinding("srcTexture", srcView);
-        cursor.SetBinding("srcSampler", gpu.m_LinearClampSampler);
-        cursor.SetBinding("dstTexture", dstView);
-
-        u32 groupsX = (dstWidth + 7) / 8;
-        u32 groupsY = (dstHeight + 7) / 8;
-
-        computePass->dispatchCompute(groupsX, groupsY, 1);
-        computePass->end();
-    }
-
-    auto commandBuffer = commandEncoder->finish();
-    gpu.m_Queue->submit(commandBuffer);
-}
-
 axm::Texture axm::Texture::BAD() {
-    PROFILE_SCOPE()
-    return { .m_GPUTexture = nullptr, .m_TextureView = nullptr };
+    return { .m_Texture = { }, .m_Valid = false };
 }
-void axm::CPUTextureData::Release() const {
-    PROFILE_SCOPE()
-    stbi_image_free(m_Data);
-}
-axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length) {
-    PROFILE_SCOPE()
-    // stbi_set_flip_vertically_on_load(true);
-    int   texWidth, texHeight, texChannels;
 
-    auto* pixels = stbi_load_from_memory(
-            CAST(data, stbi_uc const*), CAST(length, int), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+axm::Texture axm::textures::CreateTexture2D(
+        vku::VkState& vk, const void* data, VkFormat format, u32 w, u32 h, const char* label) {
+    (void)label;
+
+    Texture tex{};
+
+    const u32 mips = static_cast<u32>(std::floor(std::log2(std::max(w, h)))) + 1;
+
+    VkImage        image   = VK_NULL_HANDLE;
+    VkDeviceMemory memory  = VK_NULL_HANDLE;
+    VkImageView    view    = VK_NULL_HANDLE;
+    VkSampler      sampler = VK_NULL_HANDLE;
+
+    vku::textures::CreateImage(vk,
+                               w,
+                               h,
+                               mips,
+                               VK_SAMPLE_COUNT_1_BIT,
+                               format,
+                               VK_IMAGE_TILING_OPTIMAL,
+                               VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT
+                                       | VK_IMAGE_USAGE_SAMPLED_BIT,
+                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                               image,
+                               memory);
+    vku::textures::CreateImageView(vk, image, format, mips, VK_IMAGE_ASPECT_COLOR_BIT, view);
+    vku::textures::CreateImageSampler(
+            vk, mips, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampler);
+
+    const VkDeviceSize imageSize = static_cast<VkDeviceSize>(w) * h * 4;
+
+    vku::MappedBuffer staging = vku::buffers::CreateMappedBuffer(
+            vk,
+            imageSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    std::memcpy(staging.m_MappedAddr, data, static_cast<size_t>(imageSize));
+
+    vku::textures::TransitionImageLayout(vk,
+                                         image,
+                                         format,
+                                         mips,
+                                         VK_IMAGE_LAYOUT_UNDEFINED,
+                                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    vku::textures::CopyBufferToImage(vk, staging.m_GpuBuffer, image, w, h);
+    vku::textures::GenerateMips(vk, image, format, w, h, mips, VK_FILTER_LINEAR);
+    vku::textures::TransitionImageLayout(vk,
+                                         image,
+                                         format,
+                                         mips,
+                                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    staging.Free(vk);
+
+    tex.m_Texture = vku::Texture(image, view, memory, sampler, format, VK_SAMPLE_COUNT_1_BIT);
+    tex.m_Valid   = true;
+    return tex;
+}
+
+void axm::CPUTextureData::Release() const { stbi_image_free(m_Data); }
+
+axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length) {
+    int texWidth = 0, texHeight = 0, texChannels = 0;
+
+    auto* pixels = stbi_load_from_memory(CAST(data, stbi_uc const*),
+                                         CAST(length, int),
+                                         &texWidth,
+                                         &texHeight,
+                                         &texChannels,
+                                         STBI_rgb_alpha);
 
     return { .m_Data        = pixels,
              .m_Width       = CAST(texWidth, u32),
              .m_Height      = CAST(texHeight, u32),
              .m_NumChannels = CAST(texChannels, u32) };
 }
+
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::path& path) {
-    PROFILE_SCOPE()
     auto newPath = path.generic_string();
-    int  texWidth, texHeight, texChannels;
+    int  texWidth = 0, texHeight = 0, texChannels = 0;
     stbi_set_flip_vertically_on_load(true);
     auto* pixels = stbi_load(
             reinterpret_cast<const char*>(newPath.c_str()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -229,59 +99,4 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::
              .m_Width       = CAST(texWidth, u32),
              .m_Height      = CAST(texHeight, u32),
              .m_NumChannels = CAST(texChannels, u32) };
-}
-rhi::ComPtr<rhi::ISampler> axm::textures::CreateSampler(rhi::IDevice*              device,
-                                                        rhi::TextureFilteringMode  filter,
-                                                        rhi::TextureAddressingMode addressMode) {
-    PROFILE_SCOPE()
-
-    using namespace rhi;
-    SamplerDesc samplerDesc  = { };
-    samplerDesc.minFilter    = filter;
-    samplerDesc.magFilter    = filter;
-    samplerDesc.mipFilter    = filter;
-    samplerDesc.addressU     = addressMode;
-    samplerDesc.addressV     = addressMode;
-    samplerDesc.addressW     = addressMode;
-
-    ComPtr<ISampler> sampler = { };
-
-    if (SLANG_FAILED(device->createSampler(samplerDesc, sampler.writeRef()))) {
-        AXM_LOG("Failed to create sampler!");
-        return nullptr;
-    }
-
-    return sampler;
-}
-
-
-rhi::ComPtr<rhi::ITexture> axm::textures::CreateDepthTexture(rhi::IDevice* device, u32 w, u32 h, rhi::Format format) {
-    using namespace rhi;
-    PROFILE_SCOPE()
-    TextureDesc depthDesc  = { };
-    depthDesc.type         = TextureType::Texture2D;
-    depthDesc.size.width   = w;
-    depthDesc.size.height  = h;
-    depthDesc.size.depth   = 1;
-    depthDesc.arrayLength  = 1;
-    depthDesc.mipCount     = 1;
-    depthDesc.format       = format;
-    depthDesc.usage        = TextureUsage::DepthStencil | TextureUsage::CopySource | TextureUsage::CopyDestination;
-    depthDesc.defaultState = ResourceState::DepthWrite;
-    depthDesc.label        = "Depth Texture";
-    ComPtr<ITexture> tex;
-    device->createTexture(depthDesc, nullptr, tex.writeRef());
-    return tex;
-}
-
-
-void axm::textures::CopyDepthTexture(rhi::ICommandEncoder* commandEncoder, rhi::ITexture* src, rhi::ITexture* dst) {
-    PROFILE_SCOPE()
-    if (!commandEncoder || !src || !dst) {
-        AXM_LOG_ERROR("Cannot copy depth texture with null command encoder or textures.");
-        return;
-    }
-
-    rhi::SubresourceRange subresource = { };
-    commandEncoder->copyTexture(dst, subresource, { }, src, subresource, { }, rhi::Extent3D::kWholeTexture);
 }

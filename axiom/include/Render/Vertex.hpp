@@ -1,99 +1,49 @@
-//
-// Created by Liam on 21/06/2026.
-//
-
 #pragma once
-#include "Core/Debug.hpp"
+#include <cstddef>
 #include "Core/Maths.hpp"
-#include "Core/Profile.hpp"
-#include "Core/STL.hpp"
-#include "slang-rhi.h"
+#include "Core/Prim.hpp"
+#include "vku/vku.h"
 
-namespace axm {
+namespace axm::vertex {
 
-    namespace vertex {
+    // Interleaved position(3) / normal(3) / uv(2) vertex used by models.
+    struct PosNormalUV
+    {
+        aml::Float3 m_Pos;
+        aml::Float3 m_Normal;
+        aml::Float2 m_UV;
 
-        class Layout
-        {
-        public:
-            DynArray<rhi::InputElementDesc> m_InputElements;
-            rhi::VertexStreamDesc           m_VertexStream;
-            rhi::ComPtr<rhi::IInputLayout>  m_DeviceInputLayout;
+        static vku::VertexDescription GetVertexDescription(vku::VkState& vk) {
+            vku::VertexDescription desc(*vk.m_CPUAllocator);
 
-            Layout() = default;
+            VkVertexInputBindingDescription binding{};
+            binding.binding   = 0;
+            binding.stride    = sizeof(PosNormalUV);
+            binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+            desc.m_BindingDescriptions.push_back(binding);
 
-            template <size_t ElemCount>
-            Layout(size_t                                  dataElemSize,
-                   Array<rhi::InputElementDesc, ElemCount> inputElements,
-                   u32 instanceDataStepRate = 0) : m_VertexStream({ }), m_DeviceInputLayout(nullptr) {
-                PROFILE_SCOPE()
+            VkVertexInputAttributeDescription pos{};
+            pos.binding  = 0;
+            pos.location = 0;
+            pos.format   = VK_FORMAT_R32G32B32_SFLOAT;
+            pos.offset   = static_cast<uint32_t>(offsetof(PosNormalUV, m_Pos));
+            desc.m_AttributeDescriptions.push_back(pos);
 
-                m_InputElements.resize(ElemCount);
-                for (auto i = 0; i < ElemCount; i++) {
-                    m_InputElements[i] = inputElements[i];
-                }
+            VkVertexInputAttributeDescription normal{};
+            normal.binding  = 0;
+            normal.location = 1;
+            normal.format   = VK_FORMAT_R32G32B32_SFLOAT;
+            normal.offset   = static_cast<uint32_t>(offsetof(PosNormalUV, m_Normal));
+            desc.m_AttributeDescriptions.push_back(normal);
 
-                m_VertexStream.stride = dataElemSize;
-                m_VertexStream.slotClass
-                        = instanceDataStepRate > 0 ? rhi::InputSlotClass::PerInstance : rhi::InputSlotClass::PerVertex;
-                m_VertexStream.instanceDataStepRate = instanceDataStepRate;
-            }
+            VkVertexInputAttributeDescription uv{};
+            uv.binding  = 0;
+            uv.location = 2;
+            uv.format   = VK_FORMAT_R32G32_SFLOAT;
+            uv.offset   = static_cast<uint32_t>(offsetof(PosNormalUV, m_UV));
+            desc.m_AttributeDescriptions.push_back(uv);
 
-            template <typename VertexElementType, size_t ElementCount>
-            static Layout BuildLayout(Array<rhi::InputElementDesc, ElementCount> inputElements,
-                                      u32                                        instanceDataStepRate = 0) {
-
-                PROFILE_SCOPE()
-                return Layout(sizeof(VertexElementType), inputElements, instanceDataStepRate);
-            }
-
-            NO_DISCARD size_t GetElementSize() const {
-                PROFILE_SCOPE()
-                size_t size = 0;
-
-                for (auto& e: m_InputElements) {
-                    size += e.offset;
-                }
-
-                return size;
-            }
-
-            void BuildDeviceLayout(rhi::IDevice* device) {
-                using namespace rhi;
-
-                PROFILE_SCOPE()
-
-                VertexStreamDesc vertexStreams[]  = { m_VertexStream };
-
-                InputLayoutDesc  inputLayoutDesc  = { };
-                inputLayoutDesc.inputElements     = m_InputElements.data();
-                inputLayoutDesc.inputElementCount = m_InputElements.size();
-                inputLayoutDesc.vertexStreams     = vertexStreams;
-                // TODO: will we need more than one stream of vertices?
-                inputLayoutDesc.vertexStreamCount = 1;
-
-                if (SLANG_FAILED(device->createInputLayout(inputLayoutDesc, m_DeviceInputLayout.writeRef()))) {
-                    AXM_LOG("Failed to create input layout");
-                }
-            }
-        };
-
-
-        struct PosNormalUV
-        {
-            aml::Float3   m_Pos;
-            aml::Float3   m_Normal;
-            aml::Float2   m_UV;
-
-            static Layout GetInputLayout() {
-                using namespace rhi;
-                PROFILE_SCOPE()
-                return Layout::BuildLayout<PosNormalUV, 3>({
-                        InputElementDesc { "Position", 0, Format::RGB32Float, offsetof(PosNormalUV, m_Pos), 0 },
-                        InputElementDesc { "Normal", 1, Format::RGB32Float, offsetof(PosNormalUV, m_Normal), 0 },
-                        InputElementDesc { "UV", 2, Format::RG32Float, offsetof(PosNormalUV, m_UV), 0 },
-                });
-            }
-        };
-    }; // namespace vertex
-} // namespace axm
+            return desc;
+        }
+    };
+} // namespace axm::vertex

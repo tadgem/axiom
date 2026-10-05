@@ -1,39 +1,40 @@
 #pragma once
-#include "Render/Vertex.hpp"
+#include "Core/STL.hpp"
 #include "Render/Viewport.hpp"
-#include "slang-rhi.h"
+#include "vku/vku.h"
 
 namespace axm {
 
     struct CPUMesh
     {
-        String                m_Name;
-        void*                 m_CPUMemory;
-        const vertex::Layout& m_Layout;
-
-        CPUMesh(String name, void* data, const vertex::Layout& layout) :
-            m_Name(std::move(name)), m_CPUMemory(data), m_Layout(layout) { };
+        String   m_Name;
+        void*    m_CPUMemory;
+        CPUMesh(String name, void* data) : m_Name(std::move(name)), m_CPUMemory(data) { };
     };
 
     struct Mesh
     {
-        rhi::ComPtr<rhi::IBuffer> m_VertexBuffer;
-        rhi::ComPtr<rhi::IBuffer> m_IndexBuffer;
-        const vertex::Layout&     m_InputLayout;
+        vku::Buffer m_VertexBuffer;
+        vku::Buffer m_IndexBuffer;
+        u64         m_IndexCount = 0;
+        bool        m_Valid      = false;
 
-        u64                       m_IndexCount;
+        void        Free(vku::VkState& vk) {
+            m_VertexBuffer.Free(vk);
+            m_IndexBuffer.Free(vk);
+            m_Valid = false;
+        }
     };
 
     namespace meshes {
-        Mesh CreateMeshFromData(rhi::IDevice*         device,
-                                const void*           vertexData,
-                                u64                   vertexDataSize,
-                                const u32*            indexData,
-                                u64                   numIndices,
-                                const vertex::Layout& inputLayout,
-                                const char*           label = "AnonMesh");
+        Mesh CreateMeshFromData(vku::VkState& vk,
+                                const void*    vertexData,
+                                u64            vertexDataSize,
+                                const u32*     indexData,
+                                u64            numIndices,
+                                const char*    label = "AnonMesh");
 
-
-        void DrawMesh(const Viewport& viewPort, const Mesh& mesh, rhi::IRenderPassEncoder* renderPassEncoder);
+        void Bind(const Mesh& mesh, VkCommandBuffer cmd);
+        void DrawMesh(const Viewport& viewPort, const Mesh& mesh, VkCommandBuffer cmd);
     } // namespace meshes
-}
+} // namespace axm

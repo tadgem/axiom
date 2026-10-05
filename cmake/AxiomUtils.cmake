@@ -11,8 +11,6 @@ function(add_axiom_target name src)
     add_executable(${name} ${src})
     target_link_libraries(${name} PRIVATE axiom)
     target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    # TODO: slang-rhi has some uses that break warnings-as-errors.
-    # set_warnings_as_errors(${name})
 
 endfunction()
 

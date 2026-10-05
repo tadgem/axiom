@@ -2,6 +2,7 @@
 
 #include "Assets/AssetManager.hpp"
 #include "Core/STL.hpp"
+#include "Render/GPU.hpp"
 #include "Render/Mesh.hpp"
 #include "Render/Texture.hpp"
 #include "assimp/Importer.hpp"

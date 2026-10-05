@@ -13,6 +13,12 @@ vku::VkPipelineData axm::pipeline::CreateRasterPipeline(vku::VkState&           
         return {};
     }
 
+    // Models are imported with aiProcess_FlipWindingOrder and rendered with a
+    // Y-flipped (Vulkan) projection, which together leave front faces wound
+    // clockwise in screen space. Match the pipeline's front face to the vertex
+    // data convention so back-face culling keeps the visible geometry.
+    raster.m_FrontFace = VK_FRONT_FACE_CLOCKWISE;
+
     return vku::pipelines::CreateRasterPipeline(
             vk, shader.m_Program, vertDesc, raster, renderPass, extent, colourCount);
 }

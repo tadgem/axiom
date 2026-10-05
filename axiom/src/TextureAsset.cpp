@@ -23,7 +23,17 @@ axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path&
     return result;
 }
 
-void axm::TextureAssetFactory::UnloadAsset(Asset* asset) const { }
+void axm::TextureAssetFactory::UnloadAsset(Asset* asset) const {
+    auto* tex = dynamic_cast<TextureAsset*>(asset);
+    if (tex == nullptr) {
+        return;
+    }
+
+    if (tex->m_Data.m_Valid) {
+        tex->m_Data.Free(m_GPU.State());
+        tex->m_Data = Texture::BAD();
+    }
+}
 
 void axm::TextureAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
     auto*         transient = dynamic_cast<TextureAssetTransient*>(data);

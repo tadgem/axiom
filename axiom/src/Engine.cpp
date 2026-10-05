@@ -22,7 +22,22 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
 
     AxiomEngine engine;
 
-    vku::VkState vk = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
+    // Register the embedded Archivo font before vku builds and uploads the
+    // ImGui font atlas, otherwise the atlas is already locked and the font is
+    // silently ignored.
+    auto configureImGui = []() {
+        static ImFontConfig config{};
+        config.FontDataOwnedByAtlas = false;
+        ImFont* font = ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)&archivo_regular_ttf[0],
+                                                                  CAST(sizeof(archivo_regular_ttf), int),
+                                                                  14.0f,
+                                                                  &config);
+        if (font != nullptr) {
+            ImGui::GetIO().FontDefault = font;
+        }
+    };
+
+    vku::VkState vk = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true, configureImGui);
     engine.m_VK     = MakeUnique<vku::VkState>(std::move(vk));
 
     engine.m_GPU.m_VK           = engine.m_VK.get();
@@ -50,15 +65,6 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
     engine.m_Window.m_Width  = CAST(width, u32);
     engine.m_Window.m_Height = CAST(height, u32);
 
-    // Default font for both ImGui and NanoVG.
-    static ImFontConfig config{};
-    config.FontDataOwnedByAtlas = false;
-    ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)&archivo_regular_ttf[0],
-                                               CAST(sizeof(archivo_regular_ttf), int),
-                                               14.0f,
-                                               &config);
-    ImGui_ImplVulkan_CreateFontsTexture();
-
     // NOTE: vku's Vulkan NanoVG backend does not initialise a font stash, so
     // font registration (nvgCreateFontMem) is not available. NanoVG is used for
     // shape/vector rendering only.
@@ -78,15 +84,30 @@ axm::AxiomEngine axm::AxiomEngine::BAD() {
 }
 
 axm::AxiomEngine::~AxiomEngine() {
+    AXM_LOG_INFO("~AxiomEngine begin (m_VK={})", m_VK ? "set" : "null");
+    AXM_FLUSH_LOG();
     if (m_VK) {
         Quit();
     }
+    AXM_LOG_INFO("~AxiomEngine end");
+    AXM_FLUSH_LOG();
 }
 
 void axm::AxiomEngine::Quit() {
     PROFILE_SCOPE()
+
     m_AssetManager.UnloadAllAssets();
+
     if (m_VK) {
+        if (m_GPU.m_LinearClampSampler != VK_NULL_HANDLE) {
+            vkDestroySampler(m_VK->m_LogicalDevice, m_GPU.m_LinearClampSampler, nullptr);
+            m_GPU.m_LinearClampSampler = VK_NULL_HANDLE;
+        }
+        if (m_GPU.m_LinearWrapSampler != VK_NULL_HANDLE) {
+            vkDestroySampler(m_VK->m_LogicalDevice, m_GPU.m_LinearWrapSampler, nullptr);
+            m_GPU.m_LinearWrapSampler = VK_NULL_HANDLE;
+        }
+
         vku::init::Quit(*m_VK);
         m_VK.reset();
     }

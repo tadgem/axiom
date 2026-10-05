@@ -96,7 +96,19 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
     return result;
 }
 
-void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const { PROFILE_SCOPE() }
+void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const {
+    PROFILE_SCOPE()
+    auto* model = dynamic_cast<ModelAsset*>(asset);
+    if (model == nullptr) {
+        return;
+    }
+
+    AXM_LOG_INFO("ModelAssetFactory::UnloadAsset freeing {} meshes", model->m_Data.m_Meshes.size());
+    for (auto& entry: model->m_Data.m_Meshes) {
+        entry.m_Mesh.Free(m_GPU.State());
+    }
+    model->m_Data.m_Meshes.clear();
+}
 
 thread_local axm::DynArray<f32> g_VertexDataCommitBuffer;
 thread_local axm::DynArray<u32> g_IndexDataCommitBuffer;

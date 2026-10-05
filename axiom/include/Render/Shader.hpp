@@ -21,6 +21,9 @@ namespace axm {
         // existing program is kept and false is returned.
         bool            Reload(vku::VkState& vk);
 
+        // Destroys the underlying shader modules and descriptor set layout.
+        void            Free(vku::VkState& vk);
+
         vku::ShaderProgram m_Program;
         bool               m_Valid      = false;
         bool               m_IsCompute  = false;

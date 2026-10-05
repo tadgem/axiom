@@ -22,6 +22,7 @@ namespace axm {
         Input                           m_Input;
 
         Unique<vku::VkState>            m_VK;
+        bool                            m_Quit = false;
 
         static AxiomEngine              BAD();
         static AxiomEngine              Init();

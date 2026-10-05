@@ -20,6 +20,13 @@ axm::Shader::Shader(vku::VkState& vk, const String& computePath) :
     }
 }
 
+void axm::Shader::Free(vku::VkState& vk) {
+    if (m_Valid) {
+        m_Program.Free(vk);
+        m_Valid = false;
+    }
+}
+
 bool axm::Shader::Reload(vku::VkState& vk) {
     vku::ShaderProgram rebuilt;
     if (m_IsCompute) {

@@ -58,10 +58,6 @@ cfg.FontDataOwnedByAtlas = false;
     ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->AddFontFromMemoryTTF(&archivo_regular_ttf[0], _countof(archivo_regular_ttf), 14.0f, &cfg);
     ImGui_ImplVulkan_CreateFontsTexture();
 
-    // NOTE: vku's Vulkan NanoVG backend does not initialise a font stash, so
-    // font registration (nvgCreateFontMem) is not available. NanoVG is used for
-    // shape/vector rendering only.
-
     engine.m_OK      = true;
     engine.m_Running = engine.m_VK->m_ShouldRun;
 

@@ -12,7 +12,7 @@
 #include "ImGui/imgui_impl_vulkan.h"
 #include "ImGuizmo.h"
 #include "nanovg.h"
-
+#include "ArchivoRegularTTF.h"
 #include "SDL3/SDL.h"
 
 #include <cstring>
@@ -50,6 +50,13 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
     SDL_GetWindowSizeInPixels(engine.m_Window.m_Window, &width, &height);
     engine.m_Window.m_Width  = CAST(width, u32);
     engine.m_Window.m_Height = CAST(height, u32);
+
+
+    // TODO (LiamD) : Move this to somewhere more appropriate.
+    ImFontConfig cfg;
+cfg.FontDataOwnedByAtlas = false;              
+    ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->AddFontFromMemoryTTF(&archivo_regular_ttf[0], _countof(archivo_regular_ttf), 14.0f, &cfg);
+    ImGui_ImplVulkan_CreateFontsTexture();
 
     // NOTE: vku's Vulkan NanoVG backend does not initialise a font stash, so
     // font registration (nvgCreateFontMem) is not available. NanoVG is used for

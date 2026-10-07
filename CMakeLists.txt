@@ -38,7 +38,11 @@ set(OVERRIDE_CXX_FLAGS OFF CACHE BOOL "Disable Jolt overriding CXX flags" FORCE)
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "Disable Jolt static MSVC runtime library" FORCE)
 add_subdirectory(submodules/jolt/Build)
 
-# Third Party Single Headers
+# Lua
+add_subdirectory(submodules/luajit-cmake)
+
+# Third Party Dirs
+set(SUBMODULE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/submodules)
 set(THIRD_PARTY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_headers)
 

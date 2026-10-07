@@ -7,3 +7,6 @@
 [submodule "submodules/vku"]
 	path = submodules/vku
 	url = https://github.com/tadgem/vku.git
+[submodule "submodules/luajit-cmake"]
+	path = submodules/luajit-cmake
+	url = https://github.com/tadgem/luajit-cmake.git

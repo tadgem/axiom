@@ -34,6 +34,19 @@ int main() {
 
     vku::VkState& vk = *init.m_VK;
 
+    sol::state lua = Lua::CreateLuaState();
+
+	// by default, libraries are not opened
+	// you can open libraries by using open_libraries
+	// the libraries reside in the sol::lib enum class
+
+	lua.open_libraries(sol::lib::base);
+	// you can open all libraries by passing no arguments
+	// lua.open_libraries();
+
+	// call lua code directly
+	lua.script("print('hello world')");
+
     init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
     init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
 

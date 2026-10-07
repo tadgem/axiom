@@ -13,6 +13,7 @@ target_link_libraries(axiom PUBLIC
         flecs_static
         mimalloc-static
         Jolt
+        luajit::lib
 )
 
 target_include_directories(axiom PUBLIC
@@ -23,4 +24,5 @@ target_include_directories(axiom PUBLIC
     ${GLM_INCLUDES}
     ${MIMALLOC_INCLUDE_DIRS}
     ${SINGLE_HEADER_INCLUDE_DIRS}
+    ${SUBMODULE_DIRS}/luajit-cmake/LuaJIT/src
 )

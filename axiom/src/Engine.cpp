@@ -73,13 +73,9 @@ axm::AxiomEngine axm::AxiomEngine::BAD() {
 }
 
 axm::AxiomEngine::~AxiomEngine() {
-    AXM_LOG_INFO("~AxiomEngine begin (m_VK={})", m_VK ? "set" : "null");
-    AXM_FLUSH_LOG();
     if (m_VK) {
         Quit();
     }
-    AXM_LOG_INFO("~AxiomEngine end");
-    AXM_FLUSH_LOG();
 }
 
 void axm::AxiomEngine::Quit() {

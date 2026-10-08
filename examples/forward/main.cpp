@@ -34,7 +34,7 @@ int main() {
 
     vku::VkState& vk = *init.m_VK;
 
-    sol::state lua = Lua::CreateLuaState();
+    sol::state lua = lua::CreateLuaState();
 
 	// by default, libraries are not opened
 	// you can open libraries by using open_libraries
@@ -58,7 +58,7 @@ int main() {
     Shader cube(vk, "resources/shaders/cube.vert", "resources/shaders/cube.frag");
 
     vku::RasterizationState rasterState = vku::defaults::DefaultRasterState;
-    vku::VkPipelineData     pipeline    = pipeline::CreateRasterPipeline(
+    vku::VkPipelineData     pipeline    = pipeline::CreateRasterPipeline(   
             vk, cube, vertDesc, rasterState, vk.m_SwapchainImageRenderPass, vk.m_SwapChainImageExtent, 1);
 
     const f64 msInitTime = initTimer.ElapsedMillisecondsF();
@@ -153,6 +153,11 @@ int main() {
 
         init.PostFrame();
     }
-
-    init.Quit();
+    for(auto& drawable : drawables)
+    {
+        drawable.m_Material.Free(*init.m_VK);
+    }
+    drawables.clear();
+    pipeline.Free(*init.m_VK);
+    cube.Free(*init.m_VK);
 }

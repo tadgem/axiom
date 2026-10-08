@@ -1,6 +1,6 @@
 #include "Script/Lua.hpp"
 #include "mimalloc.h"
-void* axm::Lua::LuaCustomAllocator(void* ud, void* ptr, size_t osize, size_t nsize){
+void* axm::lua::LuaCustomAllocator(void* ud, void* ptr, size_t osize, size_t nsize){
 
     // 1. Free memory
     if (nsize == 0) {
@@ -14,7 +14,7 @@ void* axm::Lua::LuaCustomAllocator(void* ud, void* ptr, size_t osize, size_t nsi
     return mi_realloc(ptr, nsize);
 }
 
-sol::state axm::Lua::CreateLuaState()
+sol::state axm::lua::CreateLuaState()
 {
-    return std::move(sol::state(sol::default_at_panic, axm::Lua::LuaCustomAllocator, nullptr));
+    return std::move(sol::state(sol::default_at_panic, axm::lua::LuaCustomAllocator, nullptr));
 }

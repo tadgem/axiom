@@ -34,21 +34,11 @@ int main() {
 
     vku::VkState& vk = *init.m_VK;
 
-    sol::state lua = lua::CreateLuaState();
-
-	// by default, libraries are not opened
-	// you can open libraries by using open_libraries
-	// the libraries reside in the sol::lib enum class
-
-	lua.open_libraries(sol::lib::base);
-	// you can open all libraries by passing no arguments
-	// lua.open_libraries();
+    sol::state lua = lua::CreateLuaState(init);
 
 	// call lua code directly
 	lua.script("print('hello world')");
 
-    init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
-    init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
 
     g_Transform.m_Scale = aml::Vec3(0.2f, 0.2f, 0.2f);
     g_MVP               = GetMVP(g_Transform, g_Cam);
@@ -125,7 +115,7 @@ int main() {
                     meshes::DrawMesh(viewport, drawable.m_Mesh, cmd);
                 }
 
-                auto  nvg    = init.m_GPU.NanoVG();
+                auto  nvg    = init.m_VK->m_NanoVG;
                 const f32 width  = CAST(init.m_Window.m_Width, f32);
                 const f32 height = CAST(init.m_Window.m_Height, f32);
 

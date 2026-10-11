@@ -60,7 +60,7 @@ static aiTextureType GetAssimpTextureType(const axm::TextureMapType& t) {
     }
 }
 
-axm::ModelAssetFactory::ModelAssetFactory(GPU& gpu) : AssetFactory(AssetType::Model), m_GPU(gpu) { }
+axm::ModelAssetFactory::ModelAssetFactory(vku::VkState& vk) : AssetFactory(AssetType::Model), m_VK(vk) { }
 
 axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& path) const {
     PROFILE_SCOPE()
@@ -105,7 +105,7 @@ void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const {
 
     AXM_LOG_INFO("ModelAssetFactory::UnloadAsset freeing {} meshes", model->m_Data.m_Meshes.size());
     for (auto& entry: model->m_Data.m_Meshes) {
-        entry.m_Mesh.Free(m_GPU.State());
+        entry.m_Mesh.Free(m_VK);
     }
     model->m_Data.m_Meshes.clear();
 }
@@ -155,7 +155,7 @@ void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const {
         }
     }
 
-    auto gpuMesh = meshes::CreateMeshFromData(m_GPU.State(),
+    auto gpuMesh = meshes::CreateMeshFromData(m_VK,
                                               g_VertexDataCommitBuffer.data(),
                                               g_VertexDataCommitBuffer.size() * sizeof(f32),
                                               g_IndexDataCommitBuffer.data(),

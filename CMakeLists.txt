@@ -65,3 +65,5 @@ if(AXIOM_BUILD_EXAMPLES)
     add_axiom_example(axiom-example-deferred examples/deferred/main.cpp)
     add_axiom_example(axiom-example-forward examples/forward/main.cpp)
 endif()
+
+ADD_AXIOM_EXAMPLE(axiom-lab lab/main.cpp)

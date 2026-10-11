@@ -93,7 +93,7 @@ TestResult AssetManager_CanUnloadAsset(AxiomEngine* e) {
 }
 
 TestResult AssetManager_CanProcessTransient(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
 
     e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
 
@@ -122,7 +122,7 @@ TestResult AssetManager_NoFactoryForAssetType(AxiomEngine* e) {
 
 
 TestResult AssetManager_NonExistantAssetNotEnqueued(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
     e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
 
     AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(),
@@ -147,8 +147,8 @@ TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AxiomEngine* e) {
 }
 
 TestResult AssetManager_ModelAssetLoads(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(e->m_GPU);
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(e->m_GPU);
+    e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(*e->m_VK);
+    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
 
     const auto handle = e->m_AssetManager.LoadAsset("test_resources/sponza_low/Sponza.gltf", AssetType::Model);
 

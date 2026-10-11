@@ -13,6 +13,7 @@
 #include "ImGuizmo.h"
 #include "nanovg.h"
 #include "ArchivoRegularTTF.h"
+#include "Assets/Defaults.hpp"
 #include "SDL3/SDL.h"
 
 #include <cstring>
@@ -26,19 +27,26 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
     vku::VkState vk = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
     engine.m_VK     = MakeUnique<vku::VkState>(std::move(vk));
 
-    engine.m_GPU.m_VK           = engine.m_VK.get();
-    
-
     vku::textures::CreateImageSampler(*engine.m_VK,
                                       1,
                                       VK_FILTER_LINEAR,
                                       VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                                      engine.m_GPU.m_LinearClampSampler);
+                                      engine.m_Samplers.m_LinearClampSampler);
     vku::textures::CreateImageSampler(*engine.m_VK,
                                       1,
                                       VK_FILTER_LINEAR,
                                       VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                      engine.m_GPU.m_LinearWrapSampler);
+                                      engine.m_Samplers.m_LinearWrapSampler);
+    vku::textures::CreateImageSampler(*engine.m_VK,
+                                      1,
+                                      VK_FILTER_NEAREST,
+                                      VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+                                      engine.m_Samplers.m_NearestClampSampler);
+    vku::textures::CreateImageSampler(*engine.m_VK,
+                                      1,
+                                      VK_FILTER_NEAREST,
+                                      VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                                      engine.m_Samplers.m_NearestWrapSampler);
 
     auto* windowHandle = static_cast<vku::VulkanAPIWindowHandle_SDL*>(engine.m_VK->m_WindowHandle);
     if (!windowHandle || !windowHandle->m_SdlWindow) {
@@ -54,12 +62,14 @@ axm::AxiomEngine axm::AxiomEngine::Init() {
 
     // TODO (LiamD) : Move this to somewhere more appropriate.
     ImFontConfig cfg;
-cfg.FontDataOwnedByAtlas = false;              
+    cfg.FontDataOwnedByAtlas = false;              
     ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->AddFontFromMemoryTTF(&archivo_regular_ttf[0], _countof(archivo_regular_ttf), 14.0f, &cfg);
     ImGui_ImplVulkan_CreateFontsTexture();
 
     engine.m_OK      = true;
     engine.m_Running = engine.m_VK->m_ShouldRun;
+
+    AddDefaultAssetHandlers(engine);
 
     AXM_FLUSH_LOG();
     return engine;
@@ -84,13 +94,13 @@ void axm::AxiomEngine::Quit() {
     m_AssetManager.UnloadAllAssets();
 
     if (m_VK) {
-        if (m_GPU.m_LinearClampSampler != VK_NULL_HANDLE) {
-            vkDestroySampler(m_VK->m_LogicalDevice, m_GPU.m_LinearClampSampler, nullptr);
-            m_GPU.m_LinearClampSampler = VK_NULL_HANDLE;
+        if (m_Samplers.m_LinearClampSampler != VK_NULL_HANDLE) {
+            vkDestroySampler(m_VK->m_LogicalDevice, m_Samplers.m_LinearClampSampler, nullptr);
+            m_Samplers.m_LinearClampSampler = VK_NULL_HANDLE;
         }
-        if (m_GPU.m_LinearWrapSampler != VK_NULL_HANDLE) {
-            vkDestroySampler(m_VK->m_LogicalDevice, m_GPU.m_LinearWrapSampler, nullptr);
-            m_GPU.m_LinearWrapSampler = VK_NULL_HANDLE;
+        if (m_Samplers.m_LinearWrapSampler != VK_NULL_HANDLE) {
+            vkDestroySampler(m_VK->m_LogicalDevice, m_Samplers.m_LinearWrapSampler, nullptr);
+            m_Samplers.m_LinearWrapSampler = VK_NULL_HANDLE;
         }
 
         vku::init::Quit(*m_VK);

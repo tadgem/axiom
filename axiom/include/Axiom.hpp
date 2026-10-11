@@ -13,7 +13,6 @@
 #include "Core/Utils.hpp"
 
 #include "Render/Camera.hpp"
-#include "Render/GPU.hpp"
 #include "Render/ImGuiUtils.hpp"
 #include "Render/Mesh.hpp"
 #include "Render/Pipeline.hpp"

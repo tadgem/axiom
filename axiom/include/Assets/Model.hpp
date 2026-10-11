@@ -2,10 +2,10 @@
 
 #include "Assets/AssetManager.hpp"
 #include "Core/STL.hpp"
-#include "Render/GPU.hpp"
 #include "Render/Mesh.hpp"
 #include "Render/Texture.hpp"
 #include "assimp/Importer.hpp"
+#include "vku/vku.h"
 
 struct aiScene;
 
@@ -48,9 +48,9 @@ namespace axm {
     class ModelAssetFactory : public AssetFactory
     {
     public:
-        GPU& m_GPU;
+        vku::VkState& m_VK;
 
-        explicit ModelAssetFactory(GPU& gpu);
+        explicit ModelAssetFactory(vku::VkState& vk);
 
         NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
         void                       UnloadAsset(Asset* asset) const override;

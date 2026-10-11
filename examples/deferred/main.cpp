@@ -35,9 +35,6 @@ int main() {
 
     vku::VkState& vk = *init.m_VK;
 
-    init.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(init.m_GPU);
-    init.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(init.m_GPU);
-
     g_Transform.m_Scale = aml::Vec3(0.2f, 0.2f, 0.2f);
     g_MVP               = GetMVP(g_Transform, g_Cam);
 
@@ -161,7 +158,7 @@ int main() {
                 // Present pass with the NanoVG background.
                 vku::render_passes::BeginSwapchainRenderPass(vk, cmd);
 
-                auto        nvg    = init.m_GPU.NanoVG();
+                auto        nvg    = init.m_VK->m_NanoVG;
                 const f32   width  = CAST(init.m_Window.m_Width, f32);
                 const f32   height = CAST(init.m_Window.m_Height, f32);
                 NVGpaint    bgPaint = nvgRadialGradient(nvg,

@@ -18,7 +18,7 @@ function(add_axiom_example name src)
     add_axiom_target(${name} ${src})
 
     add_custom_command(
-            TARGET ${name} POST_BUILD
+            TARGET ${name} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/resources
             ${CMAKE_CURRENT_BINARY_DIR}/resources
@@ -30,7 +30,7 @@ function(add_axiom_game name src res_dir)
     add_axiom_target(${name} ${src})
 
     add_custom_command(
-            TARGET ${name} POST_BUILD
+            TARGET ${name} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${res_dir}
             ${CMAKE_BINARY_DIR}/resources
@@ -42,7 +42,7 @@ function(add_axiom_test name src)
     add_axiom_target(${name} ${src})
 
     add_custom_command(
-            TARGET ${name} POST_BUILD
+            TARGET ${name} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_resources
             ${CMAKE_CURRENT_BINARY_DIR}/test_resources
@@ -50,7 +50,7 @@ function(add_axiom_test name src)
     )
 
     add_custom_command(
-            TARGET ${name} POST_BUILD
+            TARGET ${name} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/resources
             ${CMAKE_CURRENT_BINARY_DIR}/resources

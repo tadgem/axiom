@@ -32,7 +32,7 @@ namespace {
     }
 
     TestResult Engine_NanoVgContextWorks(AxiomEngine* e) {
-        NVGcontext* nvg = e->m_GPU.NanoVG();
+        NVGcontext* nvg = e->m_VK->m_NanoVG;
         AXM_TEST_ASSERT(nvg != nullptr, "NanoVG context was not created by vku");
 
         nvgBeginFrame(nvg, 512, 512, 1.0f);

@@ -4,7 +4,7 @@
 #include "Core/STL.hpp"
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
-#include "Render/GPU.hpp"
+#include "Render/Samplers.hpp"
 #include "SDL3/SDL.h"
 #include "vku/vku.h"
 
@@ -18,7 +18,7 @@ namespace axm {
 
         AssetManager                    m_AssetManager;
         Window                          m_Window;
-        GPU                             m_GPU;
+        Samplers                        m_Samplers;
         Input                           m_Input;
 
         Unique<vku::VkState>            m_VK;

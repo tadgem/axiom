@@ -6,9 +6,9 @@ layout(location = 0) out vec4 outColour;
 layout(set = 0, binding = 1) uniform sampler2D diffuse;
 
 float findDitherValue(vec2 coords) {
-    int x = int(mod(coords.x, 4.0));
-    int y = int(mod(coords.y, 4.0));
-    int index = x + y * 4;
+    int x = int(mod(coords.x, 16.0));
+    int y = int(mod(coords.y, 16.0));
+    int index = x + y * 16;
     
     float dither[16] = float[16](
         0.0 / 16.0,  8.0 / 16.0,  2.0 / 16.0, 10.0 / 16.0,
@@ -26,9 +26,6 @@ float luma(vec3 color) {
 
 void main()
 {
-    // Textures are sampled from an UNORM view of sRGB-encoded image data and
-    // the swapchain is a linear UNORM target, so the colour is passed through
-    // unchanged (an identity round trip).
     vec2 fragCoord = gl_FragCoord.xy;
     vec4 color = texture(diffuse, fragUV);
     

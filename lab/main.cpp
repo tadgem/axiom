@@ -43,7 +43,7 @@ int main() {
     sol::state lua = lua::CreateLuaState(init);
 
 	
-	lua.script("print('hello world')");
+	lua.script("print('hello worl2d')");
 
 
     g_Transform.m_Scale = aml::Vec3(0.2f, 0.2f, 0.2f);
@@ -86,6 +86,8 @@ int main() {
 
     while (init.m_Running) {
         if (init.PreFrame()) {
+
+            // update
             auto viewport              = viewports::GetFullscreenViewport(init.m_Window.m_Window);
             g_Cam.m_ViewportDimensions = viewport.m_Size;
             controller.Update(g_Cam, CAST(init.m_DeltaTime, f32));
@@ -112,6 +114,7 @@ int main() {
             }
 
             vku::commands::RecordGraphicsCommands(vk, [&](VkCommandBuffer& cmd, uint32_t frame) {
+                // render
                 vku::render_passes::BeginSwapchainRenderPass(vk, cmd);
 
                 vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.m_Pipeline);
@@ -157,6 +160,9 @@ int main() {
 
         init.PostFrame();
     }
+    
+    // quit
+
     for(auto& drawable : drawables)
     {
         drawable.m_Material.Free(*init.m_VK);

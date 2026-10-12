@@ -7,8 +7,9 @@ namespace axm {
 	struct AxiomEngine;
 
 	namespace lua {
-		void* LuaCustomAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
+		void*		LuaCustomAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 		sol::state	CreateLuaState(AxiomEngine& engine);
 		void		InitLuaAPI(sol::state& state, AxiomEngine& engine);
+		int			RunScript(AxiomEngine& engine, const char* scriptPath);
 	}
 }

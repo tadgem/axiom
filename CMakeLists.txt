@@ -67,3 +67,12 @@ if(AXIOM_BUILD_EXAMPLES)
 endif()
 
 ADD_AXIOM_EXAMPLE(axiom-lab lab/main.cpp)
+
+file(GLOB AXIOM_LAB_SCRIPTS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lab/*.lua)
+add_custom_command(
+        TARGET axiom-lab POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${AXIOM_LAB_SCRIPTS}
+        ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Copying lab lua scripts to target output directory"
+)

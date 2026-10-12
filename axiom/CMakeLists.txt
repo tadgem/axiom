@@ -26,3 +26,7 @@ target_include_directories(axiom PUBLIC
     ${SINGLE_HEADER_INCLUDE_DIRS}
     ${SUBMODULE_DIRS}/luajit-cmake/LuaJIT/src
 )
+
+if (MSVC)
+    target_compile_options(axiom PRIVATE /bigobj)
+endif()

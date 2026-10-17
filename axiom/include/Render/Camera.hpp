@@ -4,42 +4,47 @@
 #include "Core/Window.hpp"
 #include "Render/Transform.hpp"
 
-namespace axm {
-    struct Camera
-    {
-        Camera() = default;
+namespace axm
+{
+struct Camera
+{
+	Camera() = default;
 
-        enum class ProjectionType { Perspective, Unknown };
+	enum class ProjectionType
+	{
+		Perspective,
+		Unknown
+	};
 
-        Transform      m_Transform;
-        aml::Float2    m_ViewportDimensions = aml::Float2(16.0f, 9.0f);
-        f32            m_FOV = 60.0f, m_NearPlane = 0.03f, m_FarPlane = 1000.0f;
-        ProjectionType m_ProjectionType = ProjectionType::Perspective;
+	Transform      m_Transform;
+	aml::Float2    m_ViewportDimensions = aml::Float2(16.0f, 9.0f);
+	f32            m_FOV = 60.0f, m_NearPlane = 0.03f, m_FarPlane = 1000.0f;
+	ProjectionType m_ProjectionType = ProjectionType::Perspective;
 
-        NO_DISCARD aml::Mat44 GetViewMatrix() const;
-        NO_DISCARD aml::Mat44 GetProjectionMatrix() const;
-        NO_DISCARD aml::Mat44 GetViewProjectionMatrix() const;
+	NO_DISCARD aml::Mat44 GetViewMatrix() const;
+	NO_DISCARD aml::Mat44 GetProjectionMatrix() const;
+	NO_DISCARD aml::Mat44 GetViewProjectionMatrix() const;
 
-        // Raw Y-up / OpenGL-convention projection (no Vulkan Y-flip). Required
-        // by screen-space editor tools such as ImGuizmo and Im3d, which assume
-        // the OpenGL clip space convention.
-        NO_DISCARD aml::Mat44 GetProjectionMatrixGL() const;
-        NO_DISCARD aml::Mat44 GetViewProjectionMatrixGL() const;
-    };
+	// Raw Y-up / OpenGL-convention projection (no Vulkan Y-flip). Required
+	// by screen-space editor tools such as ImGuizmo and Im3d, which assume
+	// the OpenGL clip space convention.
+	NO_DISCARD aml::Mat44 GetProjectionMatrixGL() const;
+	NO_DISCARD aml::Mat44 GetViewProjectionMatrixGL() const;
+};
 
-    class FlyCamController
-    {
-    public:
-        const Input&  m_Input;
-        const Window& m_Window;
+class FlyCamController
+{
+public:
+	const Input&  m_Input;
+	const Window& m_Window;
 
-        f32           m_MovementSpeed = 0.1f;
-        f32           m_RotationSpeed = 30.0f;
+	f32           m_MovementSpeed = 0.1f;
+	f32           m_RotationSpeed = 30.0f;
 
-        FlyCamController(const Input& input, const Window& window);
-        void Update(Camera& cam, f32 deltaTime = 0.0166667f);
+	FlyCamController(const Input& input, const Window& window);
+	void Update(Camera& cam, f32 deltaTime = 0.0166667f);
 
-    protected:
-        bool p_ShowCursor = true;
-    };
-}
+protected:
+	bool p_ShowCursor = true;
+};
+}  // namespace axm

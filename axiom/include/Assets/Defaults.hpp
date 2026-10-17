@@ -2,7 +2,7 @@
 
 namespace axm
 {
-	struct AxiomEngine;
+struct AxiomEngine;
 
-	void AddDefaultAssetHandlers(AxiomEngine& am);
-}
+void AddDefaultAssetHandlers(AxiomEngine& am);
+}  // namespace axm

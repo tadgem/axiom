@@ -6,168 +6,183 @@ using namespace axm;
 
 using TestBinaryAsset = AssetT<DynArray<u8>, AssetType::Binary>;
 
-namespace {
-    class TestAssetFactory : public AssetFactory
-    {
-    public:
-        TestAssetFactory() : AssetFactory(AssetType::Binary) { }
+namespace
+{
+class TestAssetFactory : public AssetFactory
+{
+public:
+	TestAssetFactory() : AssetFactory(AssetType::Binary) {}
 
-        NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
-            return AssetLoadResult { .m_Next
-                                     = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path))) };
-        }
-        void UnloadAsset(Asset* asset) const override {
-            auto* b = dynamic_cast<TestBinaryAsset*>(asset);
-            AXM_DELETE(b);
-        }
-        void ProcessAssetTransient(AssetTransient* data) const override { }
-        ~TestAssetFactory() override = default;
-    };
+	NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override
+	{
+		return AssetLoadResult{.m_Next = AXM_NEW(TestBinaryAsset, path, std::move(Utils::LoadBinaryFromPath(path)))};
+	}
+	void UnloadAsset(Asset* asset) const override
+	{
+		auto* b = dynamic_cast<TestBinaryAsset*>(asset);
+		AXM_DELETE(b);
+	}
+	void ProcessAssetTransient(AssetTransient* data) const override {}
+	~TestAssetFactory() override = default;
+};
 
-    class FailAssetFactory : public AssetFactory
-    {
-    public:
-        FailAssetFactory() : AssetFactory(AssetType::Binary) { }
+class FailAssetFactory : public AssetFactory
+{
+public:
+	FailAssetFactory() : AssetFactory(AssetType::Binary) {}
 
-        NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override {
-            return AssetLoadResult { .m_Next = AssetErrorMessage { .m_Message = "ERROR" } };
-        }
-        void UnloadAsset(Asset* asset) const override { }
-        void ProcessAssetTransient(AssetTransient* data) const override { }
-        ~FailAssetFactory() override = default;
-    };
-}
-TestResult AssetManager_CanProvideFactory(AxiomEngine* e) {
+	NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override
+	{
+		return AssetLoadResult{.m_Next = AssetErrorMessage{.m_Message = "ERROR"}};
+	}
+	void UnloadAsset(Asset* asset) const override {}
+	void ProcessAssetTransient(AssetTransient* data) const override {}
+	~FailAssetFactory() override = default;
+};
+}  // namespace
+TestResult AssetManager_CanProvideFactory(AxiomEngine* e)
+{
+	const auto* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
+	e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
-    const auto* factory = e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
-    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
+	AXM_TEST_ASSERT(factory, "BinaryAsset asset factory not invoked!");
 
-    AXM_TEST_ASSERT(factory, "BinaryAsset asset factory not invoked!");
-
-    return TestResult::Pass();
-}
-
-TestResult AssetManager_CanLoadAsset(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
-    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
-
-    while (e->m_AssetManager.AnyAssetsLoading()) {
-        e->m_AssetManager.Update();
-    }
-
-    const auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
-
-    AXM_TEST_ASSERT(binary->m_Data.size() == 16, "Binary Asset not expected size");
-    AXM_TEST_ASSERT(binary->m_Data[0] == '0', "Expected first binary blob to be 0");
-    AXM_TEST_ASSERT(binary->m_Data[15] == '1', "Expected last binary blob to be 1");
-
-
-    return TestResult::Pass();
+	return TestResult::Pass();
 }
 
-TestResult AssetManager_CanUnloadAsset(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
+TestResult AssetManager_CanLoadAsset(AxiomEngine* e)
+{
+	e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
+	e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
-    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
+	while (e->m_AssetManager.AnyAssetsLoading())
+	{
+		e->m_AssetManager.Update();
+	}
 
-    while (e->m_AssetManager.AnyAssetsLoading()) {
-        e->m_AssetManager.Update();
-    }
+	const auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
 
-    const auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
-    const auto  handle = binary->m_Handle;
+	AXM_TEST_ASSERT(binary->m_Data.size() == 16, "Binary Asset not expected size");
+	AXM_TEST_ASSERT(binary->m_Data[0] == '0', "Expected first binary blob to be 0");
+	AXM_TEST_ASSERT(binary->m_Data[15] == '1', "Expected last binary blob to be 1");
 
-    AXM_TEST_ASSERT(binary, "Binary Asset not valid");
-
-    e->m_AssetManager.UnloadAsset(handle);
-
-    while (e->m_AssetManager.AnyAssetsUnloading()) {
-        e->m_AssetManager.Update();
-    }
-
-    binary = e->m_AssetManager.GetAsset<TestBinaryAsset>(handle);
-
-    AXM_TEST_ASSERT(!binary, "Binary asset should not be valid, it has been unloaded")
-
-    return TestResult::Pass();
+	return TestResult::Pass();
 }
 
-TestResult AssetManager_CanProcessTransient(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
+TestResult AssetManager_CanUnloadAsset(AxiomEngine* e)
+{
+	e->m_AssetManager.AddAssetFactory<AssetType::Binary, TestAssetFactory>();
 
-    e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
+	e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
-    AXM_TEST_ASSERT(e->m_AssetManager.AnyAssetsLoading(), "Texture load should have been enqueued");
+	while (e->m_AssetManager.AnyAssetsLoading())
+	{
+		e->m_AssetManager.Update();
+	}
 
-    while (e->m_AssetManager.AnyAssetsLoading()) {
-        e->m_AssetManager.Update();
-    }
+	const auto* binary = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
+	const auto  handle = binary->m_Handle;
 
-    const auto* texture = e->m_AssetManager.GetAsset<TextureAsset>("test_resources/checkerboard.jpg");
+	AXM_TEST_ASSERT(binary, "Binary Asset not valid");
 
-    AXM_TEST_ASSERT(texture, "Texture should be loaded after asset manager signals no more loading ops.")
-    AXM_TEST_ASSERT(texture->m_Data.m_Valid, "a GPU Texture should have been allocated for this load");
+	e->m_AssetManager.UnloadAsset(handle);
 
-    return TestResult::Pass();
+	while (e->m_AssetManager.AnyAssetsUnloading())
+	{
+		e->m_AssetManager.Update();
+	}
+
+	binary = e->m_AssetManager.GetAsset<TestBinaryAsset>(handle);
+
+	AXM_TEST_ASSERT(!binary, "Binary asset should not be valid, it has been unloaded")
+
+	return TestResult::Pass();
 }
 
-TestResult AssetManager_NoFactoryForAssetType(AxiomEngine* e) {
+TestResult AssetManager_CanProcessTransient(AxiomEngine* e)
+{
+	e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
 
-    e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
+	e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
 
-    AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(), "Texture load should not have been enqueued, no factory");
+	AXM_TEST_ASSERT(e->m_AssetManager.AnyAssetsLoading(), "Texture load should have been enqueued");
 
-    return TestResult::Pass();
+	while (e->m_AssetManager.AnyAssetsLoading())
+	{
+		e->m_AssetManager.Update();
+	}
+
+	const auto* texture = e->m_AssetManager.GetAsset<TextureAsset>("test_resources/checkerboard.jpg");
+
+	AXM_TEST_ASSERT(texture, "Texture should be loaded after asset manager signals no more loading ops.")
+	AXM_TEST_ASSERT(texture->m_Data.m_Valid, "a GPU Texture should have been allocated for this load");
+
+	return TestResult::Pass();
 }
 
+TestResult AssetManager_NoFactoryForAssetType(AxiomEngine* e)
+{
+	e->m_AssetManager.LoadAsset("test_resources/checkerboard.jpg", AssetType::Texture);
 
-TestResult AssetManager_NonExistantAssetNotEnqueued(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
-    e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
+	AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(), "Texture load should not have been enqueued, no factory");
 
-    AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(),
-                    "Texture load should not have been enqueued, file does not exist");
-
-    return TestResult::Pass();
+	return TestResult::Pass();
 }
 
-TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Binary, FailAssetFactory>();
-    e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
+TestResult AssetManager_NonExistantAssetNotEnqueued(AxiomEngine* e)
+{
+	e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
+	e->m_AssetManager.LoadAsset("test_resources/wrong.jpg", AssetType::Texture);
 
-    while (e->m_AssetManager.AnyAssetsLoading()) {
-        e->m_AssetManager.Update();
-    }
+	AXM_TEST_ASSERT(!e->m_AssetManager.AnyAssetsLoading(),
+	                "Texture load should not have been enqueued, file does not exist");
 
-    const auto* asset = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
-
-    AXM_TEST_ASSERT(!asset, "Failed asset load should not mark asset as loaded");
-
-    return TestResult::Pass();
+	return TestResult::Pass();
 }
 
-TestResult AssetManager_ModelAssetLoads(AxiomEngine* e) {
-    e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(*e->m_VK);
-    e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
+TestResult AssetManager_FailedFactoryDoesNotLoadAsset(AxiomEngine* e)
+{
+	e->m_AssetManager.AddAssetFactory<AssetType::Binary, FailAssetFactory>();
+	e->m_AssetManager.LoadAsset("test_resources/test.bin", AssetType::Binary);
 
-    const auto handle = e->m_AssetManager.LoadAsset("test_resources/sponza_low/Sponza.gltf", AssetType::Model);
+	while (e->m_AssetManager.AnyAssetsLoading())
+	{
+		e->m_AssetManager.Update();
+	}
 
-    while (e->m_AssetManager.AnyAssetsLoading()) {
-        NAMED_SCOPE(AssetTickLoadingModel)
-        e->m_AssetManager.Update();
-    }
+	const auto* asset = e->m_AssetManager.GetAsset<TestBinaryAsset>("test_resources/test.bin");
 
-    const auto* asset = e->m_AssetManager.GetAsset<ModelAsset>(handle);
+	AXM_TEST_ASSERT(!asset, "Failed asset load should not mark asset as loaded");
 
-    AXM_TEST_ASSERT(asset, "Model Asset should be loaded");
+	return TestResult::Pass();
+}
 
-    for (auto& material: asset->m_Data.m_Materials) {
-        for (auto map: material.m_TextureMaps) {
-            AXM_TEST_ASSERT(e->m_AssetManager.GetAsset(map.m_Handle), "All associated textures should also be loaded");
-        }
-    }
+TestResult AssetManager_ModelAssetLoads(AxiomEngine* e)
+{
+	e->m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(*e->m_VK);
+	e->m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e->m_VK);
 
-    return TestResult::Pass();
+	const auto handle = e->m_AssetManager.LoadAsset("test_resources/sponza_low/Sponza.gltf", AssetType::Model);
+
+	while (e->m_AssetManager.AnyAssetsLoading())
+	{
+		NAMED_SCOPE(AssetTickLoadingModel)
+		e->m_AssetManager.Update();
+	}
+
+	const auto* asset = e->m_AssetManager.GetAsset<ModelAsset>(handle);
+
+	AXM_TEST_ASSERT(asset, "Model Asset should be loaded");
+
+	for (auto& material : asset->m_Data.m_Materials)
+	{
+		for (auto map : material.m_TextureMaps)
+		{
+			AXM_TEST_ASSERT(e->m_AssetManager.GetAsset(map.m_Handle), "All associated textures should also be loaded");
+		}
+	}
+
+	return TestResult::Pass();
 }
 
 AXM_BEGIN_TESTS("Asset Tests")

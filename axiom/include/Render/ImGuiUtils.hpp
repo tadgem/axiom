@@ -2,11 +2,12 @@
 #include "Render/Camera.hpp"
 #include "Render/Transform.hpp"
 
-namespace axm::ImGuiEx {
-    bool TransformEdit(Transform& trans);
+namespace axm::ImGuiEx
+{
+bool TransformEdit(Transform& trans);
 
-    bool CameraEdit(Camera& cam);
+bool CameraEdit(Camera& cam);
 
-    bool FlyCamControllerEdit(FlyCamController& controller);
+bool FlyCamControllerEdit(FlyCamController& controller);
 
-}
+}  // namespace axm::ImGuiEx

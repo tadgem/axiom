@@ -11,7 +11,6 @@
 #include "Core/STL.hpp"
 #include "Core/Timer.hpp"
 #include "Core/Utils.hpp"
-
 #include "Render/Camera.hpp"
 #include "Render/ImGuiUtils.hpp"
 #include "Render/Mesh.hpp"
@@ -22,14 +21,13 @@
 #include "Render/Transform.hpp"
 #include "Render/Vertex.hpp"
 #include "Render/Viewport.hpp"
-
 #include "Script/Lua.hpp"
 
 // Third party includes
 // TODO: (Do we want these in the public header?)
+#include "ImGuizmo.h"
 #include "assimp/Importer.hpp"
 #include "flecs.h"
 #include "im3d.h"
 #include "imgui.h"
 #include "nanovg.h"
-#include "ImGuizmo.h"

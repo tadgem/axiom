@@ -9,56 +9,57 @@
 
 struct aiScene;
 
-namespace axm {
+namespace axm
+{
 
+class Model
+{
+public:
+	struct MaterialEntry
+	{
+		struct Map
+		{
+			TextureMapType m_MapType;
+			AssetHandle    m_Handle;
+		};
 
-    class Model
-    {
-    public:
-        struct MaterialEntry
-        {
-            struct Map
-            {
-                TextureMapType m_MapType;
-                AssetHandle    m_Handle;
-            };
+		DynArray<Map> m_TextureMaps;
+	};
 
-            DynArray<Map> m_TextureMaps;
-        };
+	struct MeshEntry
+	{
+		Mesh m_Mesh;
+		u32  m_MaterialIndex;
+	};
 
-        struct MeshEntry
-        {
-            Mesh m_Mesh;
-            u32  m_MaterialIndex;
-        };
+	DynArray<MeshEntry>     m_Meshes;
+	DynArray<MaterialEntry> m_Materials;
+};
 
-        DynArray<MeshEntry>     m_Meshes;
-        DynArray<MaterialEntry> m_Materials;
-    };
+struct ModelTransientData
+{
+	Assimp::Importer m_Importer;
+	const aiScene*   m_Scene;
+};
 
-    struct ModelTransientData
-    {
-        Assimp::Importer m_Importer;
-        const aiScene*   m_Scene;
-    };
+using ModelAsset          = AssetT<Model, AssetType::Model>;
+using ModelAssetTransient = AssetTransientT<Model, ModelTransientData, AssetType::Model>;
 
-    using ModelAsset          = AssetT<Model, AssetType::Model>;
-    using ModelAssetTransient = AssetTransientT<Model, ModelTransientData, AssetType::Model>;
+class ModelAssetFactory : public AssetFactory
+{
+public:
+	vku::VkState& m_VK;
 
-    class ModelAssetFactory : public AssetFactory
-    {
-    public:
-        vku::VkState& m_VK;
+	explicit ModelAssetFactory(vku::VkState& vk);
 
-        explicit ModelAssetFactory(vku::VkState& vk);
+	NO_DISCARD AssetLoadResult     LoadAsset(const Filesystem::path& path) const override;
+	void                           UnloadAsset(Asset* asset) const override;
+	void                           ProcessAssetTransient(AssetTransient* data) const override;
+	void                           OnTransientComplete(AssetTransient* data) const override;
 
-        NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
-        void                       UnloadAsset(Asset* asset) const override;
-        void                       ProcessAssetTransient(AssetTransient* data) const override;
-        void                       OnTransientComplete(AssetTransient* data) const override;
+	static DynArray<AssetLoadInfo> ProcessSceneMaterials(const String&  directory,
+	                                                     const aiScene* scene,
+	                                                     ModelAsset*    model);
+};
 
-        static DynArray<AssetLoadInfo>
-        ProcessSceneMaterials(const String& directory, const aiScene* scene, ModelAsset* model);
-    };
-
-} // namespace axm
+}  // namespace axm

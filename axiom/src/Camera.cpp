@@ -1,93 +1,115 @@
 #include "Render/Camera.hpp"
+
 #include "Core/Utils.hpp"
 using namespace axm;
 
-aml::Mat44 axm::Camera::GetViewProjectionMatrix() const {
-    return GetProjectionMatrix() * GetViewMatrix();
+aml::Mat44 axm::Camera::GetViewProjectionMatrix() const
+{
+	return GetProjectionMatrix() * GetViewMatrix();
 }
 
-aml::Mat44 axm::Camera::GetViewProjectionMatrixGL() const {
-    return GetProjectionMatrixGL() * GetViewMatrix();
+aml::Mat44 axm::Camera::GetViewProjectionMatrixGL() const
+{
+	return GetProjectionMatrixGL() * GetViewMatrix();
 }
 
-aml::Mat44 axm::Camera::GetProjectionMatrixGL() const {
-    const auto aspect = m_ViewportDimensions.x / m_ViewportDimensions.y;
-    // Raw Y-up / OpenGL-convention projection for editor tools.
-    return aml::Mat44::sPerspective(aml::DegreesToRadians(m_FOV), aspect, m_NearPlane, m_FarPlane);
+aml::Mat44 axm::Camera::GetProjectionMatrixGL() const
+{
+	const auto aspect = m_ViewportDimensions.x / m_ViewportDimensions.y;
+	// Raw Y-up / OpenGL-convention projection for editor tools.
+	return aml::Mat44::sPerspective(aml::DegreesToRadians(m_FOV), aspect, m_NearPlane, m_FarPlane);
 }
 
-aml::Mat44 axm::Camera::GetProjectionMatrix() const {
-    // Jolt's sPerspective already maps depth to Vulkan's [0, 1] range, but it
-    // is Y-up (OpenGL convention). Vulkan clip space is Y-down, so flip the Y
-    // axis. Without this the scene renders upside down.
-    aml::Mat44 proj = GetProjectionMatrixGL();
+aml::Mat44 axm::Camera::GetProjectionMatrix() const
+{
+	// Jolt's sPerspective already maps depth to Vulkan's [0, 1] range, but it
+	// is Y-up (OpenGL convention). Vulkan clip space is Y-down, so flip the Y
+	// axis. Without this the scene renders upside down.
+	aml::Mat44 proj = GetProjectionMatrixGL();
 
-    for (u32 col = 0; col < 4; ++col) {
-        proj(1, col) = -proj(1, col);
-    }
+	for (u32 col = 0; col < 4; ++col)
+	{
+		proj(1, col) = -proj(1, col);
+	}
 
-    return proj;
+	return proj;
 }
 
-aml::Mat44 axm::Camera::GetViewMatrix() const {
-    static const aml::Vec3 IDENTITY_SCALE = { 1.0f, 1.0f, 1.0f };
-    return Utils::CreateViewMatrix(m_Transform.m_Position, m_Transform.m_Euler);
+aml::Mat44 axm::Camera::GetViewMatrix() const
+{
+	static const aml::Vec3 IDENTITY_SCALE = {1.0f, 1.0f, 1.0f};
+	return Utils::CreateViewMatrix(m_Transform.m_Position, m_Transform.m_Euler);
 }
-axm::FlyCamController::FlyCamController(const Input& input, const Window& window) : m_Input(input), m_Window(window) { }
+axm::FlyCamController::FlyCamController(const Input& input, const Window& window) : m_Input(input), m_Window(window) {}
 
-void axm::FlyCamController::Update(Camera& cam, f32 deltaTime) {
+void axm::FlyCamController::Update(Camera& cam, f32 deltaTime)
+{
+	if (!m_Input.IsMouseButtonDown(MouseButton::Right))
+	{
+		if (!p_ShowCursor)
+		{
+			auto _       = m_Window.ReleaseCursor();
+			p_ShowCursor = true;
+		}
+		return;
+	}
 
-    if (!m_Input.IsMouseButtonDown(MouseButton::Right)) {
-        if (!p_ShowCursor) {
-            auto _       = m_Window.ReleaseCursor();
-            p_ShowCursor = true;
-        }
-        return;
-    }
+	if (p_ShowCursor)
+	{
+		auto _       = m_Window.GrabCursor();
+		p_ShowCursor = false;
+	}
 
-    if (p_ShowCursor) {
-        auto _       = m_Window.GrabCursor();
-        p_ShowCursor = false;
-    }
+	const auto mouseVelocity = m_Input.GetMouseVelocity(cam.m_ViewportDimensions);
 
-    const auto mouseVelocity = m_Input.GetMouseVelocity(cam.m_ViewportDimensions);
+	f32        pitch         = cam.m_Transform.m_Euler.GetX() - (mouseVelocity.y * m_RotationSpeed);
+	f32        yaw           = cam.m_Transform.m_Euler.GetY() - (mouseVelocity.x * m_RotationSpeed);
 
-    f32        pitch         = cam.m_Transform.m_Euler.GetX() - (mouseVelocity.y * m_RotationSpeed);
-    f32        yaw           = cam.m_Transform.m_Euler.GetY() - (mouseVelocity.x * m_RotationSpeed);
+	pitch                    = aml::Clamp(pitch, -89.0f, 89.0f);
 
-    pitch                    = aml::Clamp(pitch, -89.0f, 89.0f);
+	cam.m_Transform.m_Euler.SetX(pitch);
+	cam.m_Transform.m_Euler.SetY(yaw);
+	cam.m_Transform.UpdateDirectionVectors();
 
-    cam.m_Transform.m_Euler.SetX(pitch);
-    cam.m_Transform.m_Euler.SetY(yaw);
-    cam.m_Transform.UpdateDirectionVectors();
+	aml::Vec3 velocity = {0.0f, 0.0f, 0.0f};
 
-    aml::Vec3 velocity = { 0.0f, 0.0f, 0.0f };
+	if (m_Input.IsKeyDown(Keycode::W))
+	{
+		velocity.SetZ(1.0f);
+	}
+	else if (m_Input.IsKeyDown(Keycode::S))
+	{
+		velocity.SetZ(-1.0f);
+	}
+	if (m_Input.IsKeyDown(Keycode::D))
+	{
+		velocity.SetX(1.0f);
+	}
+	else if (m_Input.IsKeyDown(Keycode::A))
+	{
+		velocity.SetX(-1.0f);
+	}
+	if (m_Input.IsKeyDown(Keycode::E))
+	{
+		velocity.SetY(1.0f);
+	}
+	else if (m_Input.IsKeyDown(Keycode::Q))
+	{
+		velocity.SetY(-1.0f);
+	}
 
-    if (m_Input.IsKeyDown(Keycode::W)) {
-        velocity.SetZ(1.0f);
-    } else if (m_Input.IsKeyDown(Keycode::S)) {
-        velocity.SetZ(-1.0f);
-    }
-    if (m_Input.IsKeyDown(Keycode::D)) {
-        velocity.SetX(1.0f);
-    } else if (m_Input.IsKeyDown(Keycode::A)) {
-        velocity.SetX(-1.0f);
-    }
-    if (m_Input.IsKeyDown(Keycode::E)) {
-        velocity.SetY(1.0f);
-    } else if (m_Input.IsKeyDown(Keycode::Q)) {
-        velocity.SetY(-1.0f);
-    }
+	const f32 speedFactor = m_MovementSpeed * deltaTime;
 
-    const f32 speedFactor = m_MovementSpeed * deltaTime;
-
-    if (velocity.GetZ() != 0.0f) {
-        cam.m_Transform.m_Position += cam.m_Transform.m_Forward * (velocity.GetZ() * speedFactor);
-    }
-    if (velocity.GetX() != 0.0f) {
-        cam.m_Transform.m_Position += cam.m_Transform.m_Right * (velocity.GetX() * speedFactor);
-    }
-    if (velocity.GetY() != 0.0f) {
-        cam.m_Transform.m_Position += cam.m_Transform.m_Up * (velocity.GetY() * speedFactor);
-    }
+	if (velocity.GetZ() != 0.0f)
+	{
+		cam.m_Transform.m_Position += cam.m_Transform.m_Forward * (velocity.GetZ() * speedFactor);
+	}
+	if (velocity.GetX() != 0.0f)
+	{
+		cam.m_Transform.m_Position += cam.m_Transform.m_Right * (velocity.GetX() * speedFactor);
+	}
+	if (velocity.GetY() != 0.0f)
+	{
+		cam.m_Transform.m_Position += cam.m_Transform.m_Up * (velocity.GetY() * speedFactor);
+	}
 }

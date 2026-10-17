@@ -1,7 +1,7 @@
 #pragma once
-#include "Core/Prim.hpp"
-
 #include <Jolt/Jolt.h>
+
+#include "Core/Prim.hpp"
 #include "Jolt/Math/Float2.h"
 #include "Jolt/Math/Float3.h"
 #include "Jolt/Math/Float4.h"
@@ -11,8 +11,9 @@
 #include "Jolt/Math/Vec4.h"
 #include "Jolt/Math/Vector.h"
 
-namespace axm::aml {
+namespace axm::aml
+{
 
-    using namespace JPH;
+using namespace JPH;
 
 }

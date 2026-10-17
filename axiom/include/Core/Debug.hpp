@@ -27,14 +27,14 @@
 #define AXM_FLUSH_LOG_EVERY_TIME()
 #endif
 #define AXM_LOG(fmt, ...)                                                                                              \
-    std::println("Axiom : " fmt, __VA_ARGS__);                                                                         \
-    AXM_FLUSH_LOG_EVERY_TIME();
+	std::println("Axiom : " fmt, __VA_ARGS__);                                                                         \
+	AXM_FLUSH_LOG_EVERY_TIME();
 #define AXM_LOG_INFO(fmt, ...)                                                                                         \
-    std::println("Axiom : INFO : " fmt, __VA_ARGS__);                                                                  \
-    AXM_FLUSH_LOG_EVERY_TIME();
+	std::println("Axiom : INFO : " fmt, __VA_ARGS__);                                                                  \
+	AXM_FLUSH_LOG_EVERY_TIME();
 #define AXM_LOG_ERROR(fmt, ...)                                                                                        \
-    std::println("Axiom : ERROR : " fmt, __VA_ARGS__);                                                                 \
-    AXM_FLUSH_LOG_EVERY_TIME();
+	std::println("Axiom : ERROR : " fmt, __VA_ARGS__);                                                                 \
+	AXM_FLUSH_LOG_EVERY_TIME();
 #else
 #define AXM_LOG(fmt, ...)
 #define AXM_LOG_INFO(fmt, ...)

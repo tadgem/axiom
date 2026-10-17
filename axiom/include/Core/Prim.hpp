@@ -13,6 +13,7 @@ using i16      = int16_t;
 using i32      = int32_t;
 using i64      = int64_t;
 
+using boolean  = u8;
 using byte     = u8;
 using str_hash = u64;
 

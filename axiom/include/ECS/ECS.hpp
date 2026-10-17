@@ -35,13 +35,14 @@ private:
 class ISystem
 {
 public:
-	virtual void Init()        = 0;
-	virtual void Update()      = 0;
-	virtual void Render()      = 0;
-	virtual void Quit()        = 0;
-
-	virtual json Serialize()   = 0;
-	virtual bool Deserialize() = 0;
+	virtual void InitSystem()                  = 0;
+	virtual void InitScene(Scene& scene)       = 0;
+	virtual void Update(Scene& scene)          = 0;
+	virtual void Render(Scene& scene)          = 0;
+	virtual void CleanupScene(Scene& scene)    = 0;
+	virtual void Cleanup()                     = 0;
+	virtual json Serialize(const Scene& scene) = 0;
+	virtual bool Deserialize(const json& json) = 0;
 };
 
 class ECSDispatcher

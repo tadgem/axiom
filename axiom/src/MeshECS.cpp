@@ -1,18 +1,18 @@
-#include "MeshECS.hpp"
+#include "ECS/MeshECS.hpp"
 
-void axm::MeshSystem::InitSystem() {}
+void      axm::MeshSystem::InitSystem() {}
 
-void axm::MeshSystem::InitScene(Scene& scene) {}
+void      axm::MeshSystem::InitScene(Scene& scene) {}
 
-void axm::MeshSystem::Update(Scene& scene) {}
+void      axm::MeshSystem::Update(Scene& scene) {}
 
-void axm::MeshSystem::Render(Scene& scene) {}
+void      axm::MeshSystem::Render(Scene& scene) {}
 
-void axm::MeshSystem::CleanupScene(Scene& scene) {}
+void      axm::MeshSystem::CleanupScene(Scene& scene) {}
 
-void axm::MeshSystem::Cleanup() {}
+void      axm::MeshSystem::Cleanup() {}
 
-json axm::MeshSystem::Serialize(const Scene& scene)
+axm::json axm::MeshSystem::Serialize(const Scene& scene)
 {
 	return json();
 }

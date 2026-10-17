@@ -14,6 +14,7 @@ target_link_libraries(axiom PUBLIC
         mimalloc-static
         Jolt
         luajit::lib
+        vfspp
 )
 
 target_include_directories(axiom PUBLIC
@@ -26,6 +27,7 @@ target_include_directories(axiom PUBLIC
     ${SINGLE_HEADER_INCLUDE_DIRS}
     ${SUBMODULE_DIRS}/luajit-cmake/LuaJIT/src
     ${SUBMODULE_DIRS}/flecs/include
+    ${SUBMODULE_DIRS}/vfspp/include
 )
 
 if (MSVC)

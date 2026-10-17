@@ -7,28 +7,29 @@
 #include "ECS/ECS.hpp"
 #include "Render/Samplers.hpp"
 #include "SDL3/SDL.h"
+#include "vfspp/VFS.h"
 #include "vku/vku.h"
-
 namespace axm
 {
 struct AxiomEngine
 {
-	bool                 m_OK      = false;
-	bool                 m_Running = true;
-	Timer                m_FrameTimer;
-	f64                  m_DeltaTime = 0.0;
+	bool                             m_OK      = false;
+	bool                             m_Running = true;
+	Timer                            m_FrameTimer;
+	f64                              m_DeltaTime = 0.0;
 
-	AssetManager         m_AssetManager;
-	ECSDispatcher        m_ECS;
-	Window               m_Window;
-	Samplers             m_Samplers;
-	Input                m_Input;
+	AssetManager                     m_AssetManager;
+	ECSDispatcher                    m_ECS;
+	Window                           m_Window;
+	Samplers                         m_Samplers;
+	Input                            m_Input;
 
-	Unique<vku::VkState> m_VK;
-	bool                 m_Quit = false;
+	Unique<vku::VkState>             m_VK;
+	Unique<vfspp::VirtualFileSystem> m_FileSystem;
+	bool                             m_Quit = false;
 
-	static AxiomEngine   BAD();
-	static AxiomEngine   Init();
+	static AxiomEngine               BAD();
+	static AxiomEngine               Init();
 
 	~AxiomEngine();
 

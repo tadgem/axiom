@@ -13,6 +13,7 @@
 #include "SDL3/SDL.h"
 #include "VkSDL.h"
 #include "nanovg.h"
+#include "vfspp/VFS.h"
 #include "vku/Init.h"
 #include "vku/Texture.h"
 
@@ -20,10 +21,10 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 {
 	PROFILE_SCOPE()
 
-	AxiomEngine  engine;
+	AxiomEngine  engine = {};
 
-	vku::VkState vk = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
-	engine.m_VK     = MakeUnique<vku::VkState>(std::move(vk));
+	vku::VkState vk     = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
+	engine.m_VK         = MakeUnique<vku::VkState>(std::move(vk));
 
 	vku::textures::CreateImageSampler(*engine.m_VK,
 	                                  1,
@@ -59,8 +60,15 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 	        &archivo_regular_ttf[0], _countof(archivo_regular_ttf), 14.0f, &cfg);
 	ImGui_ImplVulkan_CreateFontsTexture();
 
-	engine.m_OK      = true;
-	engine.m_Running = engine.m_VK->m_ShouldRun;
+	engine.m_OK         = true;
+	engine.m_Running    = engine.m_VK->m_ShouldRun;
+
+	engine.m_FileSystem = MakeUnique<vfspp::VirtualFileSystem>();
+	if (!engine.m_FileSystem->CreateFileSystem<vfspp::NativeFileSystem>("/", "resources"))
+	{
+		AXM_LOG_ERROR("Failed to initalize virtual file system");
+		return AxiomEngine::BAD();
+	}
 
 	AddDefaultAssetHandlers(engine);
 

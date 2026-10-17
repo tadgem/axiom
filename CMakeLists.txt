@@ -41,6 +41,9 @@ add_subdirectory(submodules/jolt/Build)
 # Lua
 add_subdirectory(submodules/luajit-cmake)
 
+# VFSPP
+add_subdirectory(submodules/vfspp)
+
 # Third Party Dirs
 set(SUBMODULE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/submodules)
 set(THIRD_PARTY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party)

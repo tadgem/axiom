@@ -10,3 +10,6 @@
 [submodule "submodules/luajit-cmake"]
 	path = submodules/luajit-cmake
 	url = https://github.com/tadgem/luajit-cmake.git
+[submodule "submodules/vfspp"]
+	path = submodules/vfspp
+	url = https://github.com/nextgeniuspro/vfspp.git

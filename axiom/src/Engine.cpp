@@ -92,17 +92,7 @@ void axm::AxiomEngine::Quit()
 
 	if (m_VK)
 	{
-		if (m_Samplers.m_LinearClampSampler != VK_NULL_HANDLE)
-		{
-			vkDestroySampler(m_VK->m_LogicalDevice, m_Samplers.m_LinearClampSampler, nullptr);
-			m_Samplers.m_LinearClampSampler = VK_NULL_HANDLE;
-		}
-		if (m_Samplers.m_LinearWrapSampler != VK_NULL_HANDLE)
-		{
-			vkDestroySampler(m_VK->m_LogicalDevice, m_Samplers.m_LinearWrapSampler, nullptr);
-			m_Samplers.m_LinearWrapSampler = VK_NULL_HANDLE;
-		}
-
+		m_Samplers.Free(*m_VK);
 		vku::init::Quit(*m_VK);
 		m_VK.reset();
 	}

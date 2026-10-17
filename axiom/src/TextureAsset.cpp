@@ -7,7 +7,9 @@ void OnProcessTextureAssetTransient(axm::AssetTransient* data)
 	using namespace axm;
 }
 
-axm::TextureAssetFactory::TextureAssetFactory(vku::VkState& vk) : AssetFactory(AssetType::Texture), m_VK(vk) {}
+axm::TextureAssetFactory::TextureAssetFactory(vfspp::VirtualFileSystem& vfs, vku::VkState& vk)
+    : AssetFactory(vfs, AssetType::Texture), m_VK(vk)
+{}
 
 axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path& path) const
 {

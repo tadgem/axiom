@@ -50,7 +50,7 @@ class ModelAssetFactory : public AssetFactory
 public:
 	vku::VkState& m_VK;
 
-	explicit ModelAssetFactory(vku::VkState& vk);
+	explicit ModelAssetFactory(vfspp::VirtualFileSystem& vfs, vku::VkState& vk);
 
 	NO_DISCARD AssetLoadResult     LoadAsset(const Filesystem::path& path) const override;
 	void                           UnloadAsset(Asset* asset) const override;

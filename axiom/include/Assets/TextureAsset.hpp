@@ -13,7 +13,7 @@ class TextureAssetFactory : public AssetFactory
 public:
 	vku::VkState& m_VK;
 
-	explicit TextureAssetFactory(vku::VkState& vk);
+	explicit TextureAssetFactory(vfspp::VirtualFileSystem& vfs, vku::VkState& vk);
 
 	NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
 	void                       UnloadAsset(Asset* asset) const override;

@@ -65,7 +65,9 @@ static aiTextureType GetAssimpTextureType(const axm::TextureMapType& t)
 	}
 }
 
-axm::ModelAssetFactory::ModelAssetFactory(vku::VkState& vk) : AssetFactory(AssetType::Model), m_VK(vk) {}
+axm::ModelAssetFactory::ModelAssetFactory(vfspp::VirtualFileSystem& vfs, vku::VkState& vk)
+    : AssetFactory(vfs, AssetType::Model), m_VK(vk)
+{}
 
 axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& path) const
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include "Assets/Assets.hpp"
 #include "Core/Prim.hpp"
+#include "vfspp/VFS.h"
 
 namespace axm
 {
@@ -48,9 +49,10 @@ struct AssetLoadResult
 class AssetFactory
 {
 public:
-	const AssetType m_AssetType;
+	const AssetType           m_AssetType;
+	vfspp::VirtualFileSystem& m_FileSystem;
 
-	AssetFactory(AssetType assetType) : m_AssetType(assetType) {};
+	AssetFactory(vfspp::VirtualFileSystem& vfs, AssetType assetType) : m_AssetType(assetType), m_FileSystem(vfs) {};
 
 	NO_DISCARD virtual AssetLoadResult LoadAsset(const Filesystem::path& path) const = 0;
 	virtual void                       UnloadAsset(Asset* asset) const               = 0;
@@ -63,7 +65,9 @@ public:
 class AssetManager
 {
 public:
-	AssetManager() = default;
+	vfspp::VirtualFileSystem& m_FileSystem;
+
+	AssetManager(vfspp::VirtualFileSystem& vfs) : m_FileSystem(vfs) {}
 
 	template <AssetType AssetTypeEnum, typename T, typename... Args>
 	T* AddAssetFactory(Args&&... args)
@@ -75,14 +79,12 @@ public:
 			return static_cast<T*>(p_AssetFactories[AssetTypeEnum].get());
 		}
 
-		T* f = AXM_NEW(T, std::forward<Args>(args)...);
+		T* f = AXM_NEW(T, m_FileSystem, std::forward<Args>(args)...);
 		p_AssetFactories.emplace(AssetTypeEnum, Unique<AssetFactory>(f));
 		return static_cast<T*>(p_AssetFactories[AssetTypeEnum].get());
 	}
 
-	AssetHandle LoadAsset(const Filesystem::path& path,
-	                      const AssetType&        assetType,
-	                      const OnLoadedFn&       onLoaded = nullptr);
+	AssetHandle LoadAsset(const Path& path, const AssetType& assetType, const OnLoadedFn& onLoaded = nullptr);
 	void        UnloadAsset(const AssetHandle& handle);
 	Asset*      GetAsset(const AssetHandle& handle);
 

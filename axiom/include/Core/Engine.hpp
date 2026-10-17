@@ -34,7 +34,7 @@ struct AxiomEngine
 	~AxiomEngine();
 
 	// Move-only: owns the vku::VkState (and thus the Vulkan device).
-	AxiomEngine()                                     = default;
+	AxiomEngine();
 	AxiomEngine(const AxiomEngine&)                   = delete;
 	AxiomEngine& operator=(const AxiomEngine&)        = delete;
 	AxiomEngine(AxiomEngine&&) noexcept               = default;

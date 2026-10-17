@@ -17,6 +17,8 @@
 #include "vku/Init.h"
 #include "vku/Texture.h"
 
+axm::AxiomEngine::AxiomEngine() : m_FileSystem(MakeUnique<vfspp::VirtualFileSystem>()), m_AssetManager(*m_FileSystem) {}
+
 axm::AxiomEngine axm::AxiomEngine::Init()
 {
 	PROFILE_SCOPE()
@@ -78,7 +80,8 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 
 axm::AxiomEngine axm::AxiomEngine::BAD()
 {
-	AxiomEngine engine;
+	Unique<vfspp::VirtualFileSystem> vfs = MakeUnique<vfspp::VirtualFileSystem>();
+	AxiomEngine                      engine;
 	engine.m_OK      = false;
 	engine.m_Running = false;
 	return engine;

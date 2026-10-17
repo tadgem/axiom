@@ -4,6 +4,8 @@
 #include "Core/STL.hpp"
 #include "Render/Mesh.hpp"
 #include "Render/Texture.hpp"
+#include "assimp/IOStream.hpp"
+#include "assimp/IOSystem.hpp"
 #include "assimp/Importer.hpp"
 #include "vku/vku.h"
 
@@ -44,6 +46,9 @@ struct ModelTransientData
 
 using ModelAsset          = AssetT<Model, AssetType::Model>;
 using ModelAssetTransient = AssetTransientT<Model, ModelTransientData, AssetType::Model>;
+
+class VfsppIOSystem : public Assimp::IOSystem
+{};
 
 class ModelAssetFactory : public AssetFactory
 {

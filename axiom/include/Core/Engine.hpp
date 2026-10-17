@@ -18,6 +18,7 @@ struct AxiomEngine
 	Timer                            m_FrameTimer;
 	f64                              m_DeltaTime = 0.0;
 
+	Unique<vfspp::VirtualFileSystem> m_FileSystem;
 	AssetManager                     m_AssetManager;
 	ECSDispatcher                    m_ECS;
 	Window                           m_Window;
@@ -25,7 +26,6 @@ struct AxiomEngine
 	Input                            m_Input;
 
 	Unique<vku::VkState>             m_VK;
-	Unique<vfspp::VirtualFileSystem> m_FileSystem;
 	bool                             m_Quit = false;
 
 	static AxiomEngine               BAD();

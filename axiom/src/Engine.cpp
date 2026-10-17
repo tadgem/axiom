@@ -62,16 +62,14 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 	        &archivo_regular_ttf[0], _countof(archivo_regular_ttf), 14.0f, &cfg);
 	ImGui_ImplVulkan_CreateFontsTexture();
 
-	engine.m_OK         = true;
-	engine.m_Running    = engine.m_VK->m_ShouldRun;
+	engine.m_OK      = true;
+	engine.m_Running = engine.m_VK->m_ShouldRun;
 
-	engine.m_FileSystem = MakeUnique<vfspp::VirtualFileSystem>();
 	if (!engine.m_FileSystem->CreateFileSystem<vfspp::NativeFileSystem>("/", "resources"))
 	{
 		AXM_LOG_ERROR("Failed to initalize virtual file system");
 		return AxiomEngine::BAD();
 	}
-
 	AddDefaultAssetHandlers(engine);
 
 	AXM_FLUSH_LOG();

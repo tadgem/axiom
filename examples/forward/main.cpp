@@ -59,7 +59,7 @@ int main()
 
 	auto drawables = DynArray<Drawable>{};
 
-	init.m_AssetManager.LoadAsset("resources/models/sponza/Sponza.gltf",
+	init.m_AssetManager.LoadAsset("/models/sponza/Sponza.gltf",
 	                              AssetType::Model,
 	                              [&](Asset* asset)
 	                              {

@@ -78,12 +78,17 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
 	                                     aiProcess_FixInfacingNormals | aiProcess_FindInvalidData |
 	                                     aiProcess_GenBoundingBoxes | aiProcess_FlipWindingOrder;
 
-	AssetLoadResult result     = {};
+	AssetLoadResult result = {};
+	vfspp::IFilePtr file   = m_FileSystem.OpenFile(path.generic_string(), vfspp::IFile::FileMode::Read);
 
-	auto*           modelAsset = AXM_NEW(ModelAsset, String(path.string()), {});
-	auto*           transient  = AXM_NEW(ModelAssetTransient, modelAsset);
+	DynArray<u8>    data(file->Size());
+	file->Read(data);
+
+	auto* modelAsset = AXM_NEW(ModelAsset, String(path.string()), {});
+	auto* transient  = AXM_NEW(ModelAssetTransient, modelAsset);
+
 	transient->m_TransientData.m_Scene =
-	        transient->m_TransientData.m_Importer.ReadFile(path.string().c_str(), IMPORT_FLAGS);
+	        transient->m_TransientData.m_Importer.ReadFileFromMemory(data.data(), data.size(), IMPORT_FLAGS);
 
 	if (!transient->m_TransientData.m_Scene)
 	{

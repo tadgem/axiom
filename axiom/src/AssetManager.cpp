@@ -14,7 +14,8 @@ AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
                                     const OnLoadedFn&       onLoaded)
 {
 	PROFILE_SCOPE()
-	if (!Filesystem::exists(path.c_str()))
+	std::string p = path.generic_string();
+	if (!m_FileSystem.IsFileExists(p))
 	{
 		return {};
 	}

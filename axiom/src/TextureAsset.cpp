@@ -13,8 +13,14 @@ axm::TextureAssetFactory::TextureAssetFactory(vfspp::VirtualFileSystem& vfs, vku
 
 axm::AssetLoadResult axm::TextureAssetFactory::LoadAsset(const Filesystem::path& path) const
 {
-	auto            cpuTexture   = textures::LoadCPUTextureDataFromFile(path.c_str());
+	vfspp::IFilePtr file = m_FileSystem.OpenFile(path.generic_string(), vfspp::IFile::FileMode::Read);
 
+	const u64       size = file->Size();
+	DynArray<u8>    data(size);
+
+	file->Read(data);
+	//auto            cpuTexture   = textures::LoadCPUTextureDataFromFile(path.c_str());
+	auto            cpuTexture   = textures::LoadCPUTextureDataFromMemory(data.data(), data.size());
 	AssetLoadResult result       = {};
 
 	auto*           textureAsset = AXM_NEW(TextureAsset, String(path.string()), {});

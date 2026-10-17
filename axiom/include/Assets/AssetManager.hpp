@@ -14,11 +14,11 @@ using OnUnloadedFn = void (*)(Asset*);
 
 struct AssetLoadInfo
 {
-	Filesystem::path m_Path;
-	AssetType        m_AssetType;
-	OnLoadedFn       m_OnLoadedCallback = nullptr;
+	Path       m_Path;
+	AssetType  m_AssetType;
+	OnLoadedFn m_OnLoadedCallback = nullptr;
 
-	bool operator==(const AssetLoadInfo& o) const { return m_Path == o.m_Path && m_AssetType == o.m_AssetType; }
+	bool       operator==(const AssetLoadInfo& o) const { return m_Path == o.m_Path && m_AssetType == o.m_AssetType; }
 	AssetLoadInfo&         operator=(const AssetLoadInfo& o) = default;
 	bool                   operator<(const AssetLoadInfo& o) const { return m_Path < o.m_Path; }
 

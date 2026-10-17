@@ -5,6 +5,7 @@
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
 #include "Render/Samplers.hpp"
+#include "ECS/ECS.hpp"
 #include "SDL3/SDL.h"
 #include "vku/vku.h"
 
@@ -17,6 +18,7 @@ namespace axm {
         f64                             m_DeltaTime = 0.0;
 
         AssetManager                    m_AssetManager;
+        ECSDispatcher                   m_ECS;
         Window                          m_Window;
         Samplers                        m_Samplers;
         Input                           m_Input;

@@ -25,6 +25,7 @@ target_include_directories(axiom PUBLIC
     ${MIMALLOC_INCLUDE_DIRS}
     ${SINGLE_HEADER_INCLUDE_DIRS}
     ${SUBMODULE_DIRS}/luajit-cmake/LuaJIT/src
+    ${SUBMODULE_DIRS}/flecs/include
 )
 
 if (MSVC)

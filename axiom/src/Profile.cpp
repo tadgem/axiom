@@ -5,7 +5,8 @@
 namespace axm
 {
 static HashMap<const char*, profiler::ProfilerItem> g_ProfilerItems = {};
-}
+static Mutex                                        g_ProfilerItemsMutex;
+}  // namespace axm
 axm::profiler::ScopedTimer::ScopedTimer(const char* label) : m_Label(label) {}
 // axm::profiler::ScopedTimer::ScopedTimer(std::source_location loc) : m_Label(loc.function_name()) { }
 
@@ -13,6 +14,7 @@ axm::profiler::ScopedTimer::~ScopedTimer()
 {
 	auto duration = m_Timer.ElapsedNanosecondsF();
 
+	g_ProfilerItemsMutex.lock();
 	if (!g_ProfilerItems.contains(m_Label))
 	{
 		g_ProfilerItems[m_Label] = ProfilerItem{};
@@ -31,8 +33,7 @@ axm::profiler::ScopedTimer::~ScopedTimer()
 	{
 		g_ProfilerItems[m_Label].m_MaxDuration = duration;
 	}
-
-	// find bin to put the function in.
+	g_ProfilerItemsMutex.unlock();
 }
 
 static axm::DynArray<const char*> g_ProfilerItemLabelsSorted;
@@ -113,6 +114,8 @@ void axm::profiler::ProfilerImGuiWindow(const AxiomEngine& e)
 {
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter |
 	                                  ImGuiTableFlags_BordersV | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable;
+
+	ScopedLock<Mutex> lock(g_ProfilerItemsMutex);
 
 	if (g_ProfilerItemLabelsSorted.size() != g_ProfilerItems.size())
 	{

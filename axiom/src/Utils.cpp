@@ -9,7 +9,13 @@ axm::DynArray<u8> axm::Utils::LoadBinaryFromPath(const Filesystem::path& path)
 {
 	PROFILE_SCOPE()
 	std::ifstream file{path.c_str(), std::ios::binary | std::ios::ate};
-	auto          fileSize = file.tellg();
+
+	if (!file.is_open())
+	{
+		return {};
+	}
+
+	auto fileSize = file.tellg();
 	file.seekg(std::ios::beg);
 
 	DynArray<u8> vec = {};

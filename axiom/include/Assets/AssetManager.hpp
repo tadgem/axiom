@@ -29,6 +29,7 @@ struct AssetLoadInfo
 enum class AssetState
 {
 	NotLoaded,
+	Enqueued,
 	Loading,
 	Loaded,
 	Unloading
@@ -44,6 +45,11 @@ struct AssetLoadResult
 	Variant<Asset*, AssetTransient*, AssetErrorMessage>
 	                        m_Next;           // may be final asset or transient while factory processes N steps
 	DynArray<AssetLoadInfo> m_NewAssetTasks;  // new assets to be loaded (e.g. model requests new tex)
+
+	static AssetLoadResult  Fail(const String& reason)
+	{
+		return {.m_Next = AssetErrorMessage{reason}, .m_NewAssetTasks = {}};
+	}
 };
 
 class AssetFactory

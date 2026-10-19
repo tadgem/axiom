@@ -2,7 +2,7 @@
 
 #include "Core/Prim.hpp"
 #include "Core/STL.hpp"
-#include "vku/vku.h"
+#include "Render/GPU.hpp"
 
 namespace axm
 {
@@ -51,12 +51,7 @@ namespace textures
 	CPUTextureData LoadCPUTextureDataFromMemory(void* data, size_t length);
 	CPUTextureData LoadCPUTextureDataFromFile(const Filesystem::path& path);
 
-	Texture        CreateTexture2D(vku::VkState& vk,
-	                               const void*   data,
-	                               VkFormat      format,
-	                               u32           w,
-	                               u32           h,
-	                               const char*   label = "UNKNOWN");
+	Texture CreateTexture2D(GPU& gpu, const void* data, VkFormat format, u32 w, u32 h, const char* label = "UNKNOWN");
 
 }  // namespace textures
 

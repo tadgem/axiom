@@ -50,6 +50,11 @@ using HashMap = std::
 template <typename Type>
 using Future = std::future<Type>;
 
+using Mutex  = std::mutex;
+
+template <typename SyncPrim>
+using ScopedLock = std::lock_guard<SyncPrim>;
+
 // template utils
 template <typename Type>
 static bool IsFutureReady(Future<Type> const& o)

@@ -374,7 +374,7 @@ sol::state axm::lua::CreateLuaState(AxiomEngine& engine)
 void axm::lua::InitLuaAPI(sol::state& state, AxiomEngine& engine)
 {
 	g_Context.m_Engine = &engine;
-	g_Context.m_VK     = engine.m_VK.get();
+	g_Context.m_VK     = &engine.m_GPU->m_VK;
 
 	state.new_usertype<aml::Float2>(
 	        "vec2",
@@ -521,7 +521,7 @@ void axm::lua::InitLuaAPI(sol::state& state, AxiomEngine& engine)
 		        return m.m_Material.SetSampler(*g_Context.m_VK,
 		                                       name,
 		                                       texture.m_Texture->View(),
-		                                       g_Context.m_Engine->m_Samplers.m_NearestWrapSampler);
+		                                       g_Context.m_Engine->m_GPU->m_Samplers.m_NearestWrapSampler);
 	        },
 	        "free",
 	        [](LuaMaterial& m) { m.m_Material.Free(*g_Context.m_VK); });
@@ -1380,7 +1380,7 @@ void axm::lua::InitLuaAPI(sol::state& state, AxiomEngine& engine)
 
 	sol::table nvg = state.create_table();
 	axiom["nvg"]   = nvg;
-	auto ctx       = []() { return g_Context.m_Engine->m_VK->m_NanoVG; };
+	auto ctx       = []() { return g_Context.m_Engine->m_GPU->m_VK.m_NanoVG; };
 
 	nvg.set_function("rgb", [](u8 r, u8 g, u8 b) { return nvgRGB(r, g, b); });
 	nvg.set_function("rgba", [](u8 r, u8 g, u8 b, u8 a) { return nvgRGBA(r, g, b, a); });
@@ -1791,13 +1791,14 @@ int axm::lua::RunScript(AxiomEngine& engine, const char* scriptPath)
 
 			safeCall(update, "update", CAST(engine.m_DeltaTime, f32));
 
-			vku::commands::RecordGraphicsCommands(*engine.m_VK,
+			vku::commands::RecordGraphicsCommands(engine.m_GPU->m_VK,
 			                                      [&](VkCommandBuffer& cmd, u32 frame)
 			                                      {
 				                                      g_Context.m_Cmd   = cmd;
 				                                      g_Context.m_Frame = frame;
 
-				                                      vku::render_passes::BeginSwapchainRenderPass(*engine.m_VK, cmd);
+				                                      vku::render_passes::BeginSwapchainRenderPass(engine.m_GPU->m_VK,
+				                                                                                   cmd);
 
 				                                      safeCall(render, "render");
 
@@ -1805,7 +1806,7 @@ int axm::lua::RunScript(AxiomEngine& engine, const char* scriptPath)
 				                                          g_Context.m_Im3dViewState != nullptr)
 				                                      {
 					                                      Im3d::EndFrame();
-					                                      vku::DrawIm3d(*engine.m_VK,
+					                                      vku::DrawIm3d(engine.m_GPU->m_VK,
 					                                                    cmd,
 					                                                    frame,
 					                                                    *g_Context.m_Im3dState,
@@ -1817,7 +1818,7 @@ int axm::lua::RunScript(AxiomEngine& engine, const char* scriptPath)
 					                                      g_Context.m_Im3dActive = false;
 				                                      }
 
-				                                      nvgEndFrame(engine.m_VK->m_NanoVG);
+				                                      nvgEndFrame(engine.m_GPU->m_VK.m_NanoVG);
 				                                      vkCmdEndRenderPass(cmd);
 			                                      });
 		}
@@ -1835,13 +1836,13 @@ int axm::lua::RunScript(AxiomEngine& engine, const char* scriptPath)
 
 	if (g_Context.m_Im3dViewState != nullptr)
 	{
-		vku::FreeIm3dViewport(*engine.m_VK, *g_Context.m_Im3dViewState);
+		vku::FreeIm3dViewport(engine.m_GPU->m_VK, *g_Context.m_Im3dViewState);
 		delete g_Context.m_Im3dViewState;
 		g_Context.m_Im3dViewState = nullptr;
 	}
 	if (g_Context.m_Im3dState != nullptr)
 	{
-		vku::FreeIm3d(*engine.m_VK, *g_Context.m_Im3dState);
+		vku::FreeIm3d(engine.m_GPU->m_VK, *g_Context.m_Im3dState);
 		delete g_Context.m_Im3dState;
 		g_Context.m_Im3dState = nullptr;
 	}

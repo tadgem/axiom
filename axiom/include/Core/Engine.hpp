@@ -5,10 +5,9 @@
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
 #include "ECS/ECS.hpp"
-#include "Render/Samplers.hpp"
+#include "Render/GPU.hpp"
 #include "SDL3/SDL.h"
 #include "vfspp/VFS.h"
-#include "vku/vku.h"
 namespace axm
 {
 struct AxiomEngine
@@ -22,10 +21,9 @@ struct AxiomEngine
 	AssetManager                     m_AssetManager;
 	ECSDispatcher                    m_ECS;
 	Window                           m_Window;
-	Samplers                         m_Samplers;
+	Unique<GPU>                      m_GPU;
 	Input                            m_Input;
 
-	Unique<vku::VkState>             m_VK;
 	bool                             m_Quit = false;
 
 	static AxiomEngine               BAD();

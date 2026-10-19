@@ -92,8 +92,8 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
 	{
 		result.m_Next =
 		        AssetErrorMessage{.m_Message = "ModelAssetFactory : failed to open file at " + String(path.string())};
-		AXM_DELETE(transient);
-		AXM_DELETE(modelAsset);
+		AXM_DELETE(ModelAssetTransient, transient);
+		AXM_DELETE(ModelAsset, modelAsset);
 		return result;
 	}
 

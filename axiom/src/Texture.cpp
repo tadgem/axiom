@@ -11,12 +11,12 @@ axm::Texture axm::Texture::BAD()
 	return {.m_Texture = {}, .m_Valid = false};
 }
 
-axm::Texture axm::textures::CreateTexture2D(vku::VkState& vk,
-                                            const void*   data,
-                                            VkFormat      format,
-                                            u32           w,
-                                            u32           h,
-                                            const char*   label)
+axm::Texture axm::textures::CreateTexture2D(GPU&        gpu,
+                                            const void* data,
+                                            VkFormat    format,
+                                            u32         w,
+                                            u32         h,
+                                            const char* label)
 {
 	(void) label;
 
@@ -27,7 +27,9 @@ axm::Texture axm::textures::CreateTexture2D(vku::VkState& vk,
 	VkImage        image   = VK_NULL_HANDLE;
 	VkDeviceMemory memory  = VK_NULL_HANDLE;
 	VkImageView    view    = VK_NULL_HANDLE;
-	VkSampler      sampler = VK_NULL_HANDLE;
+	VkSampler      sampler = gpu.m_Samplers.m_LinearWrapSampler;
+
+	auto&          vk      = gpu.m_VK;
 
 	vku::textures::CreateImage(
 	        vk,
@@ -42,8 +44,6 @@ axm::Texture axm::textures::CreateTexture2D(vku::VkState& vk,
 	        image,
 	        memory);
 	vku::textures::CreateImageView(vk, image, format, mips, VK_IMAGE_ASPECT_COLOR_BIT, view);
-	vku::textures::CreateImageSampler(vk, mips, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampler);
-
 	const VkDeviceSize imageSize = static_cast<VkDeviceSize>(w) * h * 4;
 
 	vku::MappedBuffer  staging   = vku::buffers::CreateMappedBuffer(
@@ -74,8 +74,8 @@ void axm::CPUTextureData::Release() const
 
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length)
 {
-	int   texWidth = 0, texHeight = 0, texChannels = 0;
-
+	int texWidth = 0, texHeight = 0, texChannels = 0;
+	stbi_set_flip_vertically_on_load(true);
 	auto* pixels = stbi_load_from_memory(
 	        CAST(data, stbi_uc const*), CAST(length, int), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 

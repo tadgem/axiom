@@ -184,7 +184,7 @@ struct GamepadState
 {
 	static constexpr SDL_JoystickID kUnknown = 0;
 
-	SDL_JoystickID                  m_ID;
+	SDL_JoystickID                  m_ID     = kUnknown;
 	GamepadAxisState                m_AxisState;
 	DynArray<GamepadButton>         m_PressedButtons;
 	DynArray<GamepadButton>         m_JustPressedButtons;

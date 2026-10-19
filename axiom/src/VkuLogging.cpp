@@ -1,6 +1,3 @@
-// vku routes its diagnostics through an application provided printf-style
-// function (see vku/Log.h). Axiom provides the implementation so that linking
-// against the vku library (and the vku SDL backend) resolves.
 #include <cstdarg>
 #include <cstdio>
 

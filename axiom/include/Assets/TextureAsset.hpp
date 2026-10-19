@@ -1,7 +1,7 @@
 #pragma once
 #include "Assets/AssetManager.hpp"
+#include "Render/GPU.hpp"
 #include "Render/Texture.hpp"
-#include "vku/vku.h"
 namespace axm
 {
 
@@ -11,9 +11,9 @@ using TextureAssetTransient = AssetTransientT<Texture, CPUTextureData, AssetType
 class TextureAssetFactory : public AssetFactory
 {
 public:
-	vku::VkState& m_VK;
+	GPU& m_GPU;
 
-	explicit TextureAssetFactory(vfspp::VirtualFileSystem& vfs, vku::VkState& vk);
+	explicit TextureAssetFactory(vfspp::VirtualFileSystem& vfs, GPU& gpu);
 
 	NO_DISCARD AssetLoadResult LoadAsset(const Filesystem::path& path) const override;
 	void                       UnloadAsset(Asset* asset) const override;

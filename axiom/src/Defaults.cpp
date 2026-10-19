@@ -6,6 +6,6 @@
 
 void axm::AddDefaultAssetHandlers(AxiomEngine& e)
 {
-	e.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e.m_VK);
-	e.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(*e.m_VK);
+	e.m_AssetManager.AddAssetFactory<AssetType::Texture, TextureAssetFactory>(*e.m_GPU);
+	e.m_AssetManager.AddAssetFactory<AssetType::Model, ModelAssetFactory>(e.m_GPU->m_VK);
 }

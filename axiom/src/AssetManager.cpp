@@ -1,7 +1,7 @@
 #include "../include/Assets/AssetManager.hpp"
 
+#include "Core/Maths.hpp"
 #include "Core/Profile.hpp"
-
 namespace axm
 {
 AssetHandle AssetLoadInfo::ToHandle() const
@@ -34,6 +34,24 @@ AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
 		if (loadInfo == queued_load)
 		{
 			return queued_load.ToHandle();
+		}
+	}
+
+	for (auto& loaded : p_LoadedAssets)
+	{
+		if (loaded.first == handle)
+		{
+			return loaded.first;
+		}
+	}
+
+	for (auto& inFlight : p_InFlightLoads)
+	{
+		AssetHandle inFlightHandle(inFlight.m_Path, inFlight.m_AssetType);
+
+		if (handle == inFlightHandle)
+		{
+			return inFlightHandle;
 		}
 	}
 
@@ -80,6 +98,15 @@ AssetState AssetManager::GetAssetLoadProgress(const AssetHandle& handle)
 	for (auto& queued : p_QueuedLoads)
 	{
 		if (queued.ToHandle() == handle)
+		{
+			return AssetState::Enqueued;
+		}
+	}
+
+	for (auto& inFlight : p_InFlightLoads)
+	{
+		AssetHandle h(inFlight.m_Path, inFlight.m_AssetType);
+		if (h == handle)
 		{
 			return AssetState::Loading;
 		}
@@ -205,10 +232,10 @@ void AssetManager::HandleAsyncTasks(u16& remainingTasks)
 
 	for (auto i = 0; i < bound; i++)
 	{
-		if (IsFutureReady(p_InFlightLoads.front().m_Task))
+		if (IsFutureReady(p_InFlightLoads[i].m_Task))
 		{
 			// get asset load result
-			auto result = p_InFlightLoads.front().m_Task.get();
+			auto result = p_InFlightLoads[i].m_Task.get();
 			// handle result & enqueue new loads
 			for (auto& newLoad : result.m_NewAssetTasks)
 			{
@@ -218,7 +245,7 @@ void AssetManager::HandleAsyncTasks(u16& remainingTasks)
 			if (std::holds_alternative<Asset*>(result.m_Next))
 			{
 				auto* asset = std::get<Asset*>(result.m_Next);
-				TransitionAssetToLoaded(asset, p_InFlightLoads.front().m_LoadCallback);
+				TransitionAssetToLoaded(asset, p_InFlightLoads[i].m_LoadCallback);
 				// decrement in case we had a callback to process
 				remainingTasks--;
 			}
@@ -228,19 +255,21 @@ void AssetManager::HandleAsyncTasks(u16& remainingTasks)
 				auto* transient = std::get<AssetTransient*>(result.m_Next);
 
 				p_InFlightTransients.push_back({.m_Transient    = Unique<AssetTransient>(transient),
-				                                .m_LoadCallback = p_InFlightLoads.front().m_LoadCallback});
+				                                .m_LoadCallback = p_InFlightLoads[i].m_LoadCallback});
 			}
 			// error
 			else
 			{
 				const auto error = std::get<AssetErrorMessage>(result.m_Next);
 				AXM_LOG_ERROR("AssetManager : Failed to load asset : {} : {}",
-				              p_InFlightLoads.front().m_Path.string(),
+				              p_InFlightLoads[i].m_Path.string(),
 				              error.m_Message);
 			}
 
-			p_InFlightLoads.erase(p_InFlightLoads.begin());
+			p_InFlightLoads.erase(p_InFlightLoads.begin() + i);
 			remainingTasks--;
+
+			remainingTasks = aml::min((u16) 0u, remainingTasks);
 		}
 	}
 }
@@ -254,7 +283,6 @@ void AssetManager::HandleTransients(u16& remainingTasks)
 		// Process one step of the first of the in flight transients
 		const auto type      = p_InFlightTransients.front().m_Transient->m_AssetType;
 		auto*      transient = p_InFlightTransients.front().m_Transient.get();
-		p_AssetFactories[type]->ProcessAssetTransient(transient);
 
 		// if transient stage is finished, move to loaded state and delete transient
 		if (transient->m_CurrentStep == transient->m_NumSteps)
@@ -265,7 +293,12 @@ void AssetManager::HandleTransients(u16& remainingTasks)
 			// do an extra step in case we have a callback
 			remainingTasks--;
 		}
+		else
+		{
+			p_AssetFactories[type]->ProcessAssetTransient(transient);
+		}
 		remainingTasks--;
+		remainingTasks = aml::min((u16) 0u, remainingTasks);
 	}
 }
 
@@ -283,6 +316,7 @@ void AssetManager::HandleUnloads(u16& remainingTasks)
 		p_LoadedAssets.erase(handle);
 		p_QueuedUnloads.erase(p_QueuedUnloads.begin());
 		remainingTasks--;
+		remainingTasks = aml::min((u16) 0u, remainingTasks);
 	}
 }
 

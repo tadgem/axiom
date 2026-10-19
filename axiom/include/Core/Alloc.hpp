@@ -27,7 +27,9 @@
 	}
 
 #define AXM_NEW(Type, ...) new (mi_malloc(sizeof(Type))) Type(__VA_ARGS__)
-#define AXM_DELETE(Obj) mi_free(Obj)
+#define AXM_DELETE(Type, Obj)                                                                                          \
+	Obj->~Type();                                                                                                      \
+	mi_free(Obj)
 
 namespace axm
 {

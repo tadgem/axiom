@@ -1,5 +1,6 @@
 #include "Assets/Model.hpp"
 
+#include "Assets/VfsppIO.hpp"
 #include "Core/Profile.hpp"
 #include "assimp/cimport.h"
 #include "assimp/mesh.h"
@@ -78,26 +79,25 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
 	                                     aiProcess_FixInfacingNormals | aiProcess_FindInvalidData |
 	                                     aiProcess_GenBoundingBoxes | aiProcess_FlipWindingOrder;
 
-	AssetLoadResult result = {};
-	vfspp::IFilePtr file   = m_FileSystem.OpenFile(path.generic_string(), vfspp::IFile::FileMode::Read);
+	AssetLoadResult result     = {};
 
-	DynArray<u8>    data(file->Size());
-	file->Read(data);
+	auto*           modelAsset = AXM_NEW(ModelAsset, String(path.string()), {});
+	auto*           transient  = AXM_NEW(ModelAssetTransient, modelAsset);
 
-	auto* modelAsset = AXM_NEW(ModelAsset, String(path.string()), {});
-	auto* transient  = AXM_NEW(ModelAssetTransient, modelAsset);
-
+	transient->m_TransientData.m_Importer.SetIOHandler(new VfsppIOSystem(m_FileSystem));
 	transient->m_TransientData.m_Scene =
-	        transient->m_TransientData.m_Importer.ReadFileFromMemory(data.data(), data.size(), IMPORT_FLAGS);
+	        transient->m_TransientData.m_Importer.ReadFile(path.generic_string(), IMPORT_FLAGS);
 
 	if (!transient->m_TransientData.m_Scene)
 	{
 		result.m_Next =
 		        AssetErrorMessage{.m_Message = "ModelAssetFactory : failed to open file at " + String(path.string())};
+		AXM_DELETE(transient);
+		AXM_DELETE(modelAsset);
 		return result;
 	}
 
-	const auto dir         = String(path.parent_path().string()) + "/";
+	const auto dir         = String(path.parent_path().generic_string()) + "/";
 	auto       nextAssets  = ProcessSceneMaterials(dir, transient->m_TransientData.m_Scene, modelAsset);
 
 	transient->m_NumSteps  = transient->m_TransientData.m_Scene->mNumMeshes;

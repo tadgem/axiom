@@ -30,6 +30,9 @@ target_include_directories(axiom PUBLIC
     ${SUBMODULE_DIRS}/vfspp/include
 )
 
+# Enable multithreading support for vfspp
+target_compile_definitions(axiom PUBLIC VFSPP_MT_SUPPORT_ENABLED)
+
 if (MSVC)
     target_compile_options(axiom PRIVATE /bigobj)
 endif()

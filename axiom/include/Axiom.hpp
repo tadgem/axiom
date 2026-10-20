@@ -21,7 +21,6 @@
 #include "Render/Transform.hpp"
 #include "Render/Vertex.hpp"
 #include "Render/Viewport.hpp"
-#include "Script/Lua.hpp"
 
 // Third party includes
 // TODO: (Do we want these in the public header?)

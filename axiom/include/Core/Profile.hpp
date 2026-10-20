@@ -30,12 +30,7 @@ namespace profiler
 		f64 m_MaxDuration;
 	};
 
-	// TODO:  This needs to be reworked when we start doing work across threads.
-	// ... but until we do that, we dont have the necessary info to do this correctly
-	// (need thread ID to identify which bin to place in, plus a way to find entries if stored as array)
-	static HashMap<const char*, ProfilerItem> g_ProfilerItems;
-
-	void                                      ProfilerImGuiWindow(const AxiomEngine& e);
+	void ProfilerImGuiWindow(const AxiomEngine& e);
 }  // namespace profiler
 }  // namespace axm
 #ifdef __FUNCTION__

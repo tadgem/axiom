@@ -182,9 +182,17 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e)
 		const auto axis  = CAST(e.gaxis.axis, GamepadAxis);
 		const auto index = GetGamepadIndex(e.gaxis.which);
 
-		AXM_ASSERT(e.gaxis.axis <= 6, "Cannot map gyro axis.");
+		AXM_ASSERT(e.gaxis.axis < 6, "Cannot map gyro axis.");
 
 		p_GamepadsState[index].m_AxisState.m_AxisValues[e.gaxis.axis] = CAST(e.gaxis.value, float);
+	}
+
+	if (e.type == SDL_EVENT_GAMEPAD_REMOVED)
+	{
+		const auto index = GetGamepadIndex(e.gdevice.which);
+		AXM_ASSERT(index < 4, "Out of bounds gamepad index");
+
+		p_GamepadsState[index] = {};
 	}
 }
 u8 axm::Input::GetGamepadIndex(const SDL_JoystickID& id)

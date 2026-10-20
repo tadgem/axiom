@@ -21,6 +21,7 @@ add_subdirectory(third_party/mimalloc)
 # own examples are not built as part of axiom.
 set(VKU_ENABLE_SLANG OFF CACHE BOOL "" FORCE)
 set(VKU_RT_SHADER_COMPILATION ON CACHE BOOL "" FORCE)
+set(VKU_RT_SHADER_COMPILATION ON CACHE BOOL "" FORCE)
 set(VKU_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(submodules/vku)
 
@@ -68,14 +69,3 @@ if(AXIOM_BUILD_EXAMPLES)
     add_axiom_example(axiom-example-deferred examples/deferred/main.cpp)
     add_axiom_example(axiom-example-forward examples/forward/main.cpp)
 endif()
-
-ADD_AXIOM_EXAMPLE(axiom-lab lab/main.cpp)
-
-file(GLOB AXIOM_LAB_SCRIPTS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lab/*.lua)
-add_custom_command(
-        TARGET axiom-lab POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${AXIOM_LAB_SCRIPTS}
-        ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Copying lab lua scripts to target output directory"
-)

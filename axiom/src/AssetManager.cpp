@@ -14,8 +14,7 @@ AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
                                     const OnLoadedFn&       onLoaded)
 {
 	PROFILE_SCOPE()
-	std::string p = path.generic_string();
-	if (!m_FileSystem.IsFileExists(p))
+	if (!m_FileSystem.IsFileExists(path.generic_string()))
 	{
 		return {};
 	}
@@ -27,13 +26,14 @@ AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
 	}
 
 	AssetHandle   handle(path, assetType);
-	AssetLoadInfo loadInfo{.m_Path = String(path.string()), .m_AssetType = assetType, .m_OnLoadedCallback = onLoaded};
+	AssetLoadInfo loadInfo{
+	        .m_Path = String(path.generic_string()), .m_AssetType = assetType, .m_OnLoadedCallback = onLoaded};
 
-	for (auto& queued_load : p_QueuedLoads)
+	for (auto& queuedLoad : p_QueuedLoads)
 	{
-		if (loadInfo == queued_load)
+		if (loadInfo == queuedLoad)
 		{
-			return queued_load.ToHandle();
+			return queuedLoad.ToHandle();
 		}
 	}
 
@@ -52,6 +52,14 @@ AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
 		if (handle == inFlightHandle)
 		{
 			return inFlightHandle;
+		}
+	}
+
+	for (auto& transient : p_InFlightTransients)
+	{
+		if (handle == transient.m_Transient->m_AssetDataPtr->m_Handle)
+		{
+			return handle;
 		}
 	}
 
@@ -199,6 +207,12 @@ void AssetManager::Shutdown()
 	UnloadAllAssets();
 }
 
+static void OnTaskPerformed(u16& remainingTasks, u16 count = 1)
+{
+	// return remainingTasks - 1 if remainingTasks > count, otherwise 0.
+	remainingTasks = (remainingTasks > count) ? (remainingTasks - count) : 0;
+}
+
 void AssetManager::HandlePendingLoads(u16& remainingTasks)
 {
 	PROFILE_SCOPE()
@@ -207,12 +221,8 @@ void AssetManager::HandlePendingLoads(u16& remainingTasks)
 
 	for (auto i = 0; i < bound; i++)
 	{
-		// get first load info
 		auto&       loadInfo = p_QueuedLoads.front();
-		// get the asset type factory
 		auto const* factory  = p_AssetFactories[loadInfo.m_AssetType].get();
-		// dispatch initial async load task
-		// p_PendingLoadTasks.emplace(handle, std::move(std::async(std::launch::async, fn, info.m_Path)));
 		auto        fn       = [factory](const Filesystem::path& path) { return factory->LoadAsset(path); };
 
 		p_InFlightLoads.push_back({.m_Path         = loadInfo.m_Path,
@@ -221,7 +231,7 @@ void AssetManager::HandlePendingLoads(u16& remainingTasks)
 		                           .m_LoadCallback = p_QueuedLoads.front().m_OnLoadedCallback});
 		// erase queued load
 		p_QueuedLoads.erase(p_QueuedLoads.begin());
-		remainingTasks--;
+		OnTaskPerformed(remainingTasks);
 	}
 }
 
@@ -246,8 +256,7 @@ void AssetManager::HandleAsyncTasks(u16& remainingTasks)
 			{
 				auto* asset = std::get<Asset*>(result.m_Next);
 				TransitionAssetToLoaded(asset, p_InFlightLoads[i].m_LoadCallback);
-				// decrement in case we had a callback to process
-				remainingTasks--;
+				OnTaskPerformed(remainingTasks);
 			}
 			// if transient, add to list for processing
 			else if (std::holds_alternative<AssetTransient*>(result.m_Next))
@@ -267,9 +276,7 @@ void AssetManager::HandleAsyncTasks(u16& remainingTasks)
 			}
 
 			p_InFlightLoads.erase(p_InFlightLoads.begin() + i);
-			remainingTasks--;
-
-			remainingTasks = aml::min((u16) 0u, remainingTasks);
+			OnTaskPerformed(remainingTasks);
 		}
 	}
 }
@@ -290,15 +297,13 @@ void AssetManager::HandleTransients(u16& remainingTasks)
 			p_AssetFactories[type]->OnTransientComplete(transient);
 			TransitionAssetToLoaded(transient->m_AssetDataPtr, p_InFlightTransients.front().m_LoadCallback);
 			p_InFlightTransients.erase(p_InFlightTransients.begin());
-			// do an extra step in case we have a callback
-			remainingTasks--;
+			OnTaskPerformed(remainingTasks);
 		}
 		else
 		{
 			p_AssetFactories[type]->ProcessAssetTransient(transient);
 		}
-		remainingTasks--;
-		remainingTasks = aml::min((u16) 0u, remainingTasks);
+		OnTaskPerformed(remainingTasks);
 	}
 }
 
@@ -315,8 +320,7 @@ void AssetManager::HandleUnloads(u16& remainingTasks)
 
 		p_LoadedAssets.erase(handle);
 		p_QueuedUnloads.erase(p_QueuedUnloads.begin());
-		remainingTasks--;
-		remainingTasks = aml::min((u16) 0u, remainingTasks);
+		OnTaskPerformed(remainingTasks);
 	}
 }
 
@@ -327,6 +331,13 @@ void AssetManager::TransitionAssetToLoaded(Asset* asset, OnLoadedFn loadCallback
 	if (asset == nullptr)
 	{
 		AXM_LOG_ERROR("TransitionAssetToLoaded : Asset is nullptr!");
+		return;
+	}
+
+	if (p_LoadedAssets.find(asset->m_Handle) != p_LoadedAssets.end())
+	{
+		// unload, wtf happened
+		p_AssetFactories[asset->m_Handle.m_AssetType]->UnloadAsset(asset);
 		return;
 	}
 

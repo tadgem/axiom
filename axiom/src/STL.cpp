@@ -15,7 +15,7 @@ str_hash          HashString(const String& input)
 str_hash HashPath(const Filesystem::path& path)
 {
 	PROFILE_SCOPE()
-	auto pathStr = String(path.string());
+	auto pathStr = String(path.generic_string());
 	return g_StringHasher(pathStr);
 }
 }  // namespace axm

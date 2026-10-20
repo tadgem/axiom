@@ -11,6 +11,13 @@ axm::Texture axm::Texture::BAD()
 	return {.m_Texture = {}, .m_Valid = false};
 }
 
+void axm::Texture::Free(vku::VkState& vk)
+{
+	m_Texture.m_Sampler = VK_NULL_HANDLE;
+	m_Texture.Free(vk);
+	m_Valid = false;
+}
+
 axm::Texture axm::textures::CreateTexture2D(GPU&        gpu,
                                             const void* data,
                                             VkFormat    format,
@@ -75,7 +82,7 @@ void axm::CPUTextureData::Release() const
 axm::CPUTextureData axm::textures::LoadCPUTextureDataFromMemory(void* data, size_t length)
 {
 	int texWidth = 0, texHeight = 0, texChannels = 0;
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load_thread(true);
 	auto* pixels = stbi_load_from_memory(
 	        CAST(data, stbi_uc const*), CAST(length, int), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
@@ -89,7 +96,7 @@ axm::CPUTextureData axm::textures::LoadCPUTextureDataFromFile(const Filesystem::
 {
 	auto newPath  = path.generic_string();
 	int  texWidth = 0, texHeight = 0, texChannels = 0;
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load_thread(true);
 	auto* pixels = stbi_load(
 	        reinterpret_cast<const char*>(newPath.c_str()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 

@@ -139,6 +139,11 @@ void                            axm::ModelAssetFactory::ProcessAssetTransient(As
 	}
 
 	g_VertexDataCommitBuffer.clear();
+	// TODO(LiamD) : This is horrible, we need to account for varios vertex layouts..
+	g_VertexDataCommitBuffer.reserve(CAST(mesh->mNumVertices * 8, size_t));
+	g_IndexDataCommitBuffer.clear();
+	g_IndexDataCommitBuffer.reserve(CAST(mesh->mNumFaces * 3, size_t));
+
 	for (auto i = 0; i < mesh->mNumVertices; i++)
 	{
 		// positions
@@ -162,7 +167,6 @@ void                            axm::ModelAssetFactory::ProcessAssetTransient(As
 		}
 	}
 
-	g_IndexDataCommitBuffer.clear();
 	for (auto i = 0; i < mesh->mNumFaces; i++)
 	{
 		if (mesh->mFaces[i].mNumIndices != 3)
@@ -189,8 +193,13 @@ void axm::ModelAssetFactory::OnTransientComplete(AssetTransient* data) const
 {
 	PROFILE_SCOPE()
 	auto* transient = dynamic_cast<ModelAssetTransient*>(data);
-
 	transient->m_TransientData.m_Importer.FreeScene();
+
+	g_VertexDataCommitBuffer.clear();
+	g_VertexDataCommitBuffer.shrink_to_fit();
+
+	g_IndexDataCommitBuffer.clear();
+	g_IndexDataCommitBuffer.shrink_to_fit();
 }
 
 static axm::Pair<axm::Model::MaterialEntry::Map, axm::String> GetMaterialTexture(const axm::String&   directory,

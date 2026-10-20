@@ -15,7 +15,6 @@
 
 namespace axm
 {
-static Mutex        g_VFSPPMutex;
 /// <summary>
 /// Assimp IOStream implementation backed by a vfspp file handle.
 /// vfspp owns the underlying file; this class keeps it open until Assimp closes
@@ -140,7 +139,6 @@ public:
 
 	Assimp::IOStream* Open(const char* pFile, const char* pMode) override
 	{
-		ScopedLock<Mutex> lock(g_VFSPPMutex);
 		const std::string path = ToVirtualPath(pFile);
 		if (path.empty())
 		{

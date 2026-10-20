@@ -23,29 +23,31 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 {
 	PROFILE_SCOPE()
 
-	AxiomEngine  engine = {};
+	AxiomEngine  engine     = {};
 
-	vku::VkState vk     = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
+	vku::VkState vk         = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
 
-	engine.m_GPU        = MakeUnique<GPU>(vk);
+	engine.m_GPU            = MakeUnique<GPU>(vk);
+
+	const uint32_t MAX_MIPS = 16;
 
 	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
-	                                  1,
+	                                  MAX_MIPS,
 	                                  VK_FILTER_LINEAR,
 	                                  VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 	                                  engine.m_GPU->m_Samplers.m_LinearClampSampler);
 	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
-	                                  1,
+	                                  MAX_MIPS,
 	                                  VK_FILTER_LINEAR,
 	                                  VK_SAMPLER_ADDRESS_MODE_REPEAT,
 	                                  engine.m_GPU->m_Samplers.m_LinearWrapSampler);
 	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
-	                                  1,
+	                                  MAX_MIPS,
 	                                  VK_FILTER_NEAREST,
 	                                  VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 	                                  engine.m_GPU->m_Samplers.m_NearestClampSampler);
 	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
-	                                  1,
+	                                  MAX_MIPS,
 	                                  VK_FILTER_NEAREST,
 	                                  VK_SAMPLER_ADDRESS_MODE_REPEAT,
 	                                  engine.m_GPU->m_Samplers.m_NearestWrapSampler);

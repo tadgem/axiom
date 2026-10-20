@@ -71,7 +71,7 @@ struct CompareItemsFromMap
 					delta = a.m_MinDuration - b.m_MinDuration;
 					break;
 				case 4:  // Max Duration
-					delta = b.m_MaxDuration > a.m_MaxDuration ? 1.0f : -1.0f;
+					delta = b.m_MaxDuration > a.m_MaxDuration;
 					break;
 			}
 			if (delta != 0)

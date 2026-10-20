@@ -35,12 +35,7 @@ int main()
 	AxiomEngine init      = AxiomEngine::Init();
 	AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
-	vku::VkState& vk  = init.m_GPU->m_VK;
-
-	sol::state    lua = lua::CreateLuaState(init);
-
-	// call lua code directly
-	lua.script("print('hello world')");
+	vku::VkState& vk                 = init.m_GPU->m_VK;
 
 	g_Transform.m_Scale              = aml::Vec3(0.2f, 0.2f, 0.2f);
 	g_MVP                            = GetMVP(g_Transform, g_Cam);

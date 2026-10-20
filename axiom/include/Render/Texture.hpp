@@ -31,9 +31,7 @@ struct Texture
 	NO_DISCARD VkImageView View() const { return m_Texture.m_ImageView; }
 	NO_DISCARD VkSampler   Sampler() const { return m_Texture.m_Sampler; }
 	NO_DISCARD VkFormat    Format() const { return m_Texture.m_Format; }
-
-	void                   Free(vku::VkState& vk) { m_Texture.Free(vk); }
-
+	void                   Free(vku::VkState& vk);
 	static Texture         BAD();
 };
 

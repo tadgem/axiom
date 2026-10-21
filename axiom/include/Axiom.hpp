@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Assets/Model.hpp"
+#include "Assets/TextureAsset.hpp"
 #include "Core/Alloc.hpp"
 #include "Core/Debug.hpp"
 #include "Core/Decorators.hpp"
@@ -8,6 +10,7 @@
 #include "Core/JSON.hpp"
 #include "Core/Maths.hpp"
 #include "Core/Prim.hpp"
+#include "Core/Profile.hpp"
 #include "Core/STL.hpp"
 #include "Core/Timer.hpp"
 #include "Core/Utils.hpp"
@@ -21,6 +24,9 @@
 #include "Render/Transform.hpp"
 #include "Render/Vertex.hpp"
 #include "Render/Viewport.hpp"
+
+// VKU
+#include "ImGui/vku_extensions.h"
 
 // Third party includes
 // TODO: (Do we want these in the public header?)

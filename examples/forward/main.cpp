@@ -1,7 +1,4 @@
-#include "Assets/Model.hpp"
-#include "Assets/TextureAsset.hpp"
-#include "Core/Profile.hpp"
-#include "Render/ImGuiUtils.hpp"
+
 #include "axiom.hpp"
 
 AXM_OVERRIDE_GLOBAL_NEW(false)

@@ -16,14 +16,38 @@ vku::VkPipelineData axm::pipeline::CreateRasterPipeline(vku::VkState&           
 		return {};
 	}
 
-	// Models are imported with aiProcess_FlipWindingOrder and rendered with a
-	// Y-flipped (Vulkan) projection, which together leave front faces wound
-	// clockwise in screen space. Match the pipeline's front face to the vertex
-	// data convention so back-face culling keeps the visible geometry.
 	raster.m_FrontFace = VK_FRONT_FACE_CLOCKWISE;
 
 	return vku::pipelines::CreateRasterPipeline(
 	        vk, shader.m_Program, vertDesc, raster, renderPass, extent, colourCount);
+}
+
+vku::VkPipelineData axm::pipeline::CreateRasterDynamicPipeline(vku::VkState&                 vk,
+                                                               Shader&                       shader,
+                                                               vku::VertexDescription&       vertDesc,
+                                                               vku::RasterizationState&      raster,
+                                                               VkExtent2D                    extent,
+                                                               DynArray<VkFormat>            formats,
+                                                               vku::PipelineAttachmentState* attachmentState)
+{
+	if (!shader.Valid())
+	{
+		AXM_LOG_ERROR("Cannot create raster pipeline from an invalid shader");
+		return {};
+	}
+
+	raster.m_FrontFace = VK_FRONT_FACE_CLOCKWISE;
+
+	if (attachmentState)
+	{
+		return vku::pipelines::CreateDynamicRasterPipeline(
+		        vk, shader.m_Program, vertDesc, raster, extent, formats.data(), formats.size(), *attachmentState);
+	}
+	else
+	{
+		return vku::pipelines::CreateDynamicRasterPipeline(
+		        vk, shader.m_Program, vertDesc, raster, extent, formats.data(), formats.size());
+	}
 }
 
 vku::VkPipelineData axm::pipeline::CreateComputePipeline(vku::VkState& vk, Shader& shader)

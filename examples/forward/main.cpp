@@ -35,7 +35,7 @@ int main()
 	AxiomEngine init      = AxiomEngine::Init();
 	AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
-	vku::VkState& vk                 = init.m_GPU->m_VK;
+	vku::VkState& vk                 = init.m_Renderer.m_GPU->m_VK;
 
 	g_Transform.m_Scale              = aml::Vec3(0.2f, 0.2f, 0.2f);
 	g_MVP                            = GetMVP(g_Transform, g_Cam);
@@ -124,7 +124,7 @@ int main()
 					        meshes::DrawMesh(viewport, drawable.m_Mesh, cmd);
 				        }
 
-				        auto      nvg     = init.m_GPU->m_VK.m_NanoVG;
+				        auto      nvg     = init.m_Renderer.m_GPU->m_VK.m_NanoVG;
 				        const f32 width   = CAST(init.m_Window.m_Width, f32);
 				        const f32 height  = CAST(init.m_Window.m_Height, f32);
 
@@ -155,9 +155,9 @@ int main()
 	}
 	for (auto& drawable : drawables)
 	{
-		drawable.m_Material.Free(init.m_GPU->m_VK);
+		drawable.m_Material.Free(init.m_Renderer.m_GPU->m_VK);
 	}
 	drawables.clear();
-	pipeline.Free(init.m_GPU->m_VK);
-	cube.Free(init.m_GPU->m_VK);
+	pipeline.Free(init.m_Renderer.m_GPU->m_VK);
+	cube.Free(init.m_Renderer.m_GPU->m_VK);
 }

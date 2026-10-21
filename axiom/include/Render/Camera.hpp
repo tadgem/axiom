@@ -39,7 +39,7 @@ public:
 	const Window& m_Window;
 
 	f32           m_MovementSpeed = 0.1f;
-	f32           m_RotationSpeed = 30.0f;
+	f32           m_RotationSpeed = 110.0f;
 
 	FlyCamController(const Input& input, const Window& window);
 	void Update(Camera& cam, f32 deltaTime = 0.0166667f);

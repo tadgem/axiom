@@ -23,36 +23,32 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 {
 	PROFILE_SCOPE()
 
-	AxiomEngine  engine     = {};
-
-	vku::VkState vk         = vku::init::Create<vku::VkSDL>("AXIOM", 1280, 720, false, true);
-
-	engine.m_GPU            = MakeUnique<GPU>(vk);
+	AxiomEngine    engine   = {};
 
 	const uint32_t MAX_MIPS = 16;
 
-	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
+	vku::textures::CreateImageSampler(engine.m_Renderer.m_GPU->m_VK,
 	                                  MAX_MIPS,
 	                                  VK_FILTER_LINEAR,
 	                                  VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-	                                  engine.m_GPU->m_Samplers.m_LinearClampSampler);
-	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
+	                                  engine.m_Renderer.m_GPU->m_Samplers.m_LinearClampSampler);
+	vku::textures::CreateImageSampler(engine.m_Renderer.m_GPU->m_VK,
 	                                  MAX_MIPS,
 	                                  VK_FILTER_LINEAR,
 	                                  VK_SAMPLER_ADDRESS_MODE_REPEAT,
-	                                  engine.m_GPU->m_Samplers.m_LinearWrapSampler);
-	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
+	                                  engine.m_Renderer.m_GPU->m_Samplers.m_LinearWrapSampler);
+	vku::textures::CreateImageSampler(engine.m_Renderer.m_GPU->m_VK,
 	                                  MAX_MIPS,
 	                                  VK_FILTER_NEAREST,
 	                                  VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-	                                  engine.m_GPU->m_Samplers.m_NearestClampSampler);
-	vku::textures::CreateImageSampler(engine.m_GPU->m_VK,
+	                                  engine.m_Renderer.m_GPU->m_Samplers.m_NearestClampSampler);
+	vku::textures::CreateImageSampler(engine.m_Renderer.m_GPU->m_VK,
 	                                  MAX_MIPS,
 	                                  VK_FILTER_NEAREST,
 	                                  VK_SAMPLER_ADDRESS_MODE_REPEAT,
-	                                  engine.m_GPU->m_Samplers.m_NearestWrapSampler);
+	                                  engine.m_Renderer.m_GPU->m_Samplers.m_NearestWrapSampler);
 
-	auto* windowHandle = static_cast<vku::VulkanAPIWindowHandle_SDL*>(engine.m_GPU->m_VK.m_WindowHandle);
+	auto* windowHandle = static_cast<vku::VulkanAPIWindowHandle_SDL*>(engine.m_Renderer.m_GPU->m_VK.m_WindowHandle);
 	if (!windowHandle || !windowHandle->m_SdlWindow)
 	{
 		AXM_LOG_ERROR("Failed to obtain SDL window handle from vku backend");
@@ -72,7 +68,7 @@ axm::AxiomEngine axm::AxiomEngine::Init()
 	ImGui_ImplVulkan_CreateFontsTexture();
 
 	engine.m_OK      = true;
-	engine.m_Running = engine.m_GPU->m_VK.m_ShouldRun;
+	engine.m_Running = engine.m_Renderer.m_GPU->m_VK.m_ShouldRun;
 
 	if (!engine.m_FileSystem->CreateFileSystem<vfspp::NativeFileSystem>("/", "resources"))
 	{
@@ -96,7 +92,7 @@ axm::AxiomEngine axm::AxiomEngine::BAD()
 
 axm::AxiomEngine::~AxiomEngine()
 {
-	if (m_GPU)
+	if (m_Renderer.m_GPU)
 	{
 		Quit();
 	}
@@ -108,11 +104,11 @@ void axm::AxiomEngine::Quit()
 
 	m_AssetManager.UnloadAllAssets();
 
-	if (m_GPU)
+	if (m_Renderer.m_GPU)
 	{
-		m_GPU->m_Samplers.Free(m_GPU->m_VK);
-		vku::init::Quit(m_GPU->m_VK);
-		m_GPU.reset();
+		m_Renderer.m_GPU->m_Samplers.Free(m_Renderer.m_GPU->m_VK);
+		vku::init::Quit(m_Renderer.m_GPU->m_VK);
+		m_Renderer.m_GPU.reset();
 	}
 }
 
@@ -124,12 +120,12 @@ bool axm::AxiomEngine::PreFrame()
 	m_FrameTimer.Reset();
 	m_Input.ClearInputs();
 
-	auto* sdlBackend      = static_cast<vku::VkSDL*>(m_GPU->m_VK.m_Backend.get());
+	auto* sdlBackend      = static_cast<vku::VkSDL*>(m_Renderer.m_GPU->m_VK.m_Backend.get());
 	sdlBackend->m_OnEvent = [this](SDL_Event& event) { m_Input.HandleFrameInputEvent(event); };
 
 	// Polls events (feeding the input hook above), rebuilds the ImGui frame and
 	// waits for/acquires the next swapchain image.
-	m_GPU->m_VK.m_Backend->PreFrame(m_GPU->m_VK);
+	m_Renderer.m_GPU->m_VK.m_Backend->PreFrame(m_Renderer.m_GPU->m_VK);
 
 	sdlBackend->m_OnEvent = nullptr;
 
@@ -143,16 +139,16 @@ bool axm::AxiomEngine::PreFrame()
 		m_Window.m_Height = CAST(h, u32);
 	}
 
-	m_Running = m_GPU->m_VK.m_ShouldRun;
+	m_Running = m_Renderer.m_GPU->m_VK.m_ShouldRun;
 
-	return m_GPU->m_VK.m_FrameValid;
+	return m_Renderer.m_GPU->m_VK.m_FrameValid;
 }
 
 void axm::AxiomEngine::PostFrame()
 {
 	PROFILE_SCOPE()
 
-	m_GPU->m_VK.m_Backend->PostFrame(m_GPU->m_VK);
+	m_Renderer.m_GPU->m_VK.m_Backend->PostFrame(m_Renderer.m_GPU->m_VK);
 
 	m_DeltaTime = m_FrameTimer.ElapsedMillisecondsF();
 

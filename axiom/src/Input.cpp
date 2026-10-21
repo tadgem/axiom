@@ -91,6 +91,7 @@ void axm::Input::ClearInputs()
 	p_JustPressedMouseButtons.clear();
 
 	p_MouseState.m_LastPos = p_MouseState.m_Pos;
+	p_MouseState.m_Rel     = {0.0f, 0.0f};
 }
 
 void axm::Input::HandleFrameInputEvent(SDL_Event& e)
@@ -174,7 +175,8 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e)
 	if (e.type == SDL_EVENT_MOUSE_MOTION)
 	{
 		p_MouseState.m_Pos = aml::Float2(e.motion.x, e.motion.y);
-		p_MouseState.m_Rel = aml::Float2(e.motion.xrel, e.motion.yrel);
+		p_MouseState.m_Rel.x += e.motion.xrel;
+		p_MouseState.m_Rel.y += e.motion.yrel;
 	}
 
 	if (e.type == SDL_EVENT_GAMEPAD_AXIS_MOTION)
@@ -182,17 +184,24 @@ void axm::Input::HandleFrameInputEvent(SDL_Event& e)
 		const auto axis  = CAST(e.gaxis.axis, GamepadAxis);
 		const auto index = GetGamepadIndex(e.gaxis.which);
 
-		AXM_ASSERT(e.gaxis.axis < 6, "Cannot map gyro axis.");
+		if (e.gaxis.axis >= 6)
+		{
+			return;
+		}
 
 		p_GamepadsState[index].m_AxisState.m_AxisValues[e.gaxis.axis] = CAST(e.gaxis.value, float);
 	}
 
 	if (e.type == SDL_EVENT_GAMEPAD_REMOVED)
 	{
-		const auto index = GetGamepadIndex(e.gdevice.which);
-		AXM_ASSERT(index < 4, "Out of bounds gamepad index");
-
-		p_GamepadsState[index] = {};
+		for (u8 i = 0; i < kNumGamepads; i++)
+		{
+			if (p_GamepadsState[i].m_ID == e.gdevice.which)
+			{
+				p_GamepadsState[i] = {};
+				break;
+			}
+		}
 	}
 }
 u8 axm::Input::GetGamepadIndex(const SDL_JoystickID& id)

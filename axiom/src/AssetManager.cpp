@@ -6,7 +6,7 @@ namespace axm
 {
 AssetHandle AssetLoadInfo::ToHandle() const
 {
-	return {String(m_Path.string()), m_AssetType};
+	return {String(m_Path.generic_string()), m_AssetType};
 }
 
 AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
@@ -16,6 +16,7 @@ AssetHandle AssetManager::LoadAsset(const Filesystem::path& path,
 	PROFILE_SCOPE()
 	if (!m_FileSystem.IsFileExists(path.generic_string()))
 	{
+		AXM_LOG_ERROR("AssetManager : No file exists at path {}", path.generic_string());
 		return {};
 	}
 
@@ -115,6 +116,14 @@ AssetState AssetManager::GetAssetLoadProgress(const AssetHandle& handle)
 	{
 		AssetHandle h(inFlight.m_Path, inFlight.m_AssetType);
 		if (h == handle)
+		{
+			return AssetState::Loading;
+		}
+	}
+
+	for (auto& transient : p_InFlightTransients)
+	{
+		if (handle == transient.m_Transient->m_AssetDataPtr->m_Handle)
 		{
 			return AssetState::Loading;
 		}
@@ -240,7 +249,7 @@ void AssetManager::HandleAsyncTasks(u16& remainingTasks)
 	PROFILE_SCOPE()
 	auto bound = std::min(CAST(remainingTasks, size_t), p_InFlightLoads.size());
 
-	for (auto i = 0; i < bound; i++)
+	for (size_t i = 0; i < p_InFlightLoads.size() && remainingTasks > 0; i++)
 	{
 		if (IsFutureReady(p_InFlightLoads[i].m_Task))
 		{
@@ -338,6 +347,7 @@ void AssetManager::TransitionAssetToLoaded(Asset* asset, OnLoadedFn loadCallback
 	{
 		// unload, wtf happened
 		p_AssetFactories[asset->m_Handle.m_AssetType]->UnloadAsset(asset);
+		Unique<Asset> discard(asset);
 		return;
 	}
 

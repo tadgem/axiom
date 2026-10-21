@@ -20,7 +20,7 @@ axm::profiler::ScopedTimer::~ScopedTimer()
 		g_ProfilerItems[m_Label] = ProfilerItem{};
 	}
 
-	g_ProfilerItems[m_Label].m_ThisFrameDuration = duration;
+	g_ProfilerItems[m_Label].m_ThisFrameDuration += duration;
 	g_ProfilerItems[m_Label].m_MeanDuration += duration;
 	g_ProfilerItems[m_Label].m_MeanDuration /= 2;
 
@@ -71,7 +71,7 @@ struct CompareItemsFromMap
 					delta = a.m_MinDuration - b.m_MinDuration;
 					break;
 				case 4:  // Max Duration
-					delta = b.m_MaxDuration > a.m_MaxDuration;
+					delta = a.m_MaxDuration - b.m_MaxDuration;
 					break;
 			}
 			if (delta != 0)

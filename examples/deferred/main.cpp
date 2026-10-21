@@ -36,7 +36,7 @@ int main()
 	AxiomEngine init      = AxiomEngine::Init();
 	AXM_ASSERT(init.m_OK, "Failed to start AXIOM");
 
-	vku::VkState& vk                = *init.m_VK;
+	vku::VkState& vk                = init.m_Renderer.m_GPU->m_VK;
 
 	g_Transform.m_Scale             = aml::Vec3(0.2f, 0.2f, 0.2f);
 	g_MVP                           = GetMVP(g_Transform, g_Cam);
@@ -94,7 +94,7 @@ int main()
 
 	auto drawables = DynArray<Drawable>{};
 
-	init.m_AssetManager.LoadAsset("resources/models/sponza/Sponza.gltf",
+	init.m_AssetManager.LoadAsset("/models/sponza/Sponza.gltf",
 	                              AssetType::Model,
 	                              [&](Asset* asset)
 	                              {
@@ -169,7 +169,7 @@ int main()
 				        // Present pass with the NanoVG background.
 				        vku::render_passes::BeginSwapchainRenderPass(vk, cmd);
 
-				        auto      nvg     = init.m_VK->m_NanoVG;
+				        auto      nvg     = vk.m_NanoVG;
 				        const f32 width   = CAST(init.m_Window.m_Width, f32);
 				        const f32 height  = CAST(init.m_Window.m_Height, f32);
 				        NVGpaint  bgPaint = nvgRadialGradient(nvg,
@@ -208,6 +208,11 @@ int main()
 
 		init.PostFrame();
 	}
-
-	init.Quit();
+	for (auto& drawable : drawables)
+	{
+		drawable.m_Material.Free(init.m_Renderer.m_GPU->m_VK);
+	}
+	drawables.clear();
+	pipeline.Free(init.m_Renderer.m_GPU->m_VK);
+	gbufferShader.Free(init.m_Renderer.m_GPU->m_VK);
 }

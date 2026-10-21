@@ -6,6 +6,14 @@
 namespace axm::pipeline
 {
 
+vku::VkPipelineData CreateRasterDynamicPipeline(vku::VkState&                 vk,
+                                                Shader&                       shader,
+                                                vku::VertexDescription&       vertDesc,
+                                                vku::RasterizationState&      raster,
+                                                VkExtent2D                    extent,
+                                                DynArray<VkFormat>            attachmentFormats,
+                                                vku::PipelineAttachmentState* attachmentState = nullptr);
+
 vku::VkPipelineData CreateRasterPipeline(vku::VkState&            vk,
                                          Shader&                  shader,
                                          vku::VertexDescription&  vertDesc,

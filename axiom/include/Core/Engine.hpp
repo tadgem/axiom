@@ -5,7 +5,7 @@
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
 #include "ECS/ECS.hpp"
-#include "Render/GPU.hpp"
+#include "Render/Renderer.hpp"
 #include "SDL3/SDL.h"
 #include "vfspp/VFS.h"
 namespace axm
@@ -21,7 +21,7 @@ struct AxiomEngine
 	AssetManager                     m_AssetManager;
 	ECSDispatcher                    m_ECS;
 	Window                           m_Window;
-	Unique<GPU>                      m_GPU;
+	Renderer                         m_Renderer;
 	Input                            m_Input;
 
 	bool                             m_Quit = false;

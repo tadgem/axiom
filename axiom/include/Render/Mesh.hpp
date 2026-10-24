@@ -13,7 +13,7 @@ struct CPUMesh
 	CPUMesh(String name, void* data) : m_Name(std::move(name)), m_CPUMemory(data) {};
 };
 
-struct Mesh
+struct StaticMesh
 {
 	vku::Buffer m_VertexBuffer;
 	vku::Buffer m_IndexBuffer;
@@ -28,16 +28,19 @@ struct Mesh
 	}
 };
 
+struct SkinnedMesh
+{};
+
 namespace meshes
 {
-	Mesh CreateMeshFromData(vku::VkState& vk,
-	                        const void*   vertexData,
-	                        u64           vertexDataSize,
-	                        const u32*    indexData,
-	                        u64           numIndices,
-	                        const char*   label = "AnonMesh");
+	StaticMesh CreateMeshFromData(vku::VkState& vk,
+	                              const void*   vertexData,
+	                              u64           vertexDataSize,
+	                              const u32*    indexData,
+	                              u64           numIndices,
+	                              const char*   label = "AnonMesh");
 
-	void Bind(const Mesh& mesh, VkCommandBuffer cmd);
-	void DrawMesh(const Viewport& viewPort, const Mesh& mesh, VkCommandBuffer cmd);
+	void       Bind(const StaticMesh& mesh, VkCommandBuffer cmd);
+	void       DrawMesh(const Viewport& viewPort, const StaticMesh& mesh, VkCommandBuffer cmd);
 }  // namespace meshes
 }  // namespace axm

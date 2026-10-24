@@ -19,7 +19,7 @@ struct Drawable
 {
 	AssetHandle   m_TextureAsset;
 	Texture*      m_Texture = nullptr;
-	Mesh          m_Mesh;
+	StaticMesh    m_Mesh;
 	vku::Material m_Material;
 };
 }  // namespace

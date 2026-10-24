@@ -7,6 +7,7 @@ vku::VkPipelineData& axm::Renderer::CreateRasterPipeline(Shader&                
                                                          vku::RasterizationState rasterState,
                                                          DynArray<VkFormat>      attachmentFormats)
 {
+	// TODO: Add default extent for dynamic pipelines.
 	p_Pipelines.push_back(vku::pipelines::CreateDynamicRasterPipeline(m_GPU->m_VK,
 	                                                                  shader.m_Program,
 	                                                                  vert,

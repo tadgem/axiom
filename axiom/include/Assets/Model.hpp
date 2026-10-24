@@ -30,8 +30,8 @@ public:
 
 	struct MeshEntry
 	{
-		Mesh m_Mesh;
-		u32  m_MaterialIndex;
+		StaticMesh m_Mesh;
+		u32        m_MaterialIndex;
 	};
 
 	DynArray<MeshEntry>     m_Meshes;

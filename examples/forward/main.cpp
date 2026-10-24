@@ -20,7 +20,7 @@ struct Drawable
 {
 	AssetHandle   m_TextureAsset;
 	Texture*      m_Texture = nullptr;
-	Mesh          m_Mesh;
+	StaticMesh    m_Mesh;
 	vku::Material m_Material;
 };
 }  // namespace
@@ -71,6 +71,7 @@ int main()
 			                              drawables.push_back(std::move(drawable));
 		                              }
 	                              });
+	init.m_AssetManager.LoadAsset("/models/dancing/source/silly_dancing.fbx", AssetType::Model);
 
 	FlyCamController controller(init.m_Input, init.m_Window);
 

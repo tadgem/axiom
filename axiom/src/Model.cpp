@@ -158,7 +158,10 @@ void                            axm::ModelAssetFactory::ProcessAssetTransient(As
 			g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].y);
 			g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].z);
 		}
-
+		if (mesh->HasBones())
+		{
+			auto* b = mesh->mBones[0];
+		}
 		// todo: support additional tex coords
 		if (mesh->HasTextureCoords(0))
 		{

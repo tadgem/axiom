@@ -4,15 +4,15 @@
 
 #include "Core/Debug.hpp"
 
-axm::StaticMesh axm::meshes::CreateMeshFromData(vku::VkState& vk,
-                                                const void*   vertexData,
-                                                u64           vertexDataSize,
-                                                const u32*    indexData,
-                                                u64           numIndices,
-                                                const char*   label)
+axm::GPUMesh axm::meshes::CreateMeshFromData(vku::VkState& vk,
+                                             const void*   vertexData,
+                                             u64           vertexDataSize,
+                                             const u32*    indexData,
+                                             u64           numIndices,
+                                             const char*   label)
 {
 	(void) label;
-	StaticMesh  mesh{};
+	GPUMesh     mesh{};
 
 	vku::Buffer vertexBuffer =
 	        vku::buffers::CreateBuffer(vk,
@@ -40,14 +40,14 @@ axm::StaticMesh axm::meshes::CreateMeshFromData(vku::VkState& vk,
 	return mesh;
 }
 
-void axm::meshes::Bind(const StaticMesh& mesh, VkCommandBuffer cmd)
+void axm::meshes::Bind(const GPUMesh& mesh, VkCommandBuffer cmd)
 {
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(cmd, 0, 1, &mesh.m_VertexBuffer.m_GpuBuffer, offsets);
 	vkCmdBindIndexBuffer(cmd, mesh.m_IndexBuffer.m_GpuBuffer, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void axm::meshes::DrawMesh(const Viewport& viewPort, const StaticMesh& mesh, VkCommandBuffer cmd)
+void axm::meshes::DrawMesh(const Viewport& viewPort, const GPUMesh& mesh, VkCommandBuffer cmd)
 {
 	VkViewport viewport{};
 	viewport.x        = 0.0f;

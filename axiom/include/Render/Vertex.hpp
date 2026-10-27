@@ -3,6 +3,7 @@
 
 #include "Core/Maths.hpp"
 #include "Core/Prim.hpp"
+#include "Render/Mesh.hpp"
 #include "vku/vku.h"
 
 namespace axm::vertex
@@ -45,6 +46,61 @@ struct PosNormalUV
 		uv.format   = VK_FORMAT_R32G32_SFLOAT;
 		uv.offset   = static_cast<uint32_t>(offsetof(PosNormalUV, m_UV));
 		desc.m_AttributeDescriptions.push_back(uv);
+
+		return desc;
+	}
+};
+struct PosNormalUVBone
+{
+	aml::Float3                   m_Pos;
+	aml::Float3                   m_Normal;
+	aml::Float2                   m_UV;
+	GPUMesh::VertexBones          m_Bones;
+
+	static vku::VertexDescription GetVertexDescription(vku::VkState& vk)
+	{
+		vku::VertexDescription          desc(*vk.m_CPUAllocator);
+
+		VkVertexInputBindingDescription binding{};
+		binding.binding   = 0;
+		binding.stride    = sizeof(PosNormalUVBone);
+		binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		desc.m_BindingDescriptions.push_back(binding);
+
+		VkVertexInputAttributeDescription pos{};
+		pos.binding  = 0;
+		pos.location = 0;
+		pos.format   = VK_FORMAT_R32G32B32_SFLOAT;
+		pos.offset   = static_cast<uint32_t>(offsetof(PosNormalUVBone, m_Pos));
+		desc.m_AttributeDescriptions.push_back(pos);
+
+		VkVertexInputAttributeDescription normal{};
+		normal.binding  = 0;
+		normal.location = 1;
+		normal.format   = VK_FORMAT_R32G32B32_SFLOAT;
+		normal.offset   = static_cast<uint32_t>(offsetof(PosNormalUVBone, m_Normal));
+		desc.m_AttributeDescriptions.push_back(normal);
+
+		VkVertexInputAttributeDescription uv{};
+		uv.binding  = 0;
+		uv.location = 2;
+		uv.format   = VK_FORMAT_R32G32_SFLOAT;
+		uv.offset   = static_cast<uint32_t>(offsetof(PosNormalUVBone, m_UV));
+		desc.m_AttributeDescriptions.push_back(uv);
+
+		VkVertexInputAttributeDescription bonesIdx{};
+		uv.binding  = 0;
+		uv.location = 3;
+		uv.format   = VK_FORMAT_R16G16B16A16_UINT;
+		uv.offset   = static_cast<uint32_t>(offsetof(PosNormalUVBone, m_Bones.m_BoneIndex));
+		desc.m_AttributeDescriptions.push_back(bonesIdx);
+
+		VkVertexInputAttributeDescription bonesWeight{};
+		uv.binding  = 0;
+		uv.location = 4;
+		uv.format   = VK_FORMAT_R16G16B16A16_UNORM;
+		uv.offset   = static_cast<uint32_t>(offsetof(PosNormalUVBone, m_Bones.m_BoneWeight));
+		desc.m_AttributeDescriptions.push_back(bonesIdx);
 
 		return desc;
 	}

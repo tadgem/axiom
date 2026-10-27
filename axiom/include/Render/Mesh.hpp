@@ -13,8 +13,15 @@ struct CPUMesh
 	CPUMesh(String name, void* data) : m_Name(std::move(name)), m_CPUMemory(data) {};
 };
 
-struct StaticMesh
+struct GPUMesh
 {
+	static constexpr size_t MAX_BONES_PER_VERTEX = 4;
+	struct VertexBones
+	{
+		u16 m_BoneIndex[MAX_BONES_PER_VERTEX];
+		f16 m_BoneWeight[MAX_BONES_PER_VERTEX];
+	};
+
 	vku::Buffer m_VertexBuffer;
 	vku::Buffer m_IndexBuffer;
 	u64         m_IndexCount = 0;
@@ -28,19 +35,16 @@ struct StaticMesh
 	}
 };
 
-struct SkinnedMesh
-{};
-
 namespace meshes
 {
-	StaticMesh CreateMeshFromData(vku::VkState& vk,
-	                              const void*   vertexData,
-	                              u64           vertexDataSize,
-	                              const u32*    indexData,
-	                              u64           numIndices,
-	                              const char*   label = "AnonMesh");
+	GPUMesh CreateMeshFromData(vku::VkState& vk,
+	                           const void*   vertexData,
+	                           u64           vertexDataSize,
+	                           const u32*    indexData,
+	                           u64           numIndices,
+	                           const char*   label = "AnonMesh");
 
-	void       Bind(const StaticMesh& mesh, VkCommandBuffer cmd);
-	void       DrawMesh(const Viewport& viewPort, const StaticMesh& mesh, VkCommandBuffer cmd);
+	void    Bind(const GPUMesh& mesh, VkCommandBuffer cmd);
+	void    DrawMesh(const Viewport& viewPort, const GPUMesh& mesh, VkCommandBuffer cmd);
 }  // namespace meshes
 }  // namespace axm

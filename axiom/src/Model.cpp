@@ -74,10 +74,10 @@ axm::AssetLoadResult axm::ModelAssetFactory::LoadAsset(const Filesystem::path& p
 {
 	PROFILE_SCOPE()
 
-	static constexpr auto IMPORT_FLAGS = aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes |
-	                                     aiProcess_GenSmoothNormals | aiProcess_OptimizeGraph |
-	                                     aiProcess_FixInfacingNormals | aiProcess_FindInvalidData |
-	                                     aiProcess_GenBoundingBoxes | aiProcess_FlipWindingOrder;
+	static constexpr auto IMPORT_FLAGS =
+	        aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_GenSmoothNormals |
+	        aiProcess_OptimizeGraph | aiProcess_LimitBoneWeights | aiProcess_FixInfacingNormals |
+	        aiProcess_FindInvalidData | aiProcess_GenBoundingBoxes | aiProcess_FlipWindingOrder;
 
 	AssetLoadResult result     = {};
 
@@ -121,52 +121,95 @@ void axm::ModelAssetFactory::UnloadAsset(Asset* asset) const
 		entry.m_Mesh.Free(m_VK);
 	}
 	model->m_Data.m_Meshes.clear();
+
+	for (auto& entry : model->m_Data.m_SkeletalMeshes)
+	{
+		entry.m_Mesh.Free(m_VK);
+	}
+	model->m_Data.m_SkeletalMeshes.clear();
 }
 
-thread_local axm::DynArray<f32> g_VertexDataCommitBuffer;
+thread_local axm::DynArray<u8>  g_VertexDataCommitBuffer;
 thread_local axm::DynArray<u32> g_IndexDataCommitBuffer;
 
-void                            axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const
+void                            PushFloatToVertexBuffer(float f)
 {
-	PROFILE_SCOPE()
-	auto*       transient = dynamic_cast<ModelAssetTransient*>(data);
-	ModelAsset* model     = transient->GetConcreteAsset();
-	auto*       mesh      = transient->m_TransientData.m_Scene->mMeshes[transient->m_CurrentStep++];
+	u8* begin = (g_VertexDataCommitBuffer.begin() + g_VertexDataCommitBuffer.size())._Ptr;
 
-	if (!mesh->HasNormals())
+	g_VertexDataCommitBuffer.insert(g_VertexDataCommitBuffer.end(), {0, 0, 0, 0});
+
+	memcpy(begin, &f, sizeof(float));
+}
+
+void PushBonesToVertexBuffer(axm::GPUMesh::VertexBones b)
+{
+	u8* begin = (g_VertexDataCommitBuffer.begin() + g_VertexDataCommitBuffer.size())._Ptr;
+
+	for (auto i = 0; i < sizeof(b); i++)
 	{
-		AXM_LOG_ERROR("Mesh {} does not have any normals", model->m_Path.generic_string());
+		g_VertexDataCommitBuffer.push_back(0);
 	}
 
+	memcpy(begin, &b, sizeof(float));
+}
+
+void ProcessSkeletalMesh(vku::VkState& vk, aiMesh* mesh, axm::ModelAsset* model)
+{
+	using namespace axm;
 	g_VertexDataCommitBuffer.clear();
 	// TODO(LiamD) : This is horrible, we need to account for varios vertex layouts..
-	g_VertexDataCommitBuffer.reserve(CAST(mesh->mNumVertices * 8, size_t));
+	g_VertexDataCommitBuffer.reserve(CAST(mesh->mNumVertices * 8 * 4, size_t));
 	g_IndexDataCommitBuffer.clear();
 	g_IndexDataCommitBuffer.reserve(CAST(mesh->mNumFaces * 3, size_t));
 
 	for (auto i = 0; i < mesh->mNumVertices; i++)
 	{
 		// positions
-		g_VertexDataCommitBuffer.push_back(mesh->mVertices[i].x);
-		g_VertexDataCommitBuffer.push_back(mesh->mVertices[i].y);
-		g_VertexDataCommitBuffer.push_back(mesh->mVertices[i].z);
+		PushFloatToVertexBuffer(mesh->mVertices[i].x);
+		PushFloatToVertexBuffer(mesh->mVertices[i].y);
+		PushFloatToVertexBuffer(mesh->mVertices[i].z);
 
 		// normals
 		if (mesh->HasNormals())
 		{
-			g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].x);
-			g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].y);
-			g_VertexDataCommitBuffer.push_back(mesh->mNormals[i].z);
+			PushFloatToVertexBuffer(mesh->mNormals[i].x);
+			PushFloatToVertexBuffer(mesh->mNormals[i].y);
+			PushFloatToVertexBuffer(mesh->mNormals[i].z);
 		}
 		if (mesh->HasBones())
 		{
 			auto* b = mesh->mBones[0];
+
+			// vertex bone attribute is 4 x 32 bytes [16:boneIdx][16:vertexWeight]
+			int   i = 10;
 		}
 		// todo: support additional tex coords
 		if (mesh->HasTextureCoords(0))
 		{
-			g_VertexDataCommitBuffer.push_back(mesh->mTextureCoords[0][i].x);
-			g_VertexDataCommitBuffer.push_back(mesh->mTextureCoords[0][i].y);
+			PushFloatToVertexBuffer(mesh->mTextureCoords[0][i].x);
+			PushFloatToVertexBuffer(mesh->mTextureCoords[0][i].y);
+		}
+
+		if (mesh->HasBones())
+		{
+			auto*                b           = mesh->mBones[0];
+			GPUMesh::VertexBones vertexBones = {};
+
+			auto                 count       = 0;
+			for (auto b = 0; b < mesh->mNumBones; b++)
+			{
+				aiBone* bone = mesh->mBones[b];
+				for (auto w = 0; w < bone->mNumWeights; w++)
+				{
+					if (bone->mWeights[w].mVertexId == i)
+					{
+						vertexBones.m_BoneIndex[count]  = static_cast<u16>(b);
+						vertexBones.m_BoneWeight[count] = f16(bone->mWeights[w].mWeight);
+					}
+				}
+			}
+
+			PushBonesToVertexBuffer(vertexBones);
 		}
 	}
 
@@ -183,13 +226,88 @@ void                            axm::ModelAssetFactory::ProcessAssetTransient(As
 		}
 	}
 
-	auto gpuMesh = meshes::CreateMeshFromData(m_VK,
+	auto gpuMesh = meshes::CreateMeshFromData(vk,
 	                                          g_VertexDataCommitBuffer.data(),
-	                                          g_VertexDataCommitBuffer.size() * sizeof(f32),
+	                                          g_VertexDataCommitBuffer.size() * sizeof(u8),
+	                                          g_IndexDataCommitBuffer.data(),
+	                                          g_IndexDataCommitBuffer.size(),
+	                                          mesh->mName.C_Str());
+	model->m_Data.m_SkeletalMeshes.push_back({.m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex});
+}
+
+void ProcessStaticMesh(vku::VkState& vk, aiMesh* mesh, axm::ModelAsset* model)
+{
+	using namespace axm;
+	g_VertexDataCommitBuffer.clear();
+	// TODO(LiamD) : This is horrible, we need to account for varios vertex layouts..
+	g_VertexDataCommitBuffer.reserve(CAST(mesh->mNumVertices * 12 * 4, size_t));
+	g_IndexDataCommitBuffer.clear();
+	g_IndexDataCommitBuffer.reserve(CAST(mesh->mNumFaces * 3, size_t));
+
+	for (auto i = 0; i < mesh->mNumVertices; i++)
+	{
+		// positions
+		PushFloatToVertexBuffer(mesh->mVertices[i].x);
+		PushFloatToVertexBuffer(mesh->mVertices[i].y);
+		PushFloatToVertexBuffer(mesh->mVertices[i].z);
+
+		// normals
+		if (mesh->HasNormals())
+		{
+			PushFloatToVertexBuffer(mesh->mNormals[i].x);
+			PushFloatToVertexBuffer(mesh->mNormals[i].y);
+			PushFloatToVertexBuffer(mesh->mNormals[i].z);
+		}
+
+		// todo: support additional tex coords
+		if (mesh->HasTextureCoords(0))
+		{
+			PushFloatToVertexBuffer(mesh->mTextureCoords[0][i].x);
+			PushFloatToVertexBuffer(mesh->mTextureCoords[0][i].y);
+		}
+	}
+
+	for (auto i = 0; i < mesh->mNumFaces; i++)
+	{
+		if (mesh->mFaces[i].mNumIndices != 3)
+		{
+			AXM_LOG_ERROR("Mesh {} has non triangular face.", model->m_Path.generic_string());
+			continue;
+		}
+		for (unsigned int index = 0; index < mesh->mFaces[i].mNumIndices; index++)
+		{
+			g_IndexDataCommitBuffer.push_back(CAST(mesh->mFaces[i].mIndices[index], u32));
+		}
+	}
+
+	auto gpuMesh = meshes::CreateMeshFromData(vk,
+	                                          g_VertexDataCommitBuffer.data(),
+	                                          g_VertexDataCommitBuffer.size() * sizeof(u8),
 	                                          g_IndexDataCommitBuffer.data(),
 	                                          g_IndexDataCommitBuffer.size(),
 	                                          mesh->mName.C_Str());
 	model->m_Data.m_Meshes.push_back({.m_Mesh = std::move(gpuMesh), .m_MaterialIndex = mesh->mMaterialIndex});
+}
+
+void axm::ModelAssetFactory::ProcessAssetTransient(AssetTransient* data) const
+{
+	PROFILE_SCOPE()
+	auto*       transient = dynamic_cast<ModelAssetTransient*>(data);
+	ModelAsset* model     = transient->GetConcreteAsset();
+	auto*       mesh      = transient->m_TransientData.m_Scene->mMeshes[transient->m_CurrentStep++];
+
+	if (!mesh->HasNormals())
+	{
+		AXM_LOG_ERROR("Mesh {} does not have any normals", model->m_Path.generic_string());
+	}
+	if (mesh->HasBones())
+	{
+		ProcessSkeletalMesh(m_VK, mesh, model);
+	}
+	else
+	{
+		ProcessStaticMesh(m_VK, mesh, model);
+	}
 }
 
 void axm::ModelAssetFactory::OnTransientComplete(AssetTransient* data) const

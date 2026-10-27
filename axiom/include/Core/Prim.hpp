@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "Decorators.hpp"
+#include "half.hpp"
 
 using u8       = uint8_t;
 using u16      = uint16_t;
@@ -17,6 +18,7 @@ using boolean  = u8;
 using byte     = u8;
 using str_hash = u64;
 
+using f16      = half_float::half;
 using f32      = float;
 using f64      = double;
 

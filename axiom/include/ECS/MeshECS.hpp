@@ -8,7 +8,7 @@ namespace axm
 
 struct MeshComponent
 {
-	StaticMesh  m_Mesh;
+	GPUMesh     m_Mesh;
 	AssetHandle m_Handle;
 };
 class MeshSystem : public ISystem

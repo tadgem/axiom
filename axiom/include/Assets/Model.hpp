@@ -28,14 +28,21 @@ public:
 		DynArray<Map> m_TextureMaps;
 	};
 
-	struct MeshEntry
+	struct StaticMeshEntry
 	{
-		StaticMesh m_Mesh;
-		u32        m_MaterialIndex;
+		GPUMesh m_Mesh;
+		u32     m_MaterialIndex;
 	};
 
-	DynArray<MeshEntry>     m_Meshes;
-	DynArray<MaterialEntry> m_Materials;
+	struct SkeletalMeshEntry
+	{
+		GPUMesh m_Mesh;
+		u32     m_MaterialIndex;
+	};
+
+	DynArray<StaticMeshEntry>   m_Meshes;
+	DynArray<SkeletalMeshEntry> m_SkeletalMeshes;
+	DynArray<MaterialEntry>     m_Materials;
 };
 
 struct ModelTransientData

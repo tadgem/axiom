@@ -10,7 +10,7 @@ endfunction()
 function(add_axiom_target name src)
     add_executable(${name} ${src})
     target_link_libraries(${name} PRIVATE axiom)
-    target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${AXIOM_INCLUDES})
 
 endfunction()
 

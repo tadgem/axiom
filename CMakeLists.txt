@@ -23,6 +23,7 @@ set(VKU_ENABLE_SLANG OFF CACHE BOOL "" FORCE)
 set(VKU_RT_SHADER_COMPILATION ON CACHE BOOL "" FORCE)
 set(VKU_RT_SHADER_COMPILATION ON CACHE BOOL "" FORCE)
 set(VKU_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "" FORCE)
 add_subdirectory(submodules/vku)
 
 # ImGuiZmo (the rest of the ImGui stack comes from vku).
@@ -34,6 +35,7 @@ set(FLECS_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory(submodules/flecs)
 
 # Jolt
+set(JPH_USE_DX12 OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_SHARED_LIBS OFF CACHE BOOL "Disable Jolt shared libs" FORCE)
 set(OVERRIDE_CXX_FLAGS OFF CACHE BOOL "Disable Jolt overriding CXX flags" FORCE)
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "Disable Jolt static MSVC runtime library" FORCE)
@@ -51,8 +53,8 @@ set(THIRD_PARTY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 set(SINGLE_HEADER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/single_headers)
 
 # AXIOM
-include(cmake/AxiomUtils.cmake)
 add_subdirectory(axiom)
+include(cmake/AxiomUtils.cmake)
 
 # TODO : Allow tests and examples to be defined in subdirectories
 # issue with required DLLs not being copied to correct directory
